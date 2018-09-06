@@ -1,0 +1,13 @@
+#!/bin/bash
+# vim:tw=0:ts=2:sw=2:et:norl:
+
+git_vim () {
+  /srv/opt/bin/bin/vim "$@"
+}
+
+main () {
+  git_vim "$@"
+}
+
+main "$@"
+
