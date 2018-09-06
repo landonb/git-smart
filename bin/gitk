@@ -6176,7 +6176,13 @@ proc drawcmittext {id row col} {
     }
     set headline [lindex $commitinfo($id) 0]
     set name [lindex $commitinfo($id) 1]
-    set date [lindex $commitinfo($id) 2]
+    # (lb): Show commit date, rather than author date.
+    # (Commit date show rebased date; author date unchanged during rebase.)
+    # https://stackoverflow.com/questions/14243380/how-to-configure-git-log-to-show-commit-date
+    #   Index 2: Author Date.
+    #   Index 4: Commit Date.
+    # set date [lindex $commitinfo($id) 2]
+    set date [lindex $commitinfo($id) 4]
     set date [formatdate $date]
     set font mainfont
     set nfont mainfont
