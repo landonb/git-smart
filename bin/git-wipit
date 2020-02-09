@@ -1,0 +1,66 @@
+#!/bin/bash
+#  vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+
+# USAGE: Creates a new, greater-numbered and dated WIP branch.
+#
+# - For intance, assuming today is 11 Feb 2020
+#   and there are already 2 WIP branches, then:
+#
+#   $ git brs
+#     master
+#     wip/01-2020-02-07
+#   * wip/02-2020-02-09
+#
+#   $ git wipit
+#   Switched to a new branch 'wip/03-2020-02-11'
+
+# ***
+
+# How wide to make the wip/XX counter.
+PRECISION="2"
+
+DTRACE=false
+# DEV/YOU: Uncomment to spit trace to stderr.
+#  DTRACE=true
+
+# ***
+
+git-wipit () {
+  local dry=false
+  [ "${1}" = "-v" ] && dry=true
+
+  local latest_wip_nr=$( \
+    git branch --list 'wip/*' \
+    | /bin/sed -E 's#^. wip/0*([0-9]+).*$#\1#' \
+    | sort -n -r \
+    | head -n1 \
+  )
+  [ -z "${latest_wip_nr}" ] && latest_wip_nr=0
+  ${DTRACE} && >&2 echo "latest_wip_nr=${latest_wip_nr}"
+
+  local next_wip_nr
+  next_wip_nr=$((${latest_wip_nr} + 1))
+  ${DTRACE} && >&2 echo "next_wip_nr=${next_wip_nr}"
+
+  local fmtd_wip_nr
+  fmtd_wip_nr=$(printf "%0${PRECISION}d" "${next_wip_nr}")
+  ${DTRACE} && >&2 echo "fmtd_wip_nr=${fmtd_wip_nr}"
+
+  local next_wip_br
+  next_wip_br="wip/${fmtd_wip_nr}-$(date +%Y-%m-%d)"
+  if ${dry}; then
+    echo "git co -b ${next_wip_br}"
+    return
+  fi
+
+  git co -b "${next_wip_br}"
+}
+
+# ***
+
+main () {
+  git-wipit "${@}"
+}
+
+main "$@"
+
