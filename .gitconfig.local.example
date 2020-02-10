@@ -26,6 +26,8 @@
 
   # Your Private, Personal, Too Embarrassing To Share Aliases Here. E.g.,
   #
+  # - With thanks to artist b'ger
+  #   http://www.ascii-art.de/ascii/uvw/vomit.txt
   puke = \
     ! echo \
       "ICAgICAgICAgICAgICAgICAgICAlJSUlJSUKICAgICAgICAgICAgICAgICAgICUlJSUgPSA9CiAg \
@@ -34,7 +36,8 @@
        XCBcLyAgICAgJWA9ICdfICAuCiAgICAgICAgICAgICAgIC8gICkgICBcL3wgICAgICAuXicsKi4g \
        LAogICAgICAgICAgICAgIC8nIC8tICAgby8gICAgICAgLSAiICUgJ18KICAgICAgICAgICAgIC9c \
        Xy8gICAgIDwgICAgICAgPSAsIF4gfiAuCiAgICAgICAgICAgICApX298LS0tLSd8ICAgICAgICAg \
-       IC5gICAnCiAgICAgICAgIF9fXy8vIChfICAtIChcCiAgICAgICAgLy8vLSggICAgXCcgICBcXAo=" \
+       IC5gICAnCiAgICAgICAgIF9fXy8vIChfICAtIChcCiAgICAgICAgLy8vLSggICAgXCcgICBcXCBi \
+       J2dlcgo=" \
       | tr -d '[:space:]' \
       | base64 --decode;
 
