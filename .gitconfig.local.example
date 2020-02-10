@@ -1,0 +1,40 @@
+# vim:tw=0:ts=2:sw=2:et:norl:ft=gitconfig
+
+# YOU: Copy this file to ~/.gitconfig.local and customize.
+
+[user]
+
+  name = XXX
+
+  email = XXX@users.noreply.github.com
+
+  # See: gpg --list-secret-keys --with-colons
+  #
+  #   signingkey = XXXXXXXXXXXXXXXX
+
+[commit]
+
+  # gpgSign = true
+
+[include]
+
+  # E.g.,
+  #
+  #   path = ~/.more-git/git-private-command.gitc
+
+[alias]
+
+  # Your Private, Personal, Too Embarrassing To Share Aliases Here. E.g.,
+  #
+  puke = \
+    ! echo \
+      "ICAgICAgICAgICAgICAgICAgICAlJSUlJSUKICAgICAgICAgICAgICAgICAgICUlJSUgPSA9CiAg \
+       ICAgICAgICAgICAgICAgICAlJUMgICAgPgogICAgICAgICAgICAgICAgICAgIF8pJyBfKCAuJyAs \
+       CiAgICAgICAgICAgICAgICAgX18vIHxfL1wgICAiICouIG8KICAgICAgICAgICAgICAgIC9gIFxf \
+       XCBcLyAgICAgJWA9ICdfICAuCiAgICAgICAgICAgICAgIC8gICkgICBcL3wgICAgICAuXicsKi4g \
+       LAogICAgICAgICAgICAgIC8nIC8tICAgby8gICAgICAgLSAiICUgJ18KICAgICAgICAgICAgIC9c \
+       Xy8gICAgIDwgICAgICAgPSAsIF4gfiAuCiAgICAgICAgICAgICApX298LS0tLSd8ICAgICAgICAg \
+       IC5gICAnCiAgICAgICAgIF9fXy8vIChfICAtIChcCiAgICAgICAgLy8vLSggICAgXCcgICBcXAo=" \
+      | tr -d '[:space:]' \
+      | base64 --decode;
+
