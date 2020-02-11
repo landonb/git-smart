@@ -43,6 +43,10 @@
 
 [interactive]
 
+  # Add a visual break (colorful flower bed)
+  # between interactive patch hunks.
+  diffFilter = diff-filter-garden
+
   # The singleKey option is not in git-FlU/.gitconfig proper because
   # it can be aggravating if your brain's not ready and wired for it.
   # - But it's here to remind you that it exists, and you might like.

@@ -1,0 +1,231 @@
+#!/bin/bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# This file exists within 'git-FlU':
+#   https://github.com/landonb/git-FlU
+# Copyright © 2020 Landon Bouma. All rights reserved.
+# License: MIT. Please find more in the LICENSE file.
+
+# USAGE: 1. Set ENVIRONs as necessary in the next section,
+#           expose_biz_vars.
+#
+#           You'll at least want to confirm `HUNK_HEADER`
+#           matches the color your git-diff uses.
+#
+#        2. Wire this script into your user's PATH, and then update
+#           your .gitconfig (or .gitconfig.local), e.g.,:
+#
+#             $ cat ~/.gitconfig
+#             ...
+#             [interactive]
+#               diffFilter = diff-filter-garden
+
+# CRED.: Flower garden ASCII art by Joan G. Stark [jgs].
+#          https://www.asciiart.eu/plants/flowers
+
+# BRIEF: Helps you differentiate between successive chunks during an
+#        interactive patch (à la `git add -p`) by printing a colorful
+#        flower bed between the chunk's diff header and the diff results.
+#
+#        E.g.,
+#
+#           $ git add -p
+#           diff --git a/bin/diff-filter-garden b/bin/diff-filter-garden
+#           index 6b2b7d4..b4fafc9 100755
+#           --- a/bin/diff-filter-garden
+#           +++ b/bin/diff-filter-garden
+#
+#           ███████                      _                                 ███████
+#           ███████                    _(_)_                               ███████
+#           ███████        @@@@       (_)@(_)    vVVVv     _     @@@@      ███████
+#           ███████       @@()@@ wWWWw  (_)\     (___)   _(_)_  @@()@@     ███████
+#           ███████        @@@@  (___)     `|/     Y    (_)@(_)  @@@@      ███████
+#           ███████         /      Y       \|     \|/    /(_)    \|        ███████
+#           ███████      \ |     \ |/       | /  \ | /  \|/       |/       ███████
+#           ███████  jgs \\|//   \\|///  \\\|// \\\|/// \|///  \\\|//      ███████
+#           ███████  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ███████
+#
+#           @@ -1,6 +1,23 @@
+#           #!/bin/bash
+#           #  vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# 
+#           +# USAGE: Wire this script into your user's PATH, and then
+#           +#        update your .gitconfig (or .gitconfig.local, eh):
+#
+#           ...
+#
+#         Except the script uses color, so it looks a little better than this!!
+
+# ALERT: Because `readarray`, this script is not POSIX-compliant.
+
+# M.E.H: Too bad I can't post a solution to this person's reddit question!
+#        ("This thread is archived", typical loaf move!)
+#
+#        - "Is it possible to clear the screen for each hunk when running
+#          `git add -p`? If yes, how?"
+#
+#          https://www.reddit.com/r/git/comments/6mll23/
+#            is_it_possible_to_clear_the_screen_for_each_hunk/
+
+# MEANS: Git's interactive.diffFilter lets you add a pipeline process to
+#        the diff generator used on interaction patch. Git expects this
+#        process's stdout line count to match its input, so we cannot
+#        change the input *too* much, but we can be sneaky and print
+#        really long lines that wrap around the terminal edge, to give
+#        the appearance of printing multiple lines.
+#
+#        - An example of using stderr directly from .gitconfig:
+# 
+#            diffFilter = "cat ;  >&2 echo '\\e[1;34m HELLO '"
+#
+#        - Note that the \e color escape doesn't work in sed; use \x1b instead.
+#
+#          This adds a blue-colored '### ' prefix to every line:
+#
+#            diffFilter = "/bin/sed -E 's/(.*)/\\x1b[1;34m###\\x1b[0m \\1/g'"
+
+# ***
+
+expose_biz_vars () {
+  # YOU: Check you ~/.gitconfig and use whatever color you have therein
+  #      to match the hunk header here.
+  #
+  #      For instance, the author's hunk headers are printed in magenta:
+  #
+  #        $ cat ~/.gitconfig
+  #        ...
+  #        [color "diff"]
+  #          frag = magenta bold
+  #
+  #      Considering the color code for magenta is \x1b\[1;35m
+  #      that's what I've got set in the variable here.
+  #
+  #      HINT: You can test changing this from the CLI.
+  #      E.g., if your hunk header is blue, you could confirm:
+  #
+  #        GIT_FLU_HUNK_HEADER='\x1b\[1;34m@@ ' git add -p
+  GIT_FLU_HUNK_HEADER=${GIT_FLU_HUNK_HEADER:-'\x1b\[1;35m@@ '}
+}
+
+# ***
+
+# Just to be clear, the garden setup populates 2 script vars.
+declare JOANS_GARDEN
+declare -a FLOWER_BED
+
+tend_your_own_garden () {
+  # Flower garden by Joan G. Stark [jgs].
+  #   https://www.asciiart.eu/plants/flowers
+  JOANS_GARDEN='
+                     _                                             
+                   _(_)_                           wWWWw   _       
+       @@@@       (_)@(_)    vVVVv     _     @@@@  (___) _(_)_     
+      @@()@@ wWWWw  (_)\\     (___)   _(_)_  @@()@@   Y  (_)@(_)    
+       @@@@  (___)     `|/     Y    (_)@(_)  @@@@   \\|/   (_)\\     
+        /      Y       \\|     \\|/    /(_)    \\|      |/      |     
+     \\ |     \\ |/       | /  \\ | /  \\|/       |/    \\|      \\|/    
+     \\\\|//   \\\\|///  \\\\\\|// \\\\\\|/// \\|///  \\\\\\|//  \\\\|//  \\\\\\|//   
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+  # NOTE: readarray not too portable. Very Bashy.
+  readarray -t FLOWER_BED <<<"$JOANS_GARDEN"
+  # Too make the variable more readable in code, there's a newline
+  # immediately after the variable name=', which we remove here.
+  FLOWER_BED=("${FLOWER_BED[@]:1}")
+}
+
+# ***
+
+random_tc () {
+  local rand_r=$(( $RANDOM * 256 / 32767 + 1 ))
+  local rand_g=$(( $RANDOM * 256 / 32767 + 1 ))
+  local rand_b=$(( $RANDOM * 256 / 32767 + 1 ))
+  local rand_rgb='\x1b[38;2;'${rand_r}';'${rand_g}';'${rand_b}'m'
+  echo "${rand_rgb}"
+}
+
+# ***
+
+plant_garden_on_stderr_maybe () {
+  # If you want to print anything immediately whenever a file is processed,
+  # you can output whatever you want to stderr.
+  # - But note the each file is only processed once, even if there are
+  #   multiple chunks, so anything printed to stderr only gets printed
+  #   prior to the *first* chunk of each file.
+  #   - Comment this return to see what I'm talking about.
+  return
+
+  >&2 echo -en "$(random_tc)"
+  >&2 echo -e "${JOANS_GARDEN}"
+  >&2 echo -e "\033[0m"
+}
+
+# ***
+
+run_sed_injection () {
+  # Because git complains if there is not a 1-to-1 input-to-output line match,
+  # but it doesn't say anything about one long line that wraps, get the terminal
+  # width, so we can format said long line that wraps.
+  local ncols=$(tput cols)
+
+  # A blank-line's worth of whitespace.
+  local blank="$(printf "%${ncols}s")"
+
+  # MAGIC_NUMBERS: We build two visual rectangular blocks, one left of the
+  # flower bed, and one to the right. We figure out the width of those
+  # columns here, subtracting 5 columns so we can add 1 column of negative
+  # space (whitespace) between the rectangular block and the flower bed.
+  local boxes_ncols=$((${ncols} - ${#FLOWER_BED[0]} - 5))
+  # The block on the right is about half the available space...
+  local boxr_ncols=$((${boxes_ncols} / 2))
+  # ... but we trim a little extra of the left-side block, so that the
+  # right-side block is always 2 or 3 columns wider than the left-side
+  # block (so the garden is either centered, or a titch more than left-
+  # of-center, which this author finds more visually appealing than it
+  # being ROC a titch).
+  local boxl_ncols=$((${boxes_ncols} - ${boxr_ncols} - 3))
+
+  # Sanity check!
+  if [ ${boxl_ncols} -lt 0 ] || [ ${boxr_ncols} -lt 0 ]; then
+    # Terminal too narrow. Return falsey and caller will just `cat`.
+    return 1
+  fi
+
+  # Format the box rows (which are just block symbols we colorize).
+  local boxl_row="$(printf "%${boxl_ncols}s" | /bin/sed -E 's/ /█/g')"
+  local boxr_row="$(printf "%${boxr_ncols}s" | /bin/sed -E 's/ /█/g')"
+
+  local hrule=''
+  local bed_row
+  local tensity=5
+  for bed_row in "${FLOWER_BED[@]}"; do
+    local rand_clr="$(random_tc)"
+    # Build the gray-gradient color using the [38;2; RGB control code.
+    local gradient_clr="\\x1b[38;2;${tensity};${tensity};${tensity}m"
+    local boxl_row_clr="${gradient_clr}${boxl_row}${attr_reset}"
+    local boxr_row_clr="${gradient_clr}${boxr_row}${attr_reset}"
+    hrule="${hrule}  ${boxl_row_clr}  ${rand_clr}${bed_row}\\x1b[0m  ${boxr_row_clr}  "
+    # Bump the gradient.
+    tensity=$((tensity + 5))
+  done
+
+  local the_garden="${blank}${hrule}${blank}"
+
+  /bin/sed -E -e "s#^(${GIT_FLU_HUNK_HEADER}.*)#${the_garden}\\1#g"
+}
+
+# ***
+
+main () {
+
+  expose_biz_vars
+
+  tend_your_own_garden
+
+  plant_garden_on_stderr_maybe
+
+  if ! run_sed_injection; then
+    cat
+  fi
+}
+
+main "${@}"
+
