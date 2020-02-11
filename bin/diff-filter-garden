@@ -5,19 +5,17 @@
 # Copyright © 2020 Landon Bouma. All rights reserved.
 # License: MIT. Please find more in the LICENSE file.
 
-# USAGE: 1. Set ENVIRONs as necessary in the next section,
-#           expose_biz_vars.
+# USAGE: Wire this script into your user's PATH, and then update
+#        your .gitconfig (or .gitconfig.local), e.g.,:
 #
-#           You'll at least want to confirm `HUNK_HEADER`
-#           matches the color your git-diff uses.
-#
-#        2. Wire this script into your user's PATH, and then update
-#           your .gitconfig (or .gitconfig.local), e.g.,:
-#
-#             $ cat ~/.gitconfig
-#             ...
-#             [interactive]
-#               diffFilter = diff-filter-garden
+#          $ cat ~/.gitconfig
+#          ...
+#          [interactive]
+#            diffFilter = diff-filter-garden
+
+# HITCH: If you don't see the flower bed, check the regex in the
+#        next section, expose_biz_vars, and confirm `HUNK_HEADER`
+#        will match the color your git-diff uses.
 
 # CRED.: Flower garden ASCII art by Joan G. Stark [jgs].
 #          https://www.asciiart.eu/plants/flowers
@@ -28,30 +26,30 @@
 #
 #        E.g.,
 #
-#           $ git add -p
-#           diff --git a/bin/diff-filter-garden b/bin/diff-filter-garden
-#           index 6b2b7d4..b4fafc9 100755
-#           --- a/bin/diff-filter-garden
-#           +++ b/bin/diff-filter-garden
+#          $ git add -p
+#          diff --git a/bin/diff-filter-garden b/bin/diff-filter-garden
+#          index 6b2b7d4..b4fafc9 100755
+#          --- a/bin/diff-filter-garden
+#          +++ b/bin/diff-filter-garden
 #
-#           ███████                      _                                 ███████
-#           ███████                    _(_)_                               ███████
-#           ███████        @@@@       (_)@(_)    vVVVv     _     @@@@      ███████
-#           ███████       @@()@@ wWWWw  (_)\     (___)   _(_)_  @@()@@     ███████
-#           ███████        @@@@  (___)     `|/     Y    (_)@(_)  @@@@      ███████
-#           ███████         /      Y       \|     \|/    /(_)    \|        ███████
-#           ███████      \ |     \ |/       | /  \ | /  \|/       |/       ███████
-#           ███████  jgs \\|//   \\|///  \\\|// \\\|/// \|///  \\\|//      ███████
-#           ███████  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ███████
+#          ███████                      _                                 ███████
+#          ███████                    _(_)_                               ███████
+#          ███████        @@@@       (_)@(_)    vVVVv     _     @@@@      ███████
+#          ███████       @@()@@ wWWWw  (_)\     (___)   _(_)_  @@()@@     ███████
+#          ███████        @@@@  (___)     `|/     Y    (_)@(_)  @@@@      ███████
+#          ███████         /      Y       \|     \|/    /(_)    \|        ███████
+#          ███████      \ |     \ |/       | /  \ | /  \|/       |/       ███████
+#          ███████  jgs \\|//   \\|///  \\\|// \\\|/// \|///  \\\|//      ███████
+#          ███████  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ███████
 #
-#           @@ -1,6 +1,23 @@
-#           #!/bin/bash
-#           #  vim:tw=0:ts=2:sw=2:et:norl:ft=bash
-# 
-#           +# USAGE: Wire this script into your user's PATH, and then
-#           +#        update your .gitconfig (or .gitconfig.local, eh):
+#          @@ -1,6 +1,23 @@
+#          #!/bin/bash
+#          #  vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 #
-#           ...
+#          +# USAGE: Wire this script into your user's PATH, and then
+#          +#        update your .gitconfig (or .gitconfig.local, eh):
+#
+#          ...
 #
 #         Except the script uses color, so it looks a little better than this!!
 
@@ -86,8 +84,8 @@
 # ***
 
 expose_biz_vars () {
-  # YOU: Check you ~/.gitconfig and use whatever color you have therein
-  #      to match the hunk header here.
+  # YOU: If the flower bed isn't grown into your interactive patch session,
+  #      check your ~/.gitconfig and look for the diff 'frag' color.
   #
   #      For instance, the author's hunk headers are printed in magenta:
   #
@@ -96,14 +94,33 @@ expose_biz_vars () {
   #        [color "diff"]
   #          frag = magenta bold
   #
-  #      Considering the color code for magenta is \x1b\[1;35m
-  #      that's what I've got set in the variable here.
+  #      We could look specifically for that color, e.g.,
+  #
+  #        GIT_FLU_HUNK_HEADER=${GIT_FLU_HUNK_HEADER:-'\x1b\[1;35m@@ '}
+  #
+  #      but we can also regex on all foreground colors: 30m→37m, and 90m→97m.
   #
   #      HINT: You can test changing this from the CLI.
   #      E.g., if your hunk header is blue, you could confirm:
   #
   #        GIT_FLU_HUNK_HEADER='\x1b\[1;34m@@ ' git add -p
-  GIT_FLU_HUNK_HEADER=${GIT_FLU_HUNK_HEADER:-'\x1b\[1;35m@@ '}
+  GIT_FLU_8BIT_CLR_RE='\x1b\[1;[39][0-7]m'
+  GIT_FLU_HUNK_HEADER=${GIT_FLU_HUNK_HEADER:-"(${GIT_FLU_8BIT_CLR_RE})?@@ "}
+
+  # YOU: Set this to false if you don't want the `a/` and `b/` prefixes
+  #      removed from the `---` and `+++` chunk headers.
+  GIT_FLU_STRIP_AB=true
+
+  # YOU: Choose how to color the flowers.
+  #      Choices:
+  #        'rainbro'  # Paints each character row a different (random) color.
+  #        'flowers'  # Paints each visual flower a different (random) color.
+  #        'randril'  # Randomly choosees either 'rainbro' or 'flowers'.
+  # - (lb): 'rainbro' was the (easy) initial implementation. Looks nice/fine.
+  #         But 'flowers' is wicked classier.
+  # GIT_FLU_CLR_AI='rainbro'
+  # GIT_FLU_CLR_AI='randril'
+  GIT_FLU_CLR_AI='flowers'
 }
 
 # ***
@@ -112,19 +129,32 @@ expose_biz_vars () {
 declare JOANS_GARDEN
 declare -a FLOWER_BED
 
+# (lb): I replaced backward slashes from the original artwork (and
+# forward slashes and bars) with non-ASCII characters -- backward
+# slashes must be escaped, which changes the column ranges for each
+# flower in each row. And as you'll see later, we rely on a static
+# column range for each flower to be able to color them separately.
 tend_your_own_garden () {
   # Flower garden by Joan G. Stark [jgs].
   #   https://www.asciiart.eu/plants/flowers
   JOANS_GARDEN='
-                     _                                             
-                   _(_)_                           wWWWw   _       
-       @@@@       (_)@(_)    vVVVv     _     @@@@  (___) _(_)_     
-      @@()@@ wWWWw  (_)\\     (___)   _(_)_  @@()@@   Y  (_)@(_)    
-       @@@@  (___)     `|/     Y    (_)@(_)  @@@@   \\|/   (_)\\     
-        /      Y       \\|     \\|/    /(_)    \\|      |/      |     
-     \\ |     \\ |/       | /  \\ | /  \\|/       |/    \\|      \\|/    
-     \\\\|//   \\\\|///  \\\\\\|// \\\\\\|/// \\|///  \\\\\\|//  \\\\|//  \\\\\\|//   
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+                   _                                             
+                 _(_)_                           wWWWw   _       
+     @@@@       (_)@(_)    vVVVv     _     @@@@  (___) _(_)_     
+    @@()@@ wWWWw  (_)╲     (___)   _(_)_  @@()@@   Y  (_)@(_)    
+     @@@@  (___)     `│╱     Y    (_)@(_)  @@@@   ╲│╱   (_)╲     
+      ╱      Y       ╲│     ╲│╱    ╱(_)    ╲│      │╱      │     
+   ╲ │     ╲ │╱       │ ╱  ╲ │ ╱  ╲│╱       │╱    ╲│      ╲│╱    
+   ╲╲│╱╱   ╲╲│╱╱   ╲╲╲│╱╱ ╲╲╲│╱╱╱ ╲│╱╱╱  ╲╲╲│╱╱  ╲╲│╱╱  ╲╲╲│╱╱   
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
+  # Col. counting... so we can assigns colors to column ranges.
+  # 4567890123456789012345678901234567890123456789012345678901234
+  #    3-9 11-15    15-24   26-32   34-40  41-47 49-53   54-61
+
+  # List the characters used to make the stems, should we want to
+  # match them later (say, to color the stems all the same color).
+  STEM_SET='[`│╱Y╲]'
+
   # NOTE: readarray not too portable. Very Bashy.
   readarray -t FLOWER_BED <<<"$JOANS_GARDEN"
   # Too make the variable more readable in code, there's a newline
@@ -138,6 +168,17 @@ random_tc () {
   local rand_r=$(( $RANDOM * 256 / 32767 + 1 ))
   local rand_g=$(( $RANDOM * 256 / 32767 + 1 ))
   local rand_b=$(( $RANDOM * 256 / 32767 + 1 ))
+  local rand_rgb='\x1b[38;2;'${rand_r}';'${rand_g}';'${rand_b}'m'
+  echo "${rand_rgb}"
+}
+
+random_green () {
+  # What's "green"? Probably any color whose Green component is greater
+  # than either of the other two components, Red or Blue. And to avoid
+  # appearing too black, assure green component is not too low (>= 50).
+  local rand_g=$(( ($RANDOM * 206 / 32767 + 1) + 50 ))
+  local rand_r=$(( $RANDOM * ${rand_g} / 32767 + 1 ))
+  local rand_b=$(( $RANDOM * ${rand_g} / 32767 + 1 ))
   local rand_rgb='\x1b[38;2;'${rand_r}';'${rand_g}';'${rand_b}'m'
   echo "${rand_rgb}"
 }
@@ -189,27 +230,98 @@ run_sed_injection () {
     return 1
   fi
 
+  local rst='\x1b[0m'
+
+  # Setup the coloring algorithm
+  local clr_ai='rainbro'
+  if [[ "${GIT_FLU_CLR_AI}" == 'flowers' ]] \
+     || ( [[ "${GIT_FLU_CLR_AI}" == 'randril' ]] \
+          && [[ $(($RANDOM % 2)) -eq 0 ]] ) \
+  ; then
+    clr_ai='flowers'
+  fi
+  local rc1="$(random_tc)"
+  local rc2="$(random_tc)"
+  local rc3="$(random_tc)"
+  local rc4="$(random_tc)"
+  local rc5="$(random_tc)"
+  local rc6="$(random_tc)"
+  local rc7="$(random_tc)"
+  local rc8="$(random_tc)"
+  local grd_clr="$(random_green)"
+
   # Format the box rows (which are just block symbols we colorize).
   local boxl_row="$(printf "%${boxl_ncols}s" | /bin/sed -E 's/ /█/g')"
   local boxr_row="$(printf "%${boxr_ncols}s" | /bin/sed -E 's/ /█/g')"
 
   local hrule=''
-  local bed_row
   local tensity=5
-  for bed_row in "${FLOWER_BED[@]}"; do
-    local rand_clr="$(random_tc)"
+  local rownr=0
+  local br
+  for br in "${FLOWER_BED[@]}"; do
+    local rc0="$(random_tc)"
     # Build the gray-gradient color using the [38;2; RGB control code.
     local gradient_clr="\\x1b[38;2;${tensity};${tensity};${tensity}m"
-    local boxl_row_clr="${gradient_clr}${boxl_row}${attr_reset}"
-    local boxr_row_clr="${gradient_clr}${boxr_row}${attr_reset}"
-    hrule="${hrule}  ${boxl_row_clr}  ${rand_clr}${bed_row}\\x1b[0m  ${boxr_row_clr}  "
+    local boxl_row_clr="${gradient_clr}${boxl_row}${rst}"
+    local boxr_row_clr="${gradient_clr}${boxr_row}${rst}"
+    local bed_row="${br}"
+
+    if [[ "${clr_ai}" == "flowers" ]] ; then
+      if [[ ${rownr} -eq $((${#FLOWER_BED[@]} - 1)) ]]; then
+        # Paint the ground marks all the same color.
+        bed_row="${grd_clr}${br}"
+      else
+        # Use the column ranges determined above to color individual flowers.
+        #    3-9 11-15    15-24   26-32   34-40  41-47 49-53   54-61
+        bed_row="${rc0}${br:0:3}${rst}${rc1}${br:3:7}${rst}${rc0}${br:10:1}${rst}${rc2}${br:11:5}${rst}${rc3}${br:16:9}${rst}${rc0}${br:25:1}${rst}${rc4}${br:26:7}${rst}${rc0}${br:33:1}${rst}${rc5}${br:34:7}${rst}${rc6}${br:41:7}${rst}${rc0}${br:48:1}${rst}${rc7}${br:49:5}${rst}${rc8}${br:54:8}${rst}${rc0}${br:62}${rst}"
+      fi
+    fi
+    # else, [[ "${clr_ai}" == 'rainbro' ]], which is ${rc0}'s job.
+
+    hrule="${hrule}  ${boxl_row_clr}  ${rc0}${bed_row}${rst}  ${boxr_row_clr}  "
+
     # Bump the gradient.
     tensity=$((tensity + 5))
+    # Bump the row count (to know when we've hit the ground).
+    rownr=$((rownr + 1))
   done
 
-  local the_garden="${blank}${hrule}${blank}"
+  # ***
 
-  /bin/sed -E -e "s#^(${GIT_FLU_HUNK_HEADER}.*)#${the_garden}\\1#g"
+  # MEH: We could remove the 'a/' and 'b/' prefixes from the first chunk
+  #      header line, e.g., 'diff --git a/foo b/foo', but this regex is
+  #      imperfect (if you had a directory "b/" in your working directory,
+  #      for instance), and I kinda like the prefixes in that line -- it's
+  #      the prefixes in the '---' and '+++' lines that I want to remove,
+  #      to make copy-paste of those paths easier.
+  #      - tl;dr: This strips the 'a/' and 'b/' prefixes from 'diff --git a/... b/...'
+  #  local git_diff="s#^((${GIT_FLU_8BIT_CLR_RE})?diff --git) a/(.*) b/(.*)#\\1 \\3 \\4#g"
+  #  ...
+  #  /bin/sed -E -e "${garden_plot}" -e "${prefix_a}" -e "${prefix_b}" -e "${git_diff}"
+
+  # MEH: We could color the plant stems all the same color, but I didn't
+  #      find that appealing. Also, because we change the color code, the
+  #      stem part must come after the flower characters, or the per-flower
+  #      coloring we did (using the rc1..rc8 variables) will be changed for
+  #      whatever characters follow a stem part.
+  #      - tl;dr: If you want to see what it looks like to color the stems
+  #               all the same color, uncomment this, and change the `sed`.
+  #  local stm_clr="$(random_tc)"
+  #  local stalk_re="s/(${STEM_SET})/${stm_clr}\\1${rst}/g"
+  #  ...
+  #  /bin/sed -E -e "${garden_plot}" -e "${prefix_a}" -e "${prefix_b}" -e "${stalk_re}"
+
+  local the_garden="${blank}${hrule}${blank}"
+  local garden_plot="s#^(${GIT_FLU_HUNK_HEADER}.*)#${the_garden}\\1#g"
+
+  local prefix_a="s#^((${GIT_FLU_8BIT_CLR_RE})?--- )a/#\\1#g"
+  local prefix_b="s#^((${GIT_FLU_8BIT_CLR_RE})?\+\+\+ )b/#\\1#g"
+
+  if ! ${GIT_FLU_STRIP_AB:-true}; then
+    /bin/sed -E -e "${garden_plot}"
+  else
+    /bin/sed -E -e "${garden_plot}" -e "${prefix_a}" -e "${prefix_b}"
+  fi
 }
 
 # ***

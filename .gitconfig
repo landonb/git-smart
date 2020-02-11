@@ -190,13 +190,17 @@
   #         what-is-the-reason-for-the-a-b-prefixes-of-git-diff
   noprefix = true
 
-  # FIXME/2020-01-23: How do you hide a/ and b/ prefixes on `git add -p`?
-  # - I testing with config sections [add], [patch], [status], but none worked.
-  #   - Note that patch isn't a command, it's really git-add--interactive-patch
-  #     (a subcommand of a subcommand?).
-  #   - Also, the `--no-prefix` option is documented in the git-diff --help,
-  #     but it's not found in git-add--help. Perhaps it was just overlooked?
-  #     - MAYBE: Perhaps this could be my first git patch/pull request?
+  # NOTE: The diff.noprefix option does not apply to the 'a/' and 'b/'
+  #       prefixes shown in interactive patch mode, i.e., on `git add -p`.
+  # - The `--no-prefix` option is documented in `git-diff --help`, but it's not
+  #   found in `git-add --help`. (So I'm guessing there's no builtin mechanism.)
+  # - But don't fret! git-FlU has the remedy!
+  #   - The `diff-filter-garden` script shows how to strip the 'a/' and 'b/'
+  #     prefixes -- but it also adds a visual break between interactive patch
+  #     hunks, which you may or may not like. So if you just want the prefix
+  #     stripping, you'll have to pull it out yourself!
+  #     - Look for and copy the interactive.diffFilter setting from the
+  #       `.gitconfig.local.example` file to your own config to try it out.
 
 [merge]
   # Choose which merge tool to use by default.
