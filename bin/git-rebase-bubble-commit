@@ -120,8 +120,18 @@ ensure_commit_unique_to_this_branch () {
 
 git_rebase_buble_commit_noninteractive () {
   local ci_before="$1"
+
+  local seditor="git-rebase-bubble-oldest"
+  if ! command -v "${seditor}" > /dev/null; then
+    seditor="${GITFLU_BIN:-${HOME}/.local/bin}/seditor"
+    if [ ! -e "${seditor}" ]; then
+      >&2 echo "ERROR: Cannot locate: git-rebase-bubble-oldest"
+      exit 1
+    fi
+  fi
+
   ${DTRACE} && >&2 echo "Pivot: git rebase -i ${ci_before}"
-  GIT_SEQUENCE_EDITOR="${HOME}/.fries/bin/git-rebase-bubble-oldest" \
+  GIT_SEQUENCE_EDITOR="${seditor}" \
     git rebase -i ${ci_before}
 }
 
