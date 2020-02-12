@@ -286,7 +286,7 @@
 
   # - Use `git brs` to show all branches, including remote branches.
   # - git-brs is inherently aliased because found on PATH.
-  #    brs = !${HOME}/.fries/bin/git-brs \"$@\"
+  #    brs = !${GITFLU_BIN:-${HOME}/.local/bin}/git-brs \"$@\"
 
   # -------
 
@@ -328,14 +328,14 @@
   # - Use `git-cleanbr` to delete a branch locally and on the remote,
   #   after switching to 'develop' or another branch.
   # - git-cleanbr is inherently aliased because found on PATH.
-  #    cleanbr = !${HOME}/.fries/bin/git-cleanbr \"$@\"
+  #    cleanbr = !${GITFLU_BIN:-${HOME}/.local/bin}/git-cleanbr \"$@\"
 
   # - Use `git-cob` to checkout a branch from an existing remote for which
   #   there is no local tracking branch, but for which there are multiple
   #   remotes with the same-named branch, and you cannot simply
   #   `git checkout <branch>` but have to be remote-specific.
   # - git-cob is inherently aliased because found on PATH.
-  #    cob = !${HOME}/.fries/bin/git-cob \"$@\"
+  #    cob = !${GITFLU_BIN:-${HOME}/.local/bin}/git-cob \"$@\"
 
   # - Use `git-coc` to create a new branch, switch to it, and push it.
   # - NOTE: I tried doing this inline, e.g.,
@@ -344,7 +344,7 @@
   #     git push ${2:-origin} ${1} -u ${1}
   #   which obviously fails. So shell out!
   # - git-coc is inherently aliased because found on PATH.
-  #    coc = !${HOME}/.fries/bin/git-coc \"$@\"
+  #    coc = !${GITFLU_BIN:-${HOME}/.local/bin}/git-coc \"$@\"
 
   # - Delete branches that are "gone" on the remote.
   #   - You can find tracking branches with missing remote branches via:
@@ -352,7 +352,7 @@
   #     and then you can big-D delete them thusly:
   #       git branch -D <branch>
   # - git-gone is inherently aliased because found on PATH.
-  #    gone = !${HOME}/.fries/bin/git-gone \"$@\"
+  #    gone = !${GITFLU_BIN:-${HOME}/.local/bin}/git-gone \"$@\"
 
 # #######################################################################
 # ***                         Logging Aliases                         ***
@@ -619,7 +619,7 @@
   # - The operation is very simple. It's essentially:
   #     undo = reset --soft @~1
   # - git-undo is inherently aliased because found on PATH.
-  #    undo = !${HOME}/.fries/bin/git-undo \"$@\"
+  #    undo = !${GITFLU_BIN:-${HOME}/.local/bin}/git-undo \"$@\"
 
   # -------
 
@@ -662,7 +662,7 @@
   #     git fetch 'upstream'  # or the named remote ($2)
   #     git rebase upstream/develop  # or the named upstream branch ($2/$3)
   # - git-bump is inherently aliased because found on PATH.
-  #    bump = !${HOME}/.fries/bin/git-bump \"$@\"
+  #    bump = !${GITFLU_BIN:-${HOME}/.local/bin}/git-bump \"$@\"
 
   # Use `git fam` to fetch from both the 'origin' and 'upstream' remotes,
   # and to remove from the local branches list those branches deleted
