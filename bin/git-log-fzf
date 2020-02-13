@@ -1,0 +1,24 @@
+#!/bin/bash
+#  vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+
+# http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
+# "It will let you select a commit, and display the diff off it, and put the
+# commit hash on your clipboard using xclip. I also have it set to use icdiff via
+# `git showtool`."
+
+fzf_log () {  
+  hash=$(git log --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" |  fzf | awk '{print $1}')
+  echo $hash | xclip
+  git showtool $hash
+}
+
+# ***
+
+main () {
+  fzf_log
+}
+
+if [[ "$0" == "${BASH_SOURCE}" ]]; then
+  main "${@}"
+fi
+
