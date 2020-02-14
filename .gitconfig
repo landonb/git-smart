@@ -703,8 +703,8 @@
       local projurl=$( \
         git remote get-url ${1:-origin} \
         | sed -E \
-          -e 's#(git@|git://|ssh://)#https://#' \
-          -e 's@com:@com/@' \
+          -e 's#(ssh://git@|git@|git://|ssh://)#https://#' \
+          -e 's#com:#com/#' \
           -e 's#\\.git$##' \
         | head -n1; \
       ); \
