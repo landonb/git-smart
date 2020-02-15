@@ -6,6 +6,10 @@
 
 # USAGE: Read through the [alias]es defined below for a description of each.
 
+# YOU/DEV: Put your user.* settings, private aliases, and whatever else you
+# want in a separate, private config file, named .gitconfig.local, that's
+# loaded last (at the end of this file, so it overrides anything herein).
+
 # CONVENTION: Some commands work on branch(es) and remote(s) and will default
 #             to the following unless you pass args indicating otherwise.
 #
@@ -37,17 +41,6 @@
 #                           branches, we're broadcasting better what's
 #                           going on (and avoiding new DEVs being misled
 #                           by a 'master' branch that's anything but).
-
-# #######################################################################
-# ***                  Your Private .gitconfig.local                  ***
-# #######################################################################
-
-# YOU/DEV: Put your [user] and other private config in a separate file
-#          named '.gitconfig.local' that's located (symlinked) alongside
-#          this file (in the same directory).
-
-[include]
-  path = .gitconfig.local
 
 # #######################################################################
 # ***                       "Engage Your Core"                        ***
@@ -713,4 +706,15 @@
 
   # Empirically speaking.
   whoami = config user.email
+
+# #######################################################################
+# ***                  Your Private .gitconfig.local                  ***
+# #######################################################################
+
+# YOU/DEV: Put your [user] and other private config in a separate file
+#          named '.gitconfig.local' that's located (symlinked) alongside
+#          this file (in the same directory).
+
+[include]
+  path = .gitconfig.local
 
