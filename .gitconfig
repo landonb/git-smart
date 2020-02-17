@@ -558,6 +558,8 @@
   # Use `git dc` to show a diff of what's already been *staged* (which
   # is what you'd see at the bottom of a `git commit -v` edit session).
   dc = diff --cached
+  # `dcc` like `dc` except no pager, dumps to terminal.
+  dcc = !git --no-pager diff --cached
 
   # Use `git dd` to dump the diff to the terminal, bypassing the pager.
   dd = !git --no-pager diff \"$@\"
