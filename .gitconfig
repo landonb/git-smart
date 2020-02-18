@@ -195,17 +195,34 @@
   #     - Look for and copy the interactive.diffFilter setting from the
   #       `.gitconfig.local.example` file to your own config to try it out.
 
+# A more informative binary diff, how brilliant!
+# - Found solution to more meaningful PDF diff at:
+#   https://superuser.com/questions/706042/how-can-i-diff-binary-files-in-git
+# - See the `*.bin diff=bin`, etc., rules in ~/.config/git/attributes, and ref:
+#   man 5 gitattributes
+
+[diff "bin"]
+  textconv = hexdump -v -C
+
+[diff "pdf"]
+  textconv = pdfinfo
+
+[diff "zip"]
+  textconv = unzip -v
+
+# Choose which merge tool to use by default.
+# Options:
+#   tool = meld
+#   tool = vimdiff
+#   tool = diffconflicts
+
 [merge]
-  # Choose which merge tool to use by default.
-  # Options:
-  #   tool = meld
-  #   tool = vimdiff
-  #   tool = diffconflicts
   tool = meld
 
+# `git mergetool` makes intermediate *.orig files but
+# doesn't delete them unless we tell it to delete them.
+
 [mergetool]
-  # `git mergetool` makes intermediate *.orig files but
-  # doesn't delete them unless we tell it to delete them.
   keepBackup = false
 
 # #######################################################################

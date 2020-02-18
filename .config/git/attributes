@@ -1,0 +1,4 @@
+*.bin diff=bin
+*.pdf diff=pdf
+*.zip diff=zip
+
