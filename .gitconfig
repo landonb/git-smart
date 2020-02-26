@@ -650,6 +650,7 @@
 
   # Use `git po` to push to the most commonly pushed remote (probably), 'origin'.
   po = push origin HEAD
+  pu = push upstream HEAD
 
   # Use `git re` to show the URL of each remote after its name.
   re = remote -v
