@@ -11,6 +11,15 @@ reveal_biz_vars () {
   GITFLU_ALIGNT=''
 }
 
+# ***
+
+remote_exists () {
+  local remote="$1"
+  git remote get-url ${remote} &> /dev/null
+}
+
+# ***
+
 cached_first_column_max () {
   local max_len=0
   [ -s "${GITFLU_TMP_MAX_WIDTH_FILE}" ] && \
@@ -36,40 +45,48 @@ callback_print_remote_info () {
 
 git_remote_for_each () {
   local callback=$1
-  local last_op
-  local last_url
-  local line
-  while IFS= read -r line; do
-    # 3 parts: name; url; "(fetch)" or "(push)".
-    set -- ${line}
-    local name
-    local url
-    local op
-    name=$1
-    url=$2
-    op=$3
-    if [ "${op}" = "(fetch)" ]; then
-      if [ -n "${last_op}" ] && [ "${last_op}" != "(push)" ]; then
-        >&2 "Unexpected: Previous line's op not “(push)”."
+  for remote in \
+    'origin' \
+    'upstream' \
+    $(git remote | grep -v -e 'origin' -e 'upstream' | sort \
+  ); do
+    ! remote_exists "${remote}" && continue
+    local last_op=''
+    local last_url=''
+    local line=''
+    while IFS= read -r line; do
+      # 3 parts: name; url; "(fetch)" or "(push)".
+      set -- ${line}
+      local name
+      local url
+      local op
+      name=$1
+      url=$2
+      op=$3
+      if [ "${op}" = "(fetch)" ]; then
+        # (fetch) should be first match.
+        [ -n "${last_op}" ] && \
+          >&2 "Unexpected: Previous op not nothing: “${last_op}”."
+        last_op="${op}"
+        last_url="${url}"
+        eval "${callback} '${name}' '${url}' '${op}'"
+      elif [ "${op}" = "(push)" ]; then
+        # (lb): It's probably possible to have other ops, or disparate
+        # URLs for the same remote, but I've never seen it in my usage,
+        # so alerting.
+        [ "${last_op}" != "(fetch)" ] && \
+          >&2 "Unexpected: Previous line's op not “(fetch)”."
+        [ "${last_url}" != "${url}" ] && \
+          >&2 "Unexpected: Previous line's url not the same."
+        last_op="${op}"
+        last_url="${url}"
+        # Only call the callback once, once first line for remote,
+        # which is the "(fetch)" line, handled above.
+      else
+        >&2 "Unexpected: Unknown op “${op}” for “${name}”."
       fi
-      last_op="${op}"
-      last_url="${url}"
-      eval "${callback} '${name}' '${url}' '${op}'"
-    elif [ "${op}" = "(push)" ]; then
-      if [ -n "${last_op}" ] && [ "${last_op}" != "(fetch)" ]; then
-        >&2 "Unexpected: Previous line's op not “(fetch)”."
-      fi
-      if [ -n "${last_url}" ] && [ "${last_url}" != "${url}" ]; then
-        >&2 "Unexpected: Previous line's url not the same."
-      fi
-      last_op="${op}"
-      last_url="${url}"
-      # Only call the callback once, once first line for remote,
-      # which is the "(fetch)" line, handled above.
-    else
-      >&2 "Unexpected: Unknown op “${op}” for “${name}”."
-    fi
-  done <<< "$(git remote -v)"
+    done <<< "$(git remote -v | grep "^${remote}\b")"
+  done
 }
 
 calculate_first_column_max () {
