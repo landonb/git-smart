@@ -3,13 +3,17 @@
 
 reveal_biz_vars () {
   # Left-align with 5 spaces between name and URL:
-  #  GITFLU_COLSEP='     '
-  #  GITFLU_ALIGNT='-'
+  #  GITFLU_COLSEP="${GITFLU_COLSEP:-     }"
+  #  GITFLU_ALIGNT="${GITFLU_ALIGNT:--}"
   # But I sorta like right-align with just 2 spaces:
-  GITFLU_COLSEP='  '
-  GITFLU_ALIGNT=''
+  GITFLU_COLSEP="${GITFLU_COLSEP:-  }"
+  GITFLU_ALIGNT="${GITFLU_ALIGNT:-}"
 
-  GITFLU_MAX_WIDTH=0
+  # YOU: Leave at zero to use max width of single repo's remotes;
+  #      or set to minimum width for all projects -- i.e., for `mr`
+  #      multiple-repository reporting, you could run, e.g.,:
+  #        mr -d / run bash -c 'GITFLU_MAX_WIDTH=12 git re'
+  GITFLU_MAX_WIDTH=${GITFLU_MAX_WIDTH:-0}
 }
 
 # ***
