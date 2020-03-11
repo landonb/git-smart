@@ -656,6 +656,7 @@
   # 2020-03-11: Check out the new `bin/git-re` tidy remote reporter!
   # - LATER: Remove this alias. For now, telling YOU where to look.
   #  re = remote -v
+  r = re
 
   # Run `git sup` periodically (or maybe after every git-pull) to process
   # any changes to the project submodules).
