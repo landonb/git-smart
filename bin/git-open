@@ -1,0 +1,27 @@
+#!/bin/bash
+# vim:tw=0:ts=2:sw=2:et:norl:
+
+# Open project web page for 'origin' (or specified) remote.
+git_open () {
+  local remote=${1:-origin}
+  git remote get-url ${remote} &> /dev/null || remote='upstream'
+  ! git remote get-url ${remote} &> /dev/null && echo 'No remote!' && return
+  local projurl=$( \
+    git remote get-url ${remote} \
+    | sed -E \
+      -e 's#(ssh://git@|git@|git://|ssh://)#https://#' \
+      -e 's#com:#com/#' \
+      -e 's#\\.git$##' \
+    | head -n1 2> /dev/null \
+  )
+  # NOTE: Using `&` to not block if browser not already running.
+  # Suppress: "Opening in existing browser session."
+  sensible-browser "${projurl}" > /dev/null &
+}
+
+main () {
+  git_open "$@"
+}
+
+main "$@"
+

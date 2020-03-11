@@ -709,21 +709,6 @@
 
 [alias]
 
-  # Open project web page for 'origin' (or specified) remote.
-  # NOTE: Call `f &` to not block if browser not already running.
-  open = "! \
-    f () { \
-      local projurl=$( \
-        git remote get-url ${1:-origin} \
-        | sed -E \
-          -e 's#(ssh://git@|git@|git://|ssh://)#https://#' \
-          -e 's#com:#com/#' \
-          -e 's#\\.git$##' \
-        | head -n1; \
-      ); \
-      sensible-browser "${projurl}"; \
-    }; f &"
-
   # Empirically speaking.
   whoami = config user.email
 
