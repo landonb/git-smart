@@ -2,106 +2,85 @@
 # vim:tw=0:ts=2:sw=2:et:norl:
 
 reveal_biz_vars () {
-  GITFLU_TMP_MAX_WIDTH_FILE='/tmp/git-FlU-remote-tidy.max-width-Aegha6paiPhoh0di'
-  #
-  GITFLU_COLSEP='     '
-  GITFLU_ALIGNT='-'
-  #
+  # Left-align with 5 spaces between name and URL:
+  #  GITFLU_COLSEP='     '
+  #  GITFLU_ALIGNT='-'
+  # But I sorta like right-align with just 2 spaces:
   GITFLU_COLSEP='  '
   GITFLU_ALIGNT=''
+
+  GITFLU_MAX_WIDTH=0
 }
 
 # ***
 
-remote_exists () {
-  local remote="$1"
-  git remote get-url ${remote} &> /dev/null
-}
+declare -A -x GITFLU_REMOTE_CACHE
 
-# ***
-
-cached_first_column_max () {
-  local max_len=0
-  [ -s "${GITFLU_TMP_MAX_WIDTH_FILE}" ] && \
-    max_len=$(cat "${GITFLU_TMP_MAX_WIDTH_FILE}")
-  echo "${max_len}"
-}
-
-callback_first_column_max () {
+update_first_column_max () {
   local name=$1
   local name_len=$(echo -n "${name}" | wc --chars)
-  local max_len=$(cached_first_column_max)
-  if [ ${name_len} -gt ${max_len} ]; then
-    echo -n ${name_len} > "${GITFLU_TMP_MAX_WIDTH_FILE}"
-  fi
+  [ ${name_len} -gt ${GITFLU_MAX_WIDTH} ] && GITFLU_MAX_WIDTH=${name_len}
+}
+
+git_remote_assemble_cache () {
+  local last_op=''
+  local last_url=''
+  local line=''
+  while IFS= read -r line; do
+    # 3 parts: name; url; "(fetch)" or "(push)".
+    set -- ${line}
+    local name=$1
+    local url=$2
+    local op=$3
+    if [ "${op}" = "(fetch)" ]; then
+      [ -n "${last_op}" ] && [ "${last_op}" != "(push)" ] && \
+        >&2 "Unexpected: Previous line's op not “(push)”."
+      last_op="${op}"
+      last_url="${url}"
+      update_first_column_max "${name}"
+      GITFLU_REMOTE_CACHE[${name}]="${url}"
+    elif [ "${op}" = "(push)" ]; then
+      # (lb): It's probably possible to have other ops, or disparate
+      # URLs for the same remote, but I've never seen it in my usage,
+      # so alerting.
+      [ -n "${last_op}" ] && [ "${last_op}" != "(fetch)" ] && \
+        >&2 "Unexpected: Previous line's op not “(fetch)”."
+      [ -n "${last_url}" ] && [ "${last_url}" != "${url}" ] && \
+        >&2 "Unexpected: Previous line's url not the same."
+      last_op="${op}"
+      last_url="${url}"
+      # Only call the callback once, once first line for remote,
+      # which is the "(fetch)" line, handled above.
+    else
+      >&2 "Unexpected: Unknown op “${op}” for “${name}”."
+    fi
+  done < <(git remote -v)
+  # CURIOUS/2020-03-11: What's difference between these two:
+  #   done < <(git remote -v)
+  #   done <<< "$(git remote -v)"
 }
 
 callback_print_remote_info () {
   local name=$1
   local url=$2
-  local collen=$(cached_first_column_max)
-  eval "printf '%${GITFLU_ALIGNT}${collen}s${GITFLU_COLSEP}%s\n' '${name}' '${url}'"
+  eval "printf '%${GITFLU_ALIGNT}${GITFLU_MAX_WIDTH}s${GITFLU_COLSEP}%s\n' '${name}' '${url}'"
 }
 
-git_remote_for_each () {
+pretty_print_tidy_remote_list () {
   local callback=$1
   for remote in \
     'origin' \
     'upstream' \
     $(git remote | grep -v -e 'origin' -e 'upstream' | sort \
   ); do
-    ! remote_exists "${remote}" && continue
-    local last_op=''
-    local last_url=''
-    local line=''
-    while IFS= read -r line; do
-      # 3 parts: name; url; "(fetch)" or "(push)".
-      set -- ${line}
-      local name
-      local url
-      local op
-      name=$1
-      url=$2
-      op=$3
-      if [ "${op}" = "(fetch)" ]; then
-        # (fetch) should be first match.
-        [ -n "${last_op}" ] && \
-          >&2 "Unexpected: Previous op not nothing: “${last_op}”."
-        last_op="${op}"
-        last_url="${url}"
-        eval "${callback} '${name}' '${url}' '${op}'"
-      elif [ "${op}" = "(push)" ]; then
-        # (lb): It's probably possible to have other ops, or disparate
-        # URLs for the same remote, but I've never seen it in my usage,
-        # so alerting.
-        [ "${last_op}" != "(fetch)" ] && \
-          >&2 "Unexpected: Previous line's op not “(fetch)”."
-        [ "${last_url}" != "${url}" ] && \
-          >&2 "Unexpected: Previous line's url not the same."
-        last_op="${op}"
-        last_url="${url}"
-        # Only call the callback once, once first line for remote,
-        # which is the "(fetch)" line, handled above.
-      else
-        >&2 "Unexpected: Unknown op “${op}” for “${name}”."
-      fi
-    done <<< "$(git remote -v | grep "^${remote}\b")"
+    ! [ ${GITFLU_REMOTE_CACHE[${remote}]+x} ] && continue
+    callback_print_remote_info "${remote}" "${GITFLU_REMOTE_CACHE[${remote}]}"
   done
 }
 
-calculate_first_column_max () {
-  git_remote_for_each "callback_first_column_max"
-}
-
-pretty_print_tidy_remote_list () {
-  git_remote_for_each "callback_print_remote_info"
-}
-
 git_remote_list_tidy () {
-  truncate -s 0 "${GITFLU_TMP_MAX_WIDTH_FILE}"
-  calculate_first_column_max
+  git_remote_assemble_cache
   pretty_print_tidy_remote_list
-  /bin/rm "${GITFLU_TMP_MAX_WIDTH_FILE}"
 }
 
 main () {
