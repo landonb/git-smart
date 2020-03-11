@@ -653,7 +653,9 @@
   pu = push upstream HEAD
 
   # Use `git re` to show the URL of each remote after its name.
-  re = remote -v
+  # 2020-03-11: Check out the new `bin/git-re` tidy remote reporter!
+  # - LATER: Remove this alias. For now, telling YOU where to look.
+  #  re = remote -v
 
   # Run `git sup` periodically (or maybe after every git-pull) to process
   # any changes to the project submodules).
