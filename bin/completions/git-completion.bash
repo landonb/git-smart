@@ -1,3 +1,11 @@
+#!/bin/bash
+# vim:tw=0:ts=4:sw=4:noet:norl:ft=sh
+# Author: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
+# Project: https://github.com/landonb/git-FlU#🌡
+# License: GPLv2 [this file only; bulk of git-FlU is MIT per LICENSE file].
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 # bash/zsh completion support for core Git.
 #
 # Copyright (C) 2006,2007 Shawn O. Pearce <spearce@spearce.org>

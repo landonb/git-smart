@@ -1,5 +1,8 @@
 #!/bin/bash
-# vim:tw=0:ts=2:sw=2:et:norl:
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-FlU#🌡
+# License: MIT. Please find more in the LICENSE file.
 
 # (lb): 2019-10-18: I had an undo alias in ~/.gitconfig,
 # but that I installed git-extras, which installs its own

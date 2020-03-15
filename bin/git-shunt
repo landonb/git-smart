@@ -1,11 +1,9 @@
 #!/bin/bash
-#  vim:tw=0:ts=2:sw=2:et:norl:ft=bash
-
-# git-shunt ::is part of:: https://github.com/landonb/home-fries
-# Copyright © 2020 Landon Bouma <landonb+git-shunt &#x40; retrosoft &#x2E; com>
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-FlU#🌡
+# License: MIT. Please find more in the LICENSE file.
 # Summary: Rebase recent legit commits below WIP limpets. And tag? We'll see. FIXME!
-# License: GPLv3
-# Usage: `git shunt`
 # Definition: shunt /SHənt/ direct or divert (someone or something) to a less
 #             important place or position; Middle English ‘move suddenly aside’.
 

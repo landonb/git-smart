@@ -1,4 +1,13 @@
 #!/bin/bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Authors: Various. Published 2012-06-05, "A better Vimdiff Git mergetool"
+#           https://vim.fandom.com/wiki/A_better_Vimdiff_Git_mergetool
+#           https://github.com/whiteinge/diffconflicts
+# Project: https://github.com/landonb/git-FlU#🌡
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+#!/bin/bash
 # A better vimdiff mergetool for Git
 #
 # Git does a great job resolving merge conflicts automatically but there are
