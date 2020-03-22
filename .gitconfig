@@ -577,9 +577,12 @@
 
   # Use `git dc` to show a diff of what's already been *staged* (which
   # is what you'd see at the bottom of a `git commit -v` edit session).
-  dc = diff --cached
+  # 2020-03-22: On second thought, because I have Bash aliases at `dff`
+  # and `dcc`, and because `dc` is the calculator app, perhaps this git-dc
+  # is not as useful/potentially confusing.
+  dc = !git --no-pager diff --cached
   # `dcc` like `dc` except no pager, dumps to terminal.
-  dcc = !git --no-pager diff --cached
+  dcc = !git diff --cached
 
   # Use `git dd` to dump the diff to the terminal, bypassing the pager.
   dd = !git --no-pager diff \"$@\"
@@ -590,7 +593,7 @@
   #   Bash alias to my user environment
   #     # <somewhere deep inside my .bashrc>
   #     alias dff='git diff'
-  df = diff
+  df = !git --no-pager diff
   # - Because I've got `dff` aliased from Bash, I have same
   #   aliased from git, so I can wire my brain both ways.
   dff = diff
