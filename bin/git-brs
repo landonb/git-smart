@@ -4,6 +4,20 @@
 # Project: https://github.com/landonb/git-FlU#🌡
 # License: MIT. Please find more in the LICENSE file.
 
+GITFLU_MYST_BRANCH_HIERARCHY="${GITFLU_MYST_BRANCH_HIERARCHY:-master develop}"
+
+GITFLU_MYST_REMOTE_HIERARCHY="${GITFLU_MYST_REMOTE_HIERARCHY:-origin upstream}"
+
+git_brs_filter_remotes () {
+  local filter
+  local remote
+  for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
+    filter="${filter}remotes/${remote}|"
+  done
+  filter="${filter}^..(?!remotes/)"
+  echo "${filter}"
+}
+
 git-brs () {
   # GREP_COLORS default: ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36
   #                      and rv and ne absent.
@@ -42,8 +56,10 @@ git-brs () {
   #   $ git branch --all -vv
   #   master        d2a885d [origin/master: behind 67] Foo: bar.
 
-  git --no-pager branch -avv \
-    | grep -P "remotes/origin|remotes/upstream|^..(?!remotes/)" \
+  local all_annotate="$(git --no-pager branch -avv)"
+  local filter_remotes="$(git_brs_filter_remotes)"
+  local important_brs="$(echo "${all_annotate}" | grep -P "${filter_remotes}")"
+  echo "${important_brs}" \
     | GREP_COLORS="mt=$(sgr_norm);$(fg_white)" egrep --color=always -e "\[[^]]+\]|$" \
     | GREP_COLORS="mt=$(sgr_bold);$(fg_black)" egrep --color=always -e " [a-f0-9]{8} |$" \
     | GREP_COLORS="mt=$(sgr_bold);$(fg_magenta)" egrep --color=always -e "^. [^[:space:]]*|$" \
