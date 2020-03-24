@@ -1,44 +1,55 @@
-#!/bin/bash
+#!/bin/sh
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
 # Project: https://github.com/landonb/git-FlU#🌡
 # License: MIT. Please find more in the LICENSE file.
 
+# Like `git fetch --all`, but fetches workflow-named remotes first (e.g.,
+# 'origin', then 'upstream'), and skips user-specified remotes (e.g., to
+# USB devices or remote hosts that are offline or not important).
+
 GITFLU_MYST_REMOTE_HIERARCHY="${GITFLU_MYST_REMOTE_HIERARCHY:-origin upstream}"
+
+GITFLU_GET_SKIP_REMOTES="${GITFLU_GET_SKIP_REMOTES}"
 
 fetch_known_remotes_orderly () {
   for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
-    if git remote get-url ${remote} 2> /dev/null; then
+    if git remote get-url ${remote} > /dev/null 2>&1; then
       echo "Fetching ‘${remote}’"
       git fetch ${remote}
     fi
   done
 }
 
-git_get () {
-  fetch_known_remotes_orderly
+fetch_remote_allowed () {
+  local cur_re="$1"
+  local remote
+  for remote in ${GITFLU_GET_SKIP_REMOTES}; do
+    [ "${cur_re}" = "${remote}" ] && return 1
+  done
+  for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
+    [ "${cur_re}" = "${remote}" ] && return 1
+  done
+  return 0
+}
 
-  # Bash for loop split on newlines...
-  # overkill because remote names do not have spaces.
-  local IFS=$'\n' 
+fetch_other_remotes_allowed () {
   local remote
   for remote in $(git remote | sort); do
-    #echo ${remote}
-    if [[ "${remote}" != 'origin' \
-       && "${remote}" != 'upstream' \
-       && "${remote}" != 'travel' ]]; then
-    echo "Fetching ${remote}"
+    fetch_remote_allowed "${remote}" || continue
+    echo "Fetching ‘${remote}’"
     git fetch ${remote}
-  fi
   done
-  unset IFS
+}
+
+git_get () {
+  fetch_known_remotes_orderly
+  fetch_other_remotes_allowed
 }
 
 main () {
   git_get
 }
 
-if [ "$0" = "${BASH_SOURCE[0]}" ]; then
-  main "${@}"
-fi
+main "${@}"
 
