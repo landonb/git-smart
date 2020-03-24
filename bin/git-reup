@@ -4,29 +4,56 @@
 # Project: https://github.com/landonb/git-FlU#🌡
 # License: MIT. Please find more in the LICENSE file.
 
-# FIXME/2020-03-23 22:59: This still useful?
-# FIXME/2020-03-23 22:59: Or named correctly?
+# If on 'develop' or 'master' branch, fast-forward merges to corresponding
+# HEAD on 'upstream' (or optional named remote); or for any other branch,
+# rebases atop the upstream progenitor, e.g., 'upstream/develop' (or whatever
+# is the last branch named in the branch hierarchy).
 
-# Rebases 'develop' (or a named branch)
-# atop 'upstream/develop' (or a named remote/branch).
-git-bump () {
-  local local_br="${1:-develop}"
-  local remote_up="${2:-upstream}"
-  local upstream_br="${3:-${1}}"
-  local remote_or="${4:-origin}"
-  git checkout "${local_br}"
+GITFLU_MYST_BRANCH_HIERARCHY="${GITFLU_MYST_BRANCH_HIERARCHY:-master develop}"
+
+git_branch_name () {
+  local branch
+  branch="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"
+  [ $? -eq 0 ] && echo "${branch}" && return
+  >&2 echo "ERROR: Missing local branch."
+  >&2 echo " HINT: Try running from a Git repo, or creating your first commit."
+  exit 1
+}
+
+git_reup () {
+  local remote_up="${1:-upstream}"
+
+  local branch
+  branch="$(git_branch_name)" || exit 1
+
   git fetch "${remote_up}"
-  git rebase "${remote_up}/${upstream_br}"
-  # 2020-02-09: Really push? Let's not.
-  #   # git fetch "${remote_or}"
-  #   git push "${remote_or}"
+
+  # MEH/2020-03-24: I see a few different ways to handle 'develop' and 'master'.
+  # E.g., if on community project, I might just want to
+  #   `git merge --ff-only upstream/(develop|master)`
+  # but if on one of my projects, sometimes I move develop to a feature
+  # HEAD (in part because I skip the pull request feature on GitHub).
+  # So really there's no ideal way to do this, at least for my workflow.
+  # So I'll just default to community develop model, when my local 'develop'
+  # and 'master' branches should always be 'upstream' fast-forward-able.
+  local progenitor
+  for brup in ${GITFLU_MYST_BRANCH_HIERARCHY}; do
+    progenitor="${branch}"
+    [ "${branch}" = "${brup}" ] && break
+  done
+  # progenitor is 'master' for 'master', 'develop' for 'develop',
+  # or 'develop' for any feature branch.
+  if [ "${branch}" = "${brup}" ]; then
+    git merge --ff-only "${remote_up}/${progenitor}"
+  else
+    git rebase "${remote_up}/${progenitor}"
+  fi
 }
 
 # ***
 
 main () {
-  set -e
-  git-bump "${@}"
+  git_reup "${@}"
 }
 
 main "$@"
