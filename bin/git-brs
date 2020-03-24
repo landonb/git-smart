@@ -62,15 +62,27 @@ git-brs () {
   local filter_remotes="$(git_brs_filter_remotes)"
   local important_brs="$(echo "${all_annotate}" | grep -P "${filter_remotes}")"
   local high="${important_brs}"
+  # Start by matching everything.
   high="$(printg "${high}" "$(sgr_norm);$(fg_white)" '\[[^]]+\]|$')"
+  # ...
   high="$(printg "${high}" "$(sgr_bold);$(fg_black)" ' [a-f0-9]{8} |$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_magenta)" '^. [^[:space:]]*|$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_yellow)" '[[:space:]]+feature/([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_green)" '[[:space:]]+wip/([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_norm);$(fg_cyan);$(bg_yellow)" '[[:space:]]+a(lpha)?[0-9]*/([^] :])*|$')"
+
+  # MAYBE/2020-03-24: Add colors to GITFLU_MYST_REMOTE_HIERARCHY and iterate rather than hardcoding remotes.
   high="$(printg "${high}" "$(sgr_bold);$(fg_white);$(bg_cyan)" 'remotes/origin/([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_black);$(bg_white)" 'remotes/upstream/([^] :])*|$')"
-  high="$(printg "${high}" "$(sgr_bold);$(fg_cyan)" '[[:space:]]+develop|[[:space:]]+master|$')"
+
+  local progenitor_filter
+  for branch in ${GITFLU_MYST_BRANCH_HIERARCHY}; do
+    progenitor_filter="${progenitor_filter}[[:space:]]+${branch}|"
+  done
+  progenitor_filter="${progenitor_filter}\$"
+  # Now, e.g., progenitor_filter='[[:space:]]+develop|[[:space:]]+master|$'
+  high="$(printg "${high}" "$(sgr_bold);$(fg_cyan)" "${progenitor_filter}")"
+
   echo "${high}"
 }
 
