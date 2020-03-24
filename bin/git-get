@@ -4,15 +4,19 @@
 # Project: https://github.com/landonb/git-FlU#🌡
 # License: MIT. Please find more in the LICENSE file.
 
+GITFLU_MYST_REMOTE_HIERARCHY="${GITFLU_MYST_REMOTE_HIERARCHY:-origin upstream}"
+
+fetch_known_remotes_orderly () {
+  for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
+    if git remote get-url ${remote} 2> /dev/null; then
+      echo "Fetching ‘${remote}’"
+      git fetch ${remote}
+    fi
+  done
+}
+
 git_get () {
-  if [[ $(git remote get-url origin 2> /dev/null) ]]; then
-    echo 'Fetching origin'
-    git fetch origin
-  fi
-  if [[ $(git remote get-url upstream 2> /dev/null) ]]; then
-    echo 'Fetching upstream'
-    git fetch upstream
-  fi
+  fetch_known_remotes_orderly
 
   # Bash for loop split on newlines...
   # overkill because remote names do not have spaces.
