@@ -7,10 +7,20 @@
 # 2017-09-27: Delete branches that are "gone" on the remote:
 #   https://stackoverflow.com/questions/7726949/remove-local-branches-no-longer-on-remote
 
-set -e
-git fetch -p || echo "WARNING: git-fetch fizzle-failed!"
-for branch in $(git --no-pager branch -vv --no-color | grep ': gone]' | awk '{print $1}'); do
-  echo "Deleting: “$branch”"
-  git branch -D $branch
-done
+git_gone () {
+  set -e
+  git fetch -p || echo "WARNING: git-fetch fizzle-failed!"
+  for branch in $(git --no-pager branch -vv --no-color | grep ': gone]' | awk '{print $1}'); do
+    echo "Deleting: “$branch”"
+    git branch -D $branch
+  done
+}
+
+main () {
+  git_gone
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
 

@@ -5,11 +5,21 @@
 # License: MIT. Please find more in the LICENSE file.
 
 # See also the git cleanup command.
-set -e
-git remote prune ${2:-origin}
-git checkout ${3:-develop}
-set +e
-git branch -D ${1}
-git push ${2:-origin} :${1}
-set -e
+git_cleanbr () {
+  set -e
+  git remote prune ${2:-origin}
+  git checkout ${3:-develop}
+  set +e
+  git branch -D ${1}
+  git push ${2:-origin} :${1}
+  set -e
+}
+
+main () {
+  git_cleanbr
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
 

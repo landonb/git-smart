@@ -95,5 +95,7 @@ main () {
   git_remote_list_tidy "$@"
 }
 
-main "$@"
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
 

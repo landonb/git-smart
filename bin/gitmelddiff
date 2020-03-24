@@ -9,5 +9,15 @@
 # GIT_EXTERNAL_DIFF is called with 7 parameters:
 #   path old-file old-hex old-mode new-file new-hex new-mode
 
-meld $1 $2
+meld_files () {
+  meld $1 $2
+}
+
+main () {
+  meld_files "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
 
