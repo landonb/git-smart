@@ -5,17 +5,54 @@
 # License: MIT. Please find more in the LICENSE file.
 
 git-brs () {
+  # GREP_COLORS default: ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36
+  #                      and rv and ne absent.
+  # GREP_COLOR is deprecated, kinda like mt, ms, and mc.
+
+  # Select Graphic Rendition (SGR) readability helpers.
+  sgr_norm () { printf '00'; }
+  sgr_bold () { printf '01'; }
+
+  fg_black () { printf '30'; }
+  fg_red () { printf '31'; }
+  fg_green () { printf '32'; }
+  fg_yellow () { printf '33'; }
+  fg_blue () { printf '34'; }
+  fg_magenta () { printf '35'; }
+  fg_cyan () { printf '36'; }
+  fg_white () { printf '37'; }
+
+  bg_black () { printf '40'; }
+  bg_red () { printf '41'; }
+  bg_green () { printf '42'; }
+  bg_yellow () { printf '43'; }
+  bg_blue () { printf '44'; }
+  bg_magenta () { printf '45'; }
+  bg_cyan () { printf '46'; }
+  bg_white () { printf '47'; }
+
+  # Use -a/--all to include remote-tracking branches. Add -v includes sha1 and
+  # commit subject line, and relationship to upstream branch. Make double -vv
+  # to also print the name of the upstream branch.
+  # E.g.:
+  #   $ git branch --all
+  #   master
+  #   $ git branch --all -v
+  #   master        d2a885d [behind 67] Foo: bar.
+  #   $ git branch --all -vv
+  #   master        d2a885d [origin/master: behind 67] Foo: bar.
+
   git --no-pager branch -avv \
-    | egrep -v "remotes/travel/" \
     | grep -P "remotes/origin|remotes/upstream|^..(?!remotes/)" \
-    | GREP_COLOR="00;37" egrep --color=always -e "\[[^]]+\]|$" \
-    | GREP_COLOR="01;30" egrep --color=always -e " [a-f0-9]{8} |$" \
-    | GREP_COLOR="01;35" egrep --color=always -e "^. [^[:space:]]*|$" \
-    | GREP_COLOR="01;33" egrep --color=always -e "[[:space:]]+feature/([^] :])*|$" \
-    | GREP_COLOR="01;32" egrep --color=always -e "[[:space:]]+wip/([^] :])*|$" \
-    | GREP_COLOR="01;37;46" egrep --color=always -e "remotes/origin/([^] :])*|$" \
-    | GREP_COLOR="01;30;47" egrep --color=always -e "remotes/upstream/([^] :])*|$" \
-    | GREP_COLOR="01;36" egrep --color=always -e "[[:space:]]+develop|[[:space:]]+master|$"
+    | GREP_COLORS="mt=$(sgr_norm);$(fg_white)" egrep --color=always -e "\[[^]]+\]|$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_black)" egrep --color=always -e " [a-f0-9]{8} |$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_magenta)" egrep --color=always -e "^. [^[:space:]]*|$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_yellow)" egrep --color=always -e "[[:space:]]+feature/([^] :])*|$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_green)" egrep --color=always -e "[[:space:]]+wip/([^] :])*|$" \
+    | GREP_COLORS="mt=$(sgr_norm);$(fg_cyan);$(bg_yellow)" egrep --color=always -e "[[:space:]]+a(lpha)?[0-9]*/([^] :])*|$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_white);$(bg_cyan)" egrep --color=always -e "remotes/origin/([^] :])*|$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_black);$(bg_white)" egrep --color=always -e "remotes/upstream/([^] :])*|$" \
+    | GREP_COLORS="mt=$(sgr_bold);$(fg_cyan)" egrep --color=always -e "[[:space:]]+develop|[[:space:]]+master|$"
 }
 
 main () {
