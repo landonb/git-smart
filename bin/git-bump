@@ -4,6 +4,9 @@
 # Project: https://github.com/landonb/git-FlU#🌡
 # License: MIT. Please find more in the LICENSE file.
 
+# FIXME/2020-03-23 22:59: This still useful?
+# FIXME/2020-03-23 22:59: Or named correctly?
+
 # Rebases 'develop' (or a named branch)
 # atop 'upstream/develop' (or a named remote/branch).
 git-bump () {
