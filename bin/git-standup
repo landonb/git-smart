@@ -1,0 +1,39 @@
+#!/bin/sh
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Adopted by: https://github.com/landonb/git-FlU#🌡
+# Author: Stephen Mathieson
+#   https://github.com/stephenmathieson/git-standup
+# License: MIT. Please find more in the LICENSE file.
+# Copyright: (c) 2013 Stephen Mathieson <me@stephenmathieson.com>
+
+# "Simple git script for remembering what you did yesterday".
+
+# USAGE:
+#
+#   See what you did:
+#
+#     $ git standup
+#     [ . . . ]
+#
+#   See what they did:
+#
+#     $ AUTHOR="Bill Nye the Science Guy" git standup
+#     [ . . . ]
+
+git_standup () {
+  AUTHOR=${AUTHOR:="`git config user.name`"}
+
+  since=yesterday
+  if [[ $(date +%u) == 1 ]] ; then
+    since="3 days ago"
+  fi
+
+  git log --since "$since" --oneline --branches=* --author="$AUTHOR"
+}
+
+main () {
+  git_standup "$@"
+}
+
+main "${@}"
+
