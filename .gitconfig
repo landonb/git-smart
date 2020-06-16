@@ -629,7 +629,15 @@
   #  rollback = reset --mixed @~1
   # Now include a one-liner of the commit you land on after rolling back.
   # Use case: I have multiple WIPs and want to rollback latest sane commit.
+  # FIXME/2020-06-15: Remove `rollback`, I think I've switched to `pop1` completely!
   rollback = ! \
+    git reset --mixed @~1 && \
+    git --no-pager log -1 --pretty=oneline --abbrev-commit
+  # 2020-05-27: Getting lazy with age.
+  # - On second thought, any combo with 2 keys runs risk of being typed
+  #   and ENTERed without me thinking. I've done it before in other cases.
+  #    rb = rollback
+  pop1 = ! \
     git reset --mixed @~1 && \
     git --no-pager log -1 --pretty=oneline --abbrev-commit
 
