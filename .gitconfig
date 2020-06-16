@@ -624,7 +624,14 @@
   # Use `git rollback` to unwind the latest commit and unstage changes.
   # - Equivalent to (or just similar?):
   #     git undo && git reset HEAD *
-  rollback = reset --mixed @~1
+  # 2020-05-24: I find myself running rollback, then `git l`, so combine the two!
+  # Was:
+  #  rollback = reset --mixed @~1
+  # Now include a one-liner of the commit you land on after rolling back.
+  # Use case: I have multiple WIPs and want to rollback latest sane commit.
+  rollback = ! \
+    git reset --mixed @~1 && \
+    git --no-pager log -1 --pretty=oneline --abbrev-commit
 
   # Use `git undo` to undo the latest commit, but not to unstage.
   # - This is useful if you want to rewrite the commit message,
