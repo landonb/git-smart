@@ -745,6 +745,15 @@
   # here's a shortcut to continue the rebase quickly.
   rc = rebase --continue
 
+  # (lb): If you just want to amend to the previous commit, here's a
+  # shortcut for that, but I've forgot about this alias since adding
+  # it, and find myself instead just running `git ci --amend`. Though
+  # maybe I'll remember to start using it someday.
+  #  cia = commit --amend --no-edit
+  # - Oh! I've been missing something key: The --no-edit! Now
+  #   I'll probably remember to start using this command.
+  cia = commit --amend --no-edit
+
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
