@@ -727,6 +727,24 @@
   #   UPstream tracking information on Push, so it's called PUP.
   pup = push --set-upstream origin HEAD
 
+  # -------
+
+  # For use with `git ci --fixup=<>`, an easier rebase command.
+  # - Common workflow:
+  #   - While working on a new feature, I make a small change
+  #     that should be part of a previous commit.
+  #   - Run `st` (git status) to see the file path, and copy it.
+  #   - Run `gitk -- <file> &` and find and copy appropriate commit hash.
+  #   - Run `git add -p <file>`, and then `git ci --fixup=<hash>`.
+  #   - Run `git wip` to commit other uncommitted changes.
+  #   - Run `git ria <hash>^` to fixup the small change to the past commit.
+  #   - Save and close the rebase script.
+  #   - Run `git pop1` to rollback the WIP commit.
+  ria = rebase -i --autosquash
+  # If the rebase pauses and you need to resolve a conflict,
+  # here's a shortcut to continue the rebase quickly.
+  rc = rebase --continue
+
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
