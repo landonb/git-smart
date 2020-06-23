@@ -672,6 +672,9 @@
   # Use `git po` to push to the most commonly pushed remote (probably), 'origin'.
   po = push origin HEAD
   pu = push upstream HEAD
+  # 2020-06-18: Changing it up...
+  pp = push proving HEAD
+  pr = push release HEAD
 
   # Use `git re` to show the URL of each remote after its name.
   # 2020-03-11: Check out the new `bin/git-re` tidy remote reporter!
