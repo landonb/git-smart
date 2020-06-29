@@ -6,7 +6,7 @@
 
 # Open project web page for 'origin' (or specified) remote.
 git_open () {
-  local remote=${1:-origin}
+  local remote=${1:-release}
   git remote get-url ${remote} &> /dev/null || remote='upstream'
   ! git remote get-url ${remote} &> /dev/null && echo 'No remote!' && return
   local projurl=$( \
