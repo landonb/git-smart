@@ -1,6 +1,6 @@
 #!/bin/sh
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
-# Adopted by: https://github.com/landonb/git-FlU#🌡
+# Adopted by: https://github.com/landonb/git-smart#💡
 # Author: Stephen Mathieson
 #   https://github.com/stephenmathieson/git-standup
 # License: MIT. Please find more in the LICENSE file.

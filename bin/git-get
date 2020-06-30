@@ -1,19 +1,19 @@
 #!/bin/sh
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
-# Project: https://github.com/landonb/git-FlU#🌡
+# Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
 # Like `git fetch --all`, but fetches workflow-named remotes first (e.g.,
 # 'origin', then 'upstream'), and skips user-specified remotes (e.g., to
 # USB devices or remote hosts that are offline or not important).
 
-GITFLU_MYST_REMOTE_HIERARCHY="${GITFLU_MYST_REMOTE_HIERARCHY:-origin upstream}"
+GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-origin upstream}"
 
-GITFLU_GET_SKIP_REMOTES="${GITFLU_GET_SKIP_REMOTES}"
+GITSMART_GET_SKIP_REMOTES="${GITSMART_GET_SKIP_REMOTES}"
 
 fetch_known_remotes_orderly () {
-  for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
+  for remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
     if git remote get-url ${remote} > /dev/null 2>&1; then
       echo "Fetching ‘${remote}’"
       git fetch ${remote}
@@ -24,10 +24,10 @@ fetch_known_remotes_orderly () {
 fetch_remote_allowed () {
   local cur_re="$1"
   local remote
-  for remote in ${GITFLU_GET_SKIP_REMOTES}; do
+  for remote in ${GITSMART_GET_SKIP_REMOTES}; do
     [ "${cur_re}" = "${remote}" ] && return 1
   done
-  for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
+  for remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
     [ "${cur_re}" = "${remote}" ] && return 1
   done
   return 0

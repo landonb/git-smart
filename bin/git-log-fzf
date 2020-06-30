@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Various.
-# Project: https://github.com/landonb/git-FlU#🌡
+# Project: https://github.com/landonb/git-smart#💡
 
 # http://owen.cymru/fzf-ripgrep-navigate-with-bash-faster-than-ever-before/
 # "It will let you select a commit, and display the diff off it, and put the

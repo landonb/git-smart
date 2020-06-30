@@ -1,32 +1,32 @@
 #!/bin/bash
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
-# Project: https://github.com/landonb/git-FlU#🌡
+# Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
 reveal_biz_vars () {
   # Left-align with 5 spaces between name and URL:
-  #  GITFLU_COLSEP="${GITFLU_COLSEP:-     }"
-  #  GITFLU_ALIGNT="${GITFLU_ALIGNT:--}"
+  #  GITSMART_COLSEP="${GITSMART_COLSEP:-     }"
+  #  GITSMART_ALIGNT="${GITSMART_ALIGNT:--}"
   # But I sorta like right-align with just 2 spaces:
-  GITFLU_COLSEP="${GITFLU_COLSEP:-  }"
-  GITFLU_ALIGNT="${GITFLU_ALIGNT:-}"
+  GITSMART_COLSEP="${GITSMART_COLSEP:-  }"
+  GITSMART_ALIGNT="${GITSMART_ALIGNT:-}"
 
   # YOU: Leave at zero to use max width of single repo's remotes;
   #      or set to minimum width for all projects -- i.e., for `mr`
   #      multiple-repository reporting, you could run, e.g.,:
-  #        mr -d / run bash -c 'GITFLU_MAX_WIDTH=12 git re'
-  GITFLU_MAX_WIDTH=${GITFLU_MAX_WIDTH:-0}
+  #        mr -d / run bash -c 'GITSMART_MAX_WIDTH=12 git re'
+  GITSMART_MAX_WIDTH=${GITSMART_MAX_WIDTH:-0}
 }
 
 # ***
 
-declare -A -x GITFLU_REMOTE_CACHE
+declare -A -x GITSMART_REMOTE_CACHE
 
 update_first_column_max () {
   local name=$1
   local name_len=$(echo -n "${name}" | wc --chars)
-  [ ${name_len} -gt ${GITFLU_MAX_WIDTH} ] && GITFLU_MAX_WIDTH=${name_len}
+  [ ${name_len} -gt ${GITSMART_MAX_WIDTH} ] && GITSMART_MAX_WIDTH=${name_len}
 }
 
 git_remote_assemble_cache () {
@@ -45,7 +45,7 @@ git_remote_assemble_cache () {
       last_op="${op}"
       last_url="${url}"
       update_first_column_max "${name}"
-      GITFLU_REMOTE_CACHE[${name}]="${url}"
+      GITSMART_REMOTE_CACHE[${name}]="${url}"
     elif [ "${op}" = "(push)" ]; then
       # (lb): It's probably possible to have other ops, or disparate
       # URLs for the same remote, but I've never seen it in my usage,
@@ -70,7 +70,7 @@ git_remote_assemble_cache () {
 callback_print_remote_info () {
   local name=$1
   local url=$2
-  eval "printf '%${GITFLU_ALIGNT}${GITFLU_MAX_WIDTH}s${GITFLU_COLSEP}%s\n' '${name}' '${url}'"
+  eval "printf '%${GITSMART_ALIGNT}${GITSMART_MAX_WIDTH}s${GITSMART_COLSEP}%s\n' '${name}' '${url}'"
 }
 
 pretty_print_tidy_remote_list () {
@@ -82,8 +82,8 @@ pretty_print_tidy_remote_list () {
     'upstream' \
     $(git remote | grep -v -e 'proving' -e 'release' -e 'origin' -e 'upstream' | sort \
   ); do
-    ! [ ${GITFLU_REMOTE_CACHE[${remote}]+x} ] && continue
-    callback_print_remote_info "${remote}" "${GITFLU_REMOTE_CACHE[${remote}]}"
+    ! [ ${GITSMART_REMOTE_CACHE[${remote}]+x} ] && continue
+    callback_print_remote_info "${remote}" "${GITSMART_REMOTE_CACHE[${remote}]}"
   done
 }
 

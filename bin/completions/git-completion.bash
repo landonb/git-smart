@@ -1,8 +1,8 @@
 #!/bin/bash
 # vim:tw=0:ts=4:sw=4:noet:norl:ft=sh
 # Author: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
-# Project: https://github.com/landonb/git-FlU#🌡
-# License: GPLv2 [this file only; bulk of git-FlU is MIT per LICENSE file].
+# Project: https://github.com/landonb/git-smart#💡
+# License: GPLv2 [this file only; bulk of git-smart is MIT per LICENSE file].
 # Source: https://github.com/git/git/blob/master/contrib/completion/git-completion.bash
 # Latest: 2020-03-09: a4fd114f.
 

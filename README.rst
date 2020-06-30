@@ -1,6 +1,6 @@
-@@@@@@@
-git-FlU
-@@@@@@@
+@@@@@@@@@
+git-smart
+@@@@@@@@@
 
 .. Contagious Git Config & Commands
 
@@ -22,23 +22,23 @@ If you want to blindly install and use all these great aliases and commands,
 try something like this::
 
     # Clone this repo somewhere.
-    git clone https://github.com/landonb/git-FlU.git
+    git clone https://github.com/landonb/git-smart.git
 
     # Record the path for symlinks we'll create.
-    git_FlU_dir="$(pwd)/git-FlU"
+    git_smart_dir="$(pwd)/git-smart"
 
-    # Keep your config, which will be sourced after git-FlU's.
+    # Keep your config, which will be sourced after git-smart's.
     # - If you don't already have a private config, see:
-    #     git-FlU/.gitconfig.local.example
+    #     git-smart/.gitconfig.local.example
     mv ~/.gitconfig ~/.gitconfig.local
 
-    # Wire git-FlU's .gitconfig via symlink.
+    # Wire git-smart's .gitconfig via symlink.
     cd "${HOME}"
-    ln -s "${git_FlU_dir}/.gitconfig"
+    ln -s "${git_smart_dir}/.gitconfig"
 
     # Wire the attributes file for enhanced binary diff.
     cd "${HOME}/.config/git"
-    ln -s "${git_FlU_dir}/.config/git/attributes"
+    ln -s "${git_smart_dir}/.config/git/attributes"
 
     # Sanity check.
     git whoami
@@ -50,13 +50,13 @@ CAVEATS
 Note: The ``git-extras`` distro package installs its own ``git-undo``,
 e.g., at ``/usr/bin/git-undo``.
 
-- You'll want to set your user's ``PATH`` so that ``git-FlU/lib`` is listed
-  before ``/usr/bin`` -- if you want the git-FlU script to win.
+- You'll want to set your user's ``PATH`` so that ``git-smart/lib`` is listed
+  before ``/usr/bin`` -- if you want the git-smart script to win.
 
-- git-FlU's ``git undo`` is a ``git reset --soft @~1``, whereas
+- git-smart's ``git undo`` is a ``git reset --soft @~1``, whereas
   git-extras' version is a ``reset --hard``.
 
-  - In git-FlU, the ``--hard`` reset is mapped to ``git rollback``.
+  - In git-smart, the ``--hard`` reset is mapped to ``git rollback``.
 
     Semantics!
 

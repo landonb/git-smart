@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
-# Project: https://github.com/landonb/git-FlU#🌡
+# Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
 # USAGE: Call with a commit message snippet to bubble the matching commit
@@ -126,7 +126,7 @@ git_rebase_buble_commit_noninteractive () {
 
   local seditor="git-rebase-bubble-oldest"
   if ! command -v "${seditor}" > /dev/null; then
-    seditor="${GITFLU_BIN:-${HOME}/.local/bin}/seditor"
+    seditor="${GITSMART_BIN:-${HOME}/.local/bin}/seditor"
     if [ ! -e "${seditor}" ]; then
       >&2 echo "ERROR: Cannot locate: git-rebase-bubble-oldest"
       exit 1

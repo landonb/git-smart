@@ -1,17 +1,17 @@
 #!/bin/bash
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
-# Project: https://github.com/landonb/git-FlU#🌡
+# Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-GITFLU_MYST_BRANCH_HIERARCHY="${GITFLU_MYST_BRANCH_HIERARCHY:-master develop}"
+GITSMART_MYST_BRANCH_HIERARCHY="${GITSMART_MYST_BRANCH_HIERARCHY:-master develop}"
 
-GITFLU_MYST_REMOTE_HIERARCHY="${GITFLU_MYST_REMOTE_HIERARCHY:-origin upstream}"
+GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-origin upstream}"
 
 git_brs_filter_remotes () {
   local filter
   local remote
-  for remote in ${GITFLU_MYST_REMOTE_HIERARCHY}; do
+  for remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
     filter="${filter}remotes/${remote}|"
   done
   filter="${filter}^..(?!remotes/)"
@@ -78,12 +78,12 @@ git-brs () {
   # high="$(printg "${high}" "$(sgr_norm);$(bg_blue);$(fg_white)" '[[:space:]]+a(lpha)?[-0-9]+/?([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_norm);$(bg_blue);$(fg_white)" '(?<=[[:space:]])a(lpha)?[-0-9]+/?([^] :])*|$')"
 
-  # FIXME/2020-03-24: Add colors to GITFLU_MYST_REMOTE_HIERARCHY and iterate rather than hardcoding remotes.
+  # FIXME/2020-03-24: Add colors to GITSMART_MYST_REMOTE_HIERARCHY and iterate rather than hardcoding remotes.
   high="$(printg "${high}" "$(sgr_bold);$(fg_white);$(bg_cyan)" 'remotes/origin/([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_black);$(bg_white)" 'remotes/upstream/([^] :])*|$')"
 
   local progenitor_filter
-  for branch in ${GITFLU_MYST_BRANCH_HIERARCHY}; do
+  for branch in ${GITSMART_MYST_BRANCH_HIERARCHY}; do
     progenitor_filter="${progenitor_filter}[[:space:]]+${branch}|"
   done
   progenitor_filter="${progenitor_filter}\$"
