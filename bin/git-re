@@ -76,9 +76,11 @@ callback_print_remote_info () {
 pretty_print_tidy_remote_list () {
   local callback=$1
   for remote in \
+    'proving' \
+    'release' \
     'origin' \
     'upstream' \
-    $(git remote | grep -v -e 'origin' -e 'upstream' | sort \
+    $(git remote | grep -v -e 'proving' -e 'release' -e 'origin' -e 'upstream' | sort \
   ); do
     ! [ ${GITFLU_REMOTE_CACHE[${remote}]+x} ] && continue
     callback_print_remote_info "${remote}" "${GITFLU_REMOTE_CACHE[${remote}]}"
