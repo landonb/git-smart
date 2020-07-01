@@ -4,9 +4,9 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-GITSMART_MYST_BRANCH_HIERARCHY="${GITSMART_MYST_BRANCH_HIERARCHY:-master develop}"
+GITSMART_MYST_BRANCH_HIERARCHY="${GITSMART_MYST_BRANCH_HIERARCHY:-liminal proving release private main trunk develop}"
 
-GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-origin upstream}"
+GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone origin upstream}"
 
 git_brs_filter_remotes () {
   local filter
@@ -35,6 +35,7 @@ git-brs () {
   fg_magenta () { printf '35'; }
   fg_cyan () { printf '36'; }
   fg_white () { printf '37'; }
+  fg_darkgray () { printf '90'; }
 
   bg_black () { printf '40'; }
   bg_red () { printf '41'; }
@@ -52,11 +53,11 @@ git-brs () {
   # to also print the name of the upstream branch.
   # E.g.:
   #   $ git branch --all
-  #   master
+  #   release
   #   $ git branch --all -v
-  #   master        d2a885d [behind 67] Foo: bar.
+  #   release        d2a885d [behind 67] Foo: bar.
   #   $ git branch --all -vv
-  #   master        d2a885d [origin/master: behind 67] Foo: bar.
+  #   release        d2a885d [proving/release: behind 67] Foo: bar.
 
   local all_annotate="$(git --no-pager branch -avv)"
   local filter_remotes="$(git_brs_filter_remotes)"
@@ -79,6 +80,10 @@ git-brs () {
   high="$(printg "${high}" "$(sgr_norm);$(bg_blue);$(fg_white)" '(?<=[[:space:]])a(lpha)?[-0-9]+/?([^] :])*|$')"
 
   # FIXME/2020-03-24: Add colors to GITSMART_MYST_REMOTE_HIERARCHY and iterate rather than hardcoding remotes.
+  high="$(printg "${high}" "$(sgr_bold);$(fg_white);$(bg_cyan)" 'remotes/proving/([^] :])*|$')"
+  high="$(printg "${high}" "$(sgr_bold);$(fg_black);$(bg_white)" 'remotes/release/([^] :])*|$')"
+  high="$(printg "${high}" "$(sgr_bold);$(fg_white);$(bg_magenta)" 'remotes/starter/([^] :])*|$')"
+  high="$(printg "${high}" "$(sgr_bold);$(fg_white);$(bg_yellow)" 'remotes/myclone/([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_white);$(bg_cyan)" 'remotes/origin/([^] :])*|$')"
   high="$(printg "${high}" "$(sgr_bold);$(fg_black);$(bg_white)" 'remotes/upstream/([^] :])*|$')"
 
@@ -87,7 +92,7 @@ git-brs () {
     progenitor_filter="${progenitor_filter}[[:space:]]+${branch}|"
   done
   progenitor_filter="${progenitor_filter}\$"
-  # Now, e.g., progenitor_filter='[[:space:]]+develop|[[:space:]]+master|$'
+  # Now, e.g., progenitor_filter='[[:space:]]+proving|[[:space:]]+release|$'
   high="$(printg "${high}" "$(sgr_bold);$(fg_cyan)" "${progenitor_filter}")"
 
   echo "${high}"
