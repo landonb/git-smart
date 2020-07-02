@@ -14,36 +14,122 @@
 # loaded last (at the end of this file, so it overrides anything herein).
 
 # CONVENTION: Some commands work on branch(es) and remote(s) and will default
-#             to the following unless you pass args indicating otherwise.
+#             to the following unless you pass args indicating otherwise
+#             (or unless the command otherwise deduces the remote name,
+#             e.g., by using the remote indicated by the tracking branch).
 #
-# - Remotes:
+# - Remote names:
 #
-#   'origin' remote -- the actual project repository, or your fork of it.
+#   'origin'      The default remote name assigned by `git clone`.
+#                 Herein assumed to refer to repositories you control,
+#                 e.g., if you fork a project, "origin" points to your
+#                 fork on, say, GitHub. Or if you create a new project,
+#                 "origin" refers to it.
+#   'upstream'    The remote name used for the main project repository,
+#                 e.g., if you fork a project, the "upstream" remote
+#                 points to the main project repository. The name,
+#                 "upstream", is not codified by any tools, GitHub,
+#                 etc., it's just what I've seen used a lot in online
+#                 document/blog posts/Q&As, so I think it's well-known.
 #
-#   'upstream' remote -- if you forked a project, the project you forked.
+#   'proving'     What I (lb) like to use instead of "origin", as in,
+#                 where I prove my forked code works before submitting
+#                 a pull request to the upstream project team.
+#   'release'     What I (lb) prefer to use instead of "upstream", as
+#                 in, the "release" remote points to the the main project
+#                 repository that pushes out the actual releases. (And if
+#                 I create a new project, I name its remote "release".)
+#                 - I like to avoid the term "origin" to indicate that
+#                   I'm deliberate about the remote name, so there should
+#                   be no confusion about what the remote represents.
+#   'starter'     When I clone someone else's project, or if I fork a
+#                 project, I name the project repository's remote "starter".
+#                 That is, the "proving" and "release" remotes points to
+#                 repositories under my control, but "starter" does not,
+#                 and references the most-upstream remote.
+#   'myclone'     When I fork a project but do not plan to contribute to
+#                 it, I'll name the remote "myclone". The name is arbitrary,
+#                 but using a name other than "proving" or "release" ensures
+#                 the git-my-merge-status command will not incorrectly
+#                 diagnose the state of my local working tree.
 #
-# - Branches:
+# - Branch names:
 #
-#   'master' branch -- target branch on which to act unless inferred or passed as arg.
+#   Most of the commands below work on the current branch, except
+#   for git-since, which assumes there's a "release" branch; and
+#   git-cleanup, which removes merged branches not identified as
+#   a "core" branch, one of: liminal|proving|release|private|main|trunk|develop.
 #
-#   'develop' branch -- if present, might also get acted upon, depending on action.
+#   'release'     For any project I share/publish publicly, I always have
+#                 at least a "release" branch. When I develop new code, I
+#                 either commit directly to "release", or I'll use a feature
+#                 branch (named something other than one of the core names)
+#                 and later merge that work into release.
 #
-#   'wip/YYYY-MM-DD-*' -- [w]ork [i]n [p]rogress branches.
+#   'private'     For any project I do not publish but that's private to
+#                 me, I generally have just one branch that I name "private",
+#                 mostly to remind me (when I run `git branch`) that the
+#                 project I'm working on is a private project.
+#
+#   'proving'     For any public project under active develop, in addition
+#                 to the "release" branch, I'll maintain a "proving" branch
+#                 where I commit code under it's ready to be released. Other
+#                 people might call the "proving" branch something different,
+#                 such as "main", "trunk", or "develop", to name a few.
+#
+#   'main', 'trunk', 'develop'
+#                 Similar in concept to 'proving'. While I don't use this
+#                 branch name, it's recognized by at least a few commands,
+#                 such as git-cleanup (below) and git-cleanbr (under bin/)
+#                 that remove feature branches (but not any "core" branch).
+#
+#   'liminal'     As Wikipedia states, "In anthropology, liminality is the
+#                 quality of ambiguity or disorientation that occurs in the
+#                 middle stage of a rite of passage." I use the branch name
+#                 "liminal" on branches that I push remotely but that I later
+#                 rebase. That is, other developers should not base their
+#                 work on this branch, but I'll eventaully rebase it before
+#                 merging it to the "proving" branch. The "liminal" branch
+#                 is essentially a feature branch, but one that I push to a
+#                 remote so that it's backed up.
+#
+#   'wip/YYYY-MM-DD-*'
+#                 Used for [w]ork [i]n [p]rogress branches. While none of
+#                 the commands in git-smart are concerned with WIP branches,
+#                 some spun-off projects do (such as git-my-merge-status),
+#                 so it's worthy of note.
 #
 #   'tip/YYYY-MM-DD-abcdef01'
-#                      -- tipped forks, where you periodically rebase your
-#                         changes atop, say, 'upstream/master'; and where you
-#                         do not have a local 'master' branch, but instead
-#                         periodically update the default branch on, say,
-#                         GitHub to reflect the latest rebased branch.
-#                         - Tipping is a way to fork a project;
-#                           and to make some changes without submitting an
-#                           upstream pull request, but also to not publish
-#                           a divergent 'master' branch that you'd have to
-#                           force-push to keep up to date. By using tip/
-#                           branches, we're broadcasting better what's
-#                           going on (and avoiding new DEVs being misled
-#                           by a 'master' branch that's anything but).
+#                 Used for tipped forks, also not a concern of git-smart,
+#                 but recognized by git-my-merge-status, so also so noted.
+#                 A "tip" branch is a branch of a forked project that's
+#                 ahead of the upstream's main development branch, but
+#                 that you don't except/want to submit as a pull request.
+#                 Think unique features you add that you're certain don't
+#                 belong upstream, or that you don't think an upstream
+#                 maintainer will accept. As such, you'll periodically
+#                 rebase your changes atop the upstream remote branch,
+#                 say, 'refs/remotes/release/release'. You'll probably
+#                 also not have a local main development branch (i.e.,
+#                 you'll delete the "release" branch after cloning your
+#                 fork, and you'll change the default branch on GitHub
+#                 before deleting the "release" branch from there as well).
+#                 - Tipping is a way to fork a project, and to make some
+#                   changes without submitting an upstream pull request,
+#                   but also to not publish a divergent "release" branch
+#                   that you'd have to force-push to keep up to date. By
+#                   using the "tip/YYYY-MM-DD-abcdef01" naming scheme,
+#                   any time the upstream branch changes, you create a
+#                   new tip branch, rebase your work, and publish a new
+#                   tip. Obviously, this might be tedious if the upstream
+#                   branch changes frequently, but I find myself only doing
+#                   this on mostly stable projects that I've forked and need
+#                   to tweak (such as my
+#                     https://github.com/hotoffthehamster/click-hotoffthehamster
+#                   forked project). Also, by following this workflow and
+#                   naming scheme, we're broadcasting better what's going
+#                   on (and avoiding new DEVs being misled by a 'release'
+#                   branch that doesn't match the upstream project's).
 
 # #######################################################################
 # ***                       "Engage Your Core"                        ***
