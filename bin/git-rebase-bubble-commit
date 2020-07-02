@@ -59,9 +59,9 @@ git-rebase-bubble-commit () {
   # There are 2 basic approaches, 1 more robust than the other.
   #
   # - The less robust method is to see if the commit is in a particular
-  #   branch, e.g., we could see if the commit exists in 'master' thusly:
+  #   branch, e.g., we could see if the commit exists in 'release' thusly:
   #
-  #     $ git merge-base --is-ancestor ${ci_target} master && echo Yup || echo Nop
+  #     $ git merge-base --is-ancestor ${ci_target} release && echo Yup || echo Nop
   #
   # - The more robust method is to get a list of all known branches that
   #   contain the commit in question, and to just count that list (because

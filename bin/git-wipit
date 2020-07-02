@@ -15,7 +15,9 @@
 #   and there are already 2 WIP branches, then:
 #
 #   $ git brs
-#     master
+#     liminal
+#     proving
+#     release
 #     wip/01-2020-02-07
 #   * wip/02-2020-02-09
 #
