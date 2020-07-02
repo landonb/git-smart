@@ -304,16 +304,27 @@
   # -------
 
   # Bro!
-  bro = ! \
+  bro = "! f () { \
+    local tracking_br_rem tracking_remote; \
+    tracking_br_rem=$(git rev-parse --abbrev-ref --symbolic-full-name @{u}); \
+    if [ $? -ne 0 ]; then \
+      >&2 echo 'ERROR: Set tracking branch to use this command'; \
+      return 1; \
+    fi; \
+    tracking_remote=$(echo ${tracking_br_rem} | /bin/sed -e 's#/.*$##'); \
+    \
     bash -c 'echo' && \
-    bash -c 'echo -e "\\\\e[31mLocal branches\\\\e[0m"' && \
-    bash -c 'echo -e "\\\\e[31m--------------\\\\e[0m"' && \
+    bash -c 'echo -e \"\\\\e[31mLocal branches\\\\e[0m\"' && \
+    bash -c 'echo -e \"\\\\e[31m--------------\\\\e[0m\"' && \
     git --no-pager branch -vv && \
     bash -c 'echo' && \
-    bash -c 'echo -e "\\\\e[31mRemote branches\\\\e[0m"' && \
-    bash -c 'echo -e "\\\\e[31m---------------\\\\e[0m"' && \
-    git --no-pager ls-remote --heads origin | sed 's?.*refs/heads/??' | sed -e "s/^/\\ \\ /" && \
-    bash -c 'echo'
+    echo \"\\\\e[31mRemote branches (on '${tracking_remote}')\\\\e[0m\" && \
+    bash -c 'echo -e \"\\\\e[31m---------------\\\\e[0m\"' && \
+    git --no-pager ls-remote --heads ${tracking_remote} \
+      | sed 's?.*refs/heads/??' \
+      | sed -e \"s/^/\\ \\ /\" && \
+    bash -c 'echo'; \
+  }; f"
 
   brs-all = !git --no-pager branch -avv
 
