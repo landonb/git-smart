@@ -317,13 +317,26 @@
 
   brs-all = !git --no-pager branch -avv
 
-  # Delete merged branches except 'master', 'develop', and current branch.
+  # Delete merged branches except any conventionally-named branch (e.g., the
+  # main development branch, what I call "proving" or others might call "main";
+  # the release branch, often called "release"; or a "private" branch, which is
+  # the branch label I use in private repositories I don't publish), and not
+  # the current branch, either.
   #   https://gist.github.com/jantimon/5b9fd9330f38d076a374c03fcbb788e1
-  cleanup = ! \
-    git remote prune origin && \
+  cleanup = "! f () { \
+    local tracking_br_rem tracking_remote; \
+    tracking_br_rem=$(git rev-parse --abbrev-ref --symbolic-full-name @{u}); \
+    if [ $? -ne 0 ]; then \
+      >&2 echo 'ERROR: Set tracking branch to use this command'; \
+      return 1; \
+    fi; \
+    tracking_remote=$(echo ${tracking_br_rem} | /bin/sed -e 's#/.*$##'); \
+    \
+    git remote prune ${tracking_remote} && \
     git branch --no-color --merged \
-      | egrep -v '(^\\*|master|develop)' \
-      | xargs git branch -d
+      | egrep -v '(^\\*liminal|proving|release|private|main|trunk|develop)' \
+      | xargs git branch -d; \
+  }; f"
 
   # Show the current branch name.
   # (I added this alias years ago, but I hardly use it.
