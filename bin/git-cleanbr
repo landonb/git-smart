@@ -4,14 +4,94 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-# See also the git cleanup command.
+# Delete (forcefully) the branch indicated (as the first argument) both
+# locally and on the remote (either deduced from the tracking branch, or
+# passed as the second argument), after checking out a different branch,
+# if necessary (either deduced, or passed as the third argument).
+
+# See also the git-cleanup command.
+
+# ***
+
+# MEH/2020-07-01 18:44: Add sh-git-nubs/bin/git-nubs.sh as a dependency, and source.
+# - For now, DRY warning: The following are duplicated from the aforementioned project.
+
+git_branch_exists () {
+  local branch_name="$1"
+  git show-ref --verify --quiet refs/heads/${branch_name}
+}
+
+git_branch_name () {
+  local branch
+  branch="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"
+  [ $? -eq 0 ] && echo "${branch}" && return
+  >&2 echo "ERROR: Missing local branch."
+  >&2 echo " HINT: Try running from a Git repo, or creating your first commit."
+  exit 1
+}
+
+git_remote_exists () {
+  local remote="$1"
+  git remote get-url ${remote} &> /dev/null
+}
+
+git_tracking_branch_remote () {
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /bin/sed -e 's#/.*$##'
+}
+
+# ***
+
 git_cleanbr () {
+  local GITSMART_CORE_BRANCHES="${GITSMART_CORE_BRANCHES:-liminal proving release private main trunk develop}"
+  local current_branch="$(git_branch_name)"
+
+  local delete_branch="${1}"
+  if [ -z "${delete_branch}" ]; then
+    >&2 echo 'ERROR: Please specify a branch name to -D delete.'
+    return 1
+  fi
+  for canon_branch in ${GITSMART_CORE_BRANCHES}; do
+    if [ "${delete_branch}" = "${canon_branch}" ]; then
+      >&2 echo 'ERROR: Try not deleting a core branch.'
+      return 1
+    fi
+  done
+
+  local remote="${2}"
+  if [ -z "${remote}" ]; then
+    # Use the remote indicated by the tracking branch, if one exists,
+    # otherwise silently ignore (and don't run the push --delete later).
+    remote="$(git_tracking_branch_remote)"
+  elif [ ! git_remote_exists "${remote}" ]; then
+    >&2 echo 'ERROR: Specified remote does not exist; try again.'
+    return 1
+  fi
+
+  local switch_branch="${3}"
+  if [ -z "${switch_branch}" ] && [ "${current_branch}" = "${delete_branch}" ] ; then
+    # Look for a branch to which to switch.
+    for canon_branch in ${GITSMART_CORE_BRANCHES}; do
+      if [ git_branch_exists "${canon_branch}" ]; then
+        switch_branch="${canon_branch}"
+        break
+      fi
+    done
+    if [ -z "${switch_branch}" ]; then
+      >&2 echo 'ERROR: Could not deduce which branch to checkout; please specify.'
+      return 1
+    fi
+  fi
+
   set -e
-  git remote prune ${2:-origin}
-  git checkout ${3:-develop}
+  git remote prune ${remote}
+  if [ -n "${switch_branch}" ]; then
+    git checkout ${switch_branch}
+  fi
   set +e
-  git branch -D ${1}
-  git push ${2:-origin} :${1}
+  git branch -D ${delete_branch}
+  if [ -n "${remote}" ]; then
+    git push ${remote} :${delete_branch}
+  fi
   set -e
 }
 
