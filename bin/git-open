@@ -4,11 +4,30 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-# Open project web page for 'origin' (or specified) remote.
+# Open project web page for branch tracking remote, or for specified remote.
+
+GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone origin upstream}"
+
+git_tracking_branch_remote () {
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /bin/sed -e 's#/.*$##'
+}
+
 git_open () {
-  local remote=${1:-release}
-  git remote get-url ${remote} &> /dev/null || remote='upstream'
-  ! git remote get-url ${remote} &> /dev/null && echo 'No remote!' && return
+  local remote="${1}"
+  [ -z "${remote}" ] && remote="$(git_tracking_branch_remote)"
+  if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
+    for try_remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
+      if git remote get-url ${try_remote} &> /dev/null; then
+        remote="${try_remote}"
+        break
+      fi
+    done
+  fi
+  if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
+    >&2 echo 'ERROR: Unable to deduce remote; please specify.'
+    exit 1
+  fi
+
   # Replace `-e` rules:
   # - For ~/.ssh/config SSH aliases, e.g.,
   #   git@github_username:username/project.git → https://username/project
