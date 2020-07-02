@@ -40,6 +40,13 @@ try something like this::
     cd "${HOME}/.config/git"
     ln -s "${git_smart_dir}/.config/git/attributes"
 
+    # Wire a `git init` template to be deliberate about the default branch name.
+    # (In lieu of running `git init && git co -b 'release'`.)
+    mkdir "${HOME}/.config/git/template"
+    cd "${HOME}/.config/git/template"
+    # Edit HEAD to set a different default branch name, then copy it.
+    /bin/cp "${git_smart_dir}/.config/git/template/HEAD" .
+
     # Sanity check.
     git whoami
 

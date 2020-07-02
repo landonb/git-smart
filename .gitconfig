@@ -901,3 +901,13 @@
 [include]
   path = .gitconfig.local
 
+# #######################################################################
+# ***                 Set your own Default Branch Name                ***
+# #######################################################################
+
+[init]
+  # The template directory's contents are copied to a new working tree's
+  # .git/ directory. We could also adds hooks, an info/exclude, etc., but
+  # (for now) we just copy the HEAD file, which specifies the default branch.
+  templateDir = ~/.config/git/template/
+
