@@ -762,7 +762,11 @@
   #   which I think is because 'pu' is not as snappy as 'pup'.
   #   Pneumonically speaking, remember that you want to set the
   #   UPstream tracking information on Push, so it's called PUP.
-  pup = push --set-upstream origin HEAD
+  # - See also the more direct call to set just the tracking branch, e.g.,
+  #     git branch -u <remote>/<branch>
+  # 2020-07-01: I never use this command. Let's disable it.
+  # - (I'll instead use, e.g., `git pp -u`, if I have to.)
+  #  pup = push --set-upstream origin HEAD
 
   # -------
 
