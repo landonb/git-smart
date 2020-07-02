@@ -5,11 +5,13 @@
 # License: MIT. Please find more in the LICENSE file.
 
 # Like `git fetch --all`, but fetches workflow-named remotes first (e.g.,
-# 'origin', then 'upstream'), and skips user-specified remotes (e.g., to
+# 'proving', then 'release'), and skips user-specified remotes (e.g., to
 # USB devices or remote hosts that are offline or not important).
 
-GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-origin upstream}"
+GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone origin upstream}"
 
+# YOU: Set this variable from your private Bashrc.
+# E.g., list remotes to private backup media.
 GITSMART_GET_SKIP_REMOTES="${GITSMART_GET_SKIP_REMOTES}"
 
 fetch_known_remotes_orderly () {
@@ -28,6 +30,7 @@ fetch_remote_allowed () {
     [ "${cur_re}" = "${remote}" ] && return 1
   done
   for remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
+    # Return false, because fetch_known_remotes_orderly already fetched.
     [ "${cur_re}" = "${remote}" ] && return 1
   done
   return 0
