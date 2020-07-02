@@ -741,6 +741,8 @@
   # from each of the two remotes.
   # - NOTE: See notes atop this file re: Why 'origin' and 'upstream' remotes.
   fam = fetch --multiple origin upstream --prune
+  # - (lb): See comments elsewhere re: my latest workflow and remote names now.
+  fpr = fetch --multiple proving release --prune
 
   # Use `git fap` to fetch and prune branches deleted from each of the remotes.
   # - (lb): `--all` fails if any remote cannot be reached, which affects me
@@ -749,8 +751,8 @@
   #         almost --all'ways fails for me. Additionally, `--all` can take a
   #         while if there are many remotes.
   #         - As such, oftentimes it's better to be deliberate when fetching
-  #         from remotes -- that is, consider using a command like `fam`, not
-  #         like `fap`.
+  #         from remotes -- that is, consider using either of the commands
+  #         `fam` or `fpr`, but not `fap`.
   fap = fetch --all --prune
 
   # Use `git pup` to push a branch and add tracking information (e.g., to
