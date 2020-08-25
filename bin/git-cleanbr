@@ -36,7 +36,7 @@ git_remote_exists () {
 }
 
 git_tracking_branch_remote () {
-  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /bin/sed -e 's#/.*$##'
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
 }
 
 # ***

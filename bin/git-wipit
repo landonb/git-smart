@@ -41,7 +41,7 @@ git-wipit () {
 
   local latest_wip_nr=$( \
     git branch --list 'wip/*' \
-    | /bin/sed -E 's#^. wip/0*([0-9]+).*$#\1#' \
+    | /usr/bin/env sed -E 's#^. wip/0*([0-9]+).*$#\1#' \
     | sort -n -r \
     | head -n1 \
   )
