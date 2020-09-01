@@ -8,6 +8,10 @@
 
 GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone origin upstream}"
 
+os_is_macos () {
+  [ "$(uname)" == "Darwin" ]
+}
+
 git_tracking_branch_remote () {
   git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
 }
@@ -47,7 +51,19 @@ git_open () {
   )
   # NOTE: Using `&` to not block if browser not already running.
   # Suppress: "Opening in existing browser session."
-  sensible-browser "${projurl}" > /dev/null &
+  if ! os_is_macos; then
+    # 2020-09-01: Default was to open in tab of existing window:
+    #   sensible-browser "${projurl}" > /dev/null &
+    # but I find that a new window is generally what I want.
+    # - For one, new window will always show up in mate-panel at the
+    #   end of the window list (predictable) rather than activating
+    #   an existing mate-panel entry (at an unpredictable position).
+    sensible-browser --new-window "${projurl}" > /dev/null &
+  else
+    # Open in tab of existing window:
+    #   open "${projurl}" > /dev/null &
+    open -n --args --new-window "${projurl}" > /dev/null &
+  fi
 }
 
 main () {
