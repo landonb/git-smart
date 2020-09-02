@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Authors: Various. Published 2012-06-05, "A better Vimdiff Git mergetool"
 #           https://vim.fandom.com/wiki/A_better_Vimdiff_Git_mergetool

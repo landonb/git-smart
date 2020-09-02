@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # vim:tw=0:ts=2:sw=2:et:norl:ft=bash
 # Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
 # Project: https://github.com/landonb/git-smart#💡
@@ -25,7 +25,7 @@ declare -A -x GITSMART_REMOTE_CACHE
 
 update_first_column_max () {
   local name=$1
-  local name_len=$(echo -n "${name}" | wc --chars)
+  local name_len=$(/usr/bin/env echo -n "${name}" | wc --chars)
   [ ${name_len} -gt ${GITSMART_MAX_WIDTH} ] && GITSMART_MAX_WIDTH=${name_len}
 }
 

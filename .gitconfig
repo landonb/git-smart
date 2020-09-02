@@ -362,7 +362,7 @@
 #             f() { [[ -z "$1" ]] && echo 'Z!' || echo 'n.'; }; f: [[: not found
 #           n.
 #         But you could instead shell out your shell code to Bash, e.g.,
-#           test2 = ! "/bin/bash -c \"f () { [[ -z \\\"$1\\\" ]] && echo Z || echo n; }; f\""
+#           test2 = ! "/usr/bin/env bash -c \"f () { [[ -z \\\"$1\\\" ]] && echo Z || echo n; }; f\""
 #         or you could just rewrite it to be POSIX-compliant, e.g.,
 #           test3 = "! f() { [ -z \"$1\" ] && echo 'Z!' || echo 'n.'; }; f"
 #
