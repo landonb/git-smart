@@ -62,7 +62,7 @@ git_open () {
   else
     # Open in tab of existing window:
     #   open "${projurl}" > /dev/null &
-    open -n --args --new-window "${projurl}" > /dev/null &
+    open -n "${projurl}" --args --new-window > /dev/null &
   fi
 }
 
