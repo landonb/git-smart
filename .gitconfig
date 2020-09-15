@@ -314,6 +314,13 @@
 [mergetool]
   keepBackup = false
 
+# (lb): I rarely use pull. If I forsee conflicts, or am not positive
+# they are not any, I'll git-fetch and then git-merge deliberately. If
+# I ever git-pull, I'm anticipating it'll be like `git merge --ff-only`.
+
+[pull]
+  ff = only
+
 # #######################################################################
 # ***              Ever-expanding Git Aliases Collection              ***
 # #######################################################################
