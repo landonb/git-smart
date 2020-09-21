@@ -451,7 +451,11 @@
   #    - I think that `git br` is more versatile -- in addition to seeing what
   #      branch the tree is on, it also reminds me of what other branches exist.
   #    - The only reason I see to keep this alias is as a rev-parse usage example.)
-  cur = rev-parse --abbrev-ref HEAD
+  # Weird: git rev-parse defaults --abbrev-ref per core.warnAmbiguousRefs, but
+  #          rev-parse --abbrev-ref HEAD
+  #        on Linux returns the --abbrev-ref=loose form, e.g., "my_branch", but
+  #        on macOS it runs like --abbrev-ref=strict, e.g., "heads/my_branch".
+  cur = rev-parse --abbrev-ref=loose HEAD
 
   # -------
 
