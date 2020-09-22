@@ -25,7 +25,7 @@ declare -A -x GITSMART_REMOTE_CACHE
 
 update_first_column_max () {
   local name=$1
-  local name_len=$(/usr/bin/env echo -n "${name}" | wc --chars)
+  local name_len=$(printf %s "${name}" | wc --chars)
   [ ${name_len} -gt ${GITSMART_MAX_WIDTH} ] && GITSMART_MAX_WIDTH=${name_len}
 }
 
