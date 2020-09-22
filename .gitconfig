@@ -685,7 +685,7 @@
   #   https://icanhazdadjoke.com/api
   # - Bored?
   #   curl -H "Accept: application/json" "https://icanhazdadjoke.com/search?term=bar"
-  dad = !curl https://icanhazdadjoke.com/ && echo && git add
+  dad = !curl "https://icanhazdadjoke.com/" && echo && git add
   rad = !echo '   (⌐■_■)' && git add
 
   # Use `git ci-` if you're too lazy to just type `git ci -m`.
