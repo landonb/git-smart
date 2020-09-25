@@ -905,6 +905,9 @@
   # Empirically speaking.
   whoami = config user.email
 
+  # SHA of the very first commit.
+  first-commit = rev-list --max-parents=0 HEAD
+
 # #######################################################################
 # ***                  Your Private .gitconfig.local                  ***
 # #######################################################################
