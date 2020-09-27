@@ -126,7 +126,7 @@ git_rebase_buble_commit_noninteractive () {
 
   local seditor="git-rebase-bubble-oldest"
   if ! command -v "${seditor}" > /dev/null; then
-    seditor="${GITSMART_BIN:-${HOME}/.local/bin}/seditor"
+    seditor="${GITSMART_BIN:-${HOME}/.local/bin}/${seditor}"
     if [ ! -e "${seditor}" ]; then
       >&2 echo "ERROR: Cannot locate: git-rebase-bubble-oldest"
       exit 1
