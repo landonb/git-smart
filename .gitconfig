@@ -666,9 +666,14 @@
 
 [alias]
 
+  # Simple git-commit shortcut:
   ci = commit
 
+  # (lb): Used 60% of the time (type message at prompt).
+  cm = commit --message
+
   # Use `git ci-` if you're too lazy to just type `git ci -m`.
+  # (lb): Used 0% of the time.
   ci- = commit -m
 
   # - Some other commit alias ruminations:
@@ -683,6 +688,8 @@
   #
   # - One goal I have in life is to stop composing commit messages
   #   at the terminal prompt, and to *always* use Vim (my EDITOR).
+  #
+  #   (lb): Used 40% of the time (type message at prompt).
   cv = commit -v
 
 # #######################################################################
@@ -914,45 +921,42 @@
 
 [alias]
 
-  # Show rebase recipe with '--fixup' commits ordered and actioned propely:
-  #
-  #  ria = rebase -i --autosquash
-  #
+  # Show rebase recipe with '--fixup' commits ordered
+  # and commanded to 'f'ixup.
+  ria = rebase -i --autosquash
+
   # - Use case: Works well with `git ci --fixup=<>`, e.g.,
   #
   #     git ci --fixup=abcd1234 && git ria abcd1234^
   #
   # - Common workflow:
+  #
   #   - While working on a new feature, I make a small change
   #     that should be part of a previous commit.
+  #
   #   - Run `st` (git status) to see the file path, and copy it.
+  #
   #   - Run `gitk -- <file> &` and find and copy appropriate commit hash.
+  #
   #     - Or better yet find it with `git latest <search terms>`
   #       and then verify using `tig`, which has replaced gitk in my D2D.
-  #   - Run `git add -p <file>`, and then `git ci --fixup=<hash>`.
-  #   - Run `git wip` to commit other uncommitted changes.
-  #   - Run `git ria <hash>^` to fixup the small change to the past commit.
-  #   - Save and close the rebase script.
-  #   - Run `git pop1` to rollback the WIP commit.
   #
-  # - The one without hooks!
-  #   - The rebase `reword` feature runs hooks by default. Will this disable?
-  #     - Note this option is similar to git commit option,
-  #       but with no -n equivalent, and
-  #       it indicates just pre-rebase, with no mention of commit-msg.
-  #         --no-verify
-  #           This option bypasses the pre-rebase hook. See also githooks(5).
-  ria = rebase -i --autosquash --no-verify
+  #   - Run `git add -p <file>`, and then `git ci --fixup=<hash>`.
+  #
+  #   - Run `git wip` to commit other uncommitted changes.
+  #
+  #   - Run `git ria <hash>^` to fixup the small change to the past commit.
+  #
+  #   - Save and close the rebase script.
+  #
+  #   - Run `git pop1` to rollback the WIP commit.
 
   # If the rebase pauses and you need to resolve a conflict,
   # here's a shortcut to continue the rebase quickly.
   rc = rebase --continue
 
   # A quick --fixup to the last commit, and works with unstaged work.
-  #  cia = commit --amend --no-edit
-  # So: What's the point of having hooks if you just skip them, eh? =P
-  #   -n, --no-verify / This option bypasses the pre-commit and commit-msg hooks.
-  cia = commit --amend --no-edit --no-verify
+  cia = commit --amend --no-edit
 
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
