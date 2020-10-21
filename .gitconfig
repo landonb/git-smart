@@ -661,32 +661,12 @@
   }; f"
 
 # #######################################################################
-# ***                   Staging and Commit Aliases                    ***
+# ***                         Commit Aliases                          ***
 # #######################################################################
 
 [alias]
 
   ci = commit
-
-  ls = ls-files
-
-  st = status
-
-  wip = ! \
-    git add -A && \
-    git ci -m WIP
-
-  # -------
-
-  ad = add -p
-  # ADDitional noise.
-  # - Ref:
-  #   https://www.reddit.com/r/git/comments/6ecr4o/git_dad/
-  #   https://icanhazdadjoke.com/api
-  # - Bored?
-  #   curl -H "Accept: application/json" "https://icanhazdadjoke.com/search?term=bar"
-  dad = !curl "https://icanhazdadjoke.com/" && echo && git add
-  rad = !echo '   (⌐■_■)' && git add
 
   # Use `git ci-` if you're too lazy to just type `git ci -m`.
   ci- = commit -m
@@ -704,6 +684,57 @@
   # - One goal I have in life is to stop composing commit messages
   #   at the terminal prompt, and to *always* use Vim (my EDITOR).
   cv = commit -v
+
+# #######################################################################
+# ***                   Staging and Commit Aliases                    ***
+# #######################################################################
+
+[alias]
+
+  st = status
+
+  # -------
+
+  ad = add -p
+  # ADDitional noise.
+  # - Ref:
+  #   https://www.reddit.com/r/git/comments/6ecr4o/git_dad/
+  #   https://icanhazdadjoke.com/api
+  # - Bored?
+  #   curl -H "Accept: application/json" "https://icanhazdadjoke.com/search?term=bar"
+  dad = !curl "https://icanhazdadjoke.com/" && echo && git add
+  rad = !echo '   (⌐■_■)' && git add
+
+  # -------
+
+  wip = ! \
+    git add -A && \
+    git ci -m WIP
+
+  # See: bin/git-wipit
+  wippit = wipit
+
+# #######################################################################
+# ***                       Files List Aliases                        ***
+# #######################################################################
+
+[alias]
+
+  ls = ls-files
+
+  # Use `git ignored` to show --assume-unchanged files.
+  # - Docs/Ref:
+  #     -v: "Similar to -t, but use lowercase letters for files that
+  #          are marked as assume unchanged (see git-update-index(1))."
+  #     https://stackoverflow.com/questions/2363197/
+  #       can-i-get-a-list-of-files-marked-assume-unchanged
+  ignored = !git ls-files -v | grep "^[[:lower:]]"
+
+# #######################################################################
+# ***                          Diff Aliases                           ***
+# #######################################################################
+
+[alias]
 
   # Use `git dc` to show a diff of what's already been *staged* (which
   # is what you'd see at the bottom of a `git commit -v` edit session).
@@ -728,21 +759,15 @@
   #   aliased from git, so I can wire my brain both ways.
   dff = diff
 
-  # Use `git ignored` to show --assume-unchanged files.
-  # - Docs/Ref:
-  #     -v: "Similar to -t, but use lowercase letters for files that
-  #          are marked as assume unchanged (see git-update-index(1))."
-  #     https://stackoverflow.com/questions/2363197/
-  #       can-i-get-a-list-of-files-marked-assume-unchanged
-  ignored = !git ls-files -v | grep "^[[:lower:]]"
-
-  wippit = wipit
-
 # #######################################################################
-# ***              Redoing Commits and Rewriting History              ***
+# ***                     Undo and Undodo Commits                     ***
 # #######################################################################
 
 [alias]
+
+  # See `git undo` command at: bin/git-undo
+
+  # -------
 
   # HINT: If you `rollback` or `undo` accidentally and need to recover,
   #       you can find the commit you blew away in the reflog. Just run:
@@ -750,6 +775,8 @@
   #         git reflog
   #
   #       (Though if you just want to undo an undo, run `git undo-undo`.)
+
+  # -------
 
   # Use `git rollback` to unwind the latest commit and unstage changes.
   # - Equivalent to (or just similar?):
@@ -771,18 +798,30 @@
     git reset --mixed @~1 && \
     git --no-pager log -1 --pretty=oneline --abbrev-commit
 
+  # -------
+
   # Use `git undo` to undo the latest commit, but not to unstage.
+  #
+  # - The undo command is in its own file on PATH, so
+  #   that it runs, not git-extras' /usr/bin/git-undo.
+  #
+  #   See:
+  #
+  #     bin/git-undo
+  #
   # - This is useful if you want to rewrite the commit message,
   #   or if you want to incorporate changes without having to
   #   perform a squash operation.
+  #
   # - NOTE: The git-extras package installs its own /usr/bin/git-undo,
-  #   which shadows any alias defined here, in the .gitconfig.
+  #         which shadows any alias defined here, in the .gitconfig.
+  #
   #   - So while this operation could be an alias because it's so simple,
-  #     it instead much be a file found (first) on PATH.
+  #     it instead must be a file found (first) on PATH.
+  #
   # - The operation is very simple. It's essentially:
+  #
   #     undo = reset --soft @~1
-  # - git-undo is inherently aliased because found on PATH.
-  #    undo = !${GITSMART_BIN:-${HOME}/.local/bin}/git-undo \"$@\"
 
   # -------
 
@@ -869,7 +908,11 @@
   # - (I'll instead use, e.g., `git pp -u`, if I have to.)
   #  pup = push --set-upstream origin HEAD
 
-  # -------
+# #######################################################################
+# ***              Redoing Commits and Rewriting History              ***
+# #######################################################################
+
+[alias]
 
   # Show rebase recipe with '--fixup' commits ordered and actioned propely:
   #
