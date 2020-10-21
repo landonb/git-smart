@@ -905,14 +905,11 @@
   # here's a shortcut to continue the rebase quickly.
   rc = rebase --continue
 
-  # (lb): If you just want to amend to the previous commit, here's a
-  # shortcut for that, but I've forgot about this alias since adding
-  # it, and find myself instead just running `git ci --amend`. Though
-  # maybe I'll remember to start using it someday.
+  # A quick --fixup to the last commit, and works with unstaged work.
   #  cia = commit --amend --no-edit
-  # - Oh! I've been missing something key: The --no-edit! Now
-  #   I'll probably remember to start using this command.
-  cia = commit --amend --no-edit
+  # So: What's the point of having hooks if you just skip them, eh? =P
+  #   -n, --no-verify / This option bypasses the pre-commit and commit-msg hooks.
+  cia = commit --amend --no-edit --no-verify
 
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
