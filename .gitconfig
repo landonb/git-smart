@@ -871,18 +871,36 @@
 
   # -------
 
-  # For use with `git ci --fixup=<>`, an easier rebase command.
+  # Show rebase recipe with '--fixup' commits ordered and actioned propely:
+  #
+  #  ria = rebase -i --autosquash
+  #
+  # - Use case: Works well with `git ci --fixup=<>`, e.g.,
+  #
+  #     git ci --fixup=abcd1234 && git ria abcd1234^
+  #
   # - Common workflow:
   #   - While working on a new feature, I make a small change
   #     that should be part of a previous commit.
   #   - Run `st` (git status) to see the file path, and copy it.
   #   - Run `gitk -- <file> &` and find and copy appropriate commit hash.
+  #     - Or better yet find it with `git latest <search terms>`
+  #       and then verify using `tig`, which has replaced gitk in my D2D.
   #   - Run `git add -p <file>`, and then `git ci --fixup=<hash>`.
   #   - Run `git wip` to commit other uncommitted changes.
   #   - Run `git ria <hash>^` to fixup the small change to the past commit.
   #   - Save and close the rebase script.
   #   - Run `git pop1` to rollback the WIP commit.
-  ria = rebase -i --autosquash
+  #
+  # - The one without hooks!
+  #   - The rebase `reword` feature runs hooks by default. Will this disable?
+  #     - Note this option is similar to git commit option,
+  #       but with no -n equivalent, and
+  #       it indicates just pre-rebase, with no mention of commit-msg.
+  #         --no-verify
+  #           This option bypasses the pre-rebase hook. See also githooks(5).
+  ria = rebase -i --autosquash --no-verify
+
   # If the rebase pauses and you need to resolve a conflict,
   # here's a shortcut to continue the rebase quickly.
   rc = rebase --continue
