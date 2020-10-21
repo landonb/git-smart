@@ -692,6 +692,9 @@
   #   (lb): Used 40% of the time (type message at prompt).
   cv = commit -v
 
+  # A quick --fixup to the last commit, and works with unstaged work.
+  cia = commit --amend --no-edit
+
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
 # #######################################################################
@@ -954,9 +957,6 @@
   # If the rebase pauses and you need to resolve a conflict,
   # here's a shortcut to continue the rebase quickly.
   rc = rebase --continue
-
-  # A quick --fixup to the last commit, and works with unstaged work.
-  cia = commit --amend --no-edit
 
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
