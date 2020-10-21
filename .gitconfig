@@ -695,6 +695,8 @@
   # A quick --fixup to the last commit, and works with unstaged work.
   cia = commit --amend --no-edit
 
+  cim = commit --amend
+
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
 # #######################################################################
