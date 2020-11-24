@@ -36,7 +36,7 @@
 #                 where I prove my forked code works before submitting
 #                 a pull request to the upstream project team.
 #   'release'     What I (lb) prefer to use instead of "upstream", as
-#                 in, the "release" remote points to the the main project
+#                 in, the "release" remote points to the main project
 #                 repository that pushes out the actual releases. (And if
 #                 I create a new project, I name its remote "release".)
 #                 - I like to avoid the term "origin" to indicate that
@@ -88,7 +88,7 @@
 #                 middle stage of a rite of passage." I use the branch name
 #                 "liminal" on branches that I push remotely but that I later
 #                 rebase. That is, other developers should not base their
-#                 work on this branch, but I'll eventaully rebase it before
+#                 work on this branch, but I'll eventually rebase it before
 #                 merging it to the "proving" branch. The "liminal" branch
 #                 is essentially a feature branch, but one that I push to a
 #                 remote so that it's backed up.
@@ -666,7 +666,7 @@
 
 [alias]
 
-  # Simple git-commit shortcut:
+  # Simple git-commit shortcut.
   ci = commit
 
   # (lb): Used 60% of the time (type message at prompt).
@@ -891,9 +891,10 @@
   # Use `git fam` to fetch from both the 'origin' and 'upstream' remotes,
   # and to remove from the local branches list those branches deleted
   # from each of the two remotes.
-  # - NOTE: See notes atop this file re: Why 'origin' and 'upstream' remotes.
+  # (lb): See comments atop this file re: How branches are named.
+  # - Former workflow: 'origin' and 'upstream'.
   fam = fetch --multiple origin upstream --prune
-  # - (lb): See comments elsewhere re: my latest workflow and remote names now.
+  # - Latest workflow: 'proving' and 'release'.
   fpr = fetch --multiple proving release --prune
 
   # Use `git fap` to fetch and prune branches deleted from each of the remotes.
