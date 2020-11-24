@@ -777,6 +777,9 @@
   # -------
 
   ad = add -p
+  # 2020-11-24: I didn't even remember `git ad` was here.
+  # - Would I remember instead if it was `git ap`?
+  ap = add -p
   # ADDitional noise.
   # - Ref:
   #   https://www.reddit.com/r/git/comments/6ecr4o/git_dad/
