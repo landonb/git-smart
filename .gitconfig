@@ -746,6 +746,9 @@
   #
   #   (lb): Used 40% of the time (type message at prompt).
   cv = commit -v
+  # 2020-11-24: `git cv` not sticking, let's give `git ce` a whirl,
+  # as in, commit message using EDITOR.
+  ce = commit --verbose
 
 
   cim = commit --amend
