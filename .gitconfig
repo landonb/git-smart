@@ -580,6 +580,8 @@
     | sort -g \
     | awk 'BEGIN {print "count\tfile"} {print $1 \"\t\" $2}'
 
+  # -------
+
   # Use `git lg` to show a very concise single-line log history.
   #
   # - Shows one log entry per line formatted like:
@@ -597,6 +599,59 @@
     log --graph --abbrev-commit --date=relative \
         --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
 
+  # -------
+
+  # Use `git lg1` to see the best representation I could make of the `tig`  log view.
+  #
+  # STYLE: Prefer `%C(foo)` to `%Cfoo` for readability.
+  # INFO.: `less -R` required here, but not if you paste this command to your terminal.
+  lg1 = "! f() { \
+    git \
+      --no-pager \
+      log \
+      --color=always \
+      --date=\"format:%a %F %H:%M %z\" \
+      --pretty=\"format:%h %C(blue)%cd %C(green)%<(22)%an%C(reset)%C(blue)o%C(reset)%C(red)%d%C(reset) %s\" \
+      --graph | less -S -R; \
+  }; f"
+  # Hint:
+  #
+  #     --color=always        Because of the |pipe.
+  #
+  #     --date="format:..."   Pairs well with %cd
+  #       %a %F %H:%M %z        E.g., "Sat 2020-11-21 16:58 -0600"
+  #
+  #     --pretty="format:..." I got the format looking almost like `tig`,
+  #                             but tig might be doing something custom. I do
+  #                             not see how to generate a similar graph column.
+  #       %Cblue              Blue foreground color
+  #       %Cgreen             Green foreground color
+  #       %Cred               Red foreground color
+  #                             Note: %Cblue, %Cgreen and %Cred all I see
+  #                             defined in man git-log, but %Ccyan works, or
+  #                             even %C(cyan) -- +1 parens, it's easier to read.
+  #       %Creset             Resets color
+  #       %<(22)              Right-pads with spaces to 22-characters
+  #       %h                  Abbreviated commit hash
+  #       %cd                 Committer date (format respects --date= option)
+  #       %an                 Author name
+  #       o                   You'll see in `tig`, part of its custom --graph
+  #       %d                  Ref names, like the --decorate option of git-log(1)
+  #       %s                  Subject
+  #
+  #     --graph               Draws graphical rep. of history on left hand side;
+  #                             not quite like tig, which draws history after
+  #                             the author's name and before the suject, not sure
+  #                             how it does it.
+  #
+  #     | less -S             -S, aka --chop-long-lines, to not wrap lines
+  #     | less -R             -R, or --RAW-CONTROL-CHARS: “Like -r, but only ANSI "color"
+  #                                escape sequences are output in "raw" form. Unlike -r,
+  #                                the screen appearance is maintained correctly in most
+  #                                cases.”
+
+  # -------
+
   # Use `git log1` to show exclusive history for the currently branch.
   #
   # - Shows one log entry per line, formatted like:
@@ -613,6 +668,8 @@
   log1 = \
     log --graph --abbrev-commit --date=local --decorate \
         --pretty="%C(yellow)%h%x09%C(cyan)%<(12)%an%x09%C(blue)%>(24)%ad%C(auto)%x09%D%s"
+
+  # -------
 
   # Use `git logs` to show more inclusive history than `git logs`.
   #
@@ -638,6 +695,8 @@
     log --graph --abbrev-commit --date=local --decorate \
         --branches --remotes --tags --notes --oneline  \
         --pretty="%C(yellow)%h%x09%C(cyan)%<(12)%an%x09%C(blue)%>(24)%ad%C(auto)%x09%D%s"
+
+  # -------
 
   # Use `git since` to show the log history since the last common ancestor
   # between two branches.
