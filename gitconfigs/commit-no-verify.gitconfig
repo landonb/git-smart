@@ -1,0 +1,104 @@
+# vim:tw=0:ts=2:sw=2:et:norl:ft=gitconfig
+# Author: Landon Bouma (landonb &#x40; tallybark &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT
+
+# USAGE: Use `includeIf` to source this file for specific projects.
+#
+#   For instance, in ~/.gitconfig.local, add:
+#
+#     [includeIf "gitdir:/path/to/some-project/"]
+#
+#       path = /path/to/git-smart/gitconfigs/commit-no-verify.gitconfig
+#
+#   This is useful for projects that have pre-commit hooks you'd like to bypass.
+
+# #######################################################################
+
+# ETHICS: You'll have to decide if it's against the ethos of the project or
+# not to skip hooks. This author rebases a ton, so the only utility of any
+# sort of hooks come in when I'm ready to put a cap on a feature branch and
+# either PR it, or merge it. And even then, I'd say, if you can run checks
+# manually, and if you have a CI pipeline that does it automatically when
+# you merge to a mainline branch or that runs when the PR is created, then
+# you really don't need a pre-commit hook, do you.
+#
+# - In any case, the whole point of this file is to work around a codebase
+#   you're working on that has a pre-commit hook that you cannot disable.
+#
+#   Though I wonder now as I write this what happens if you simply remove
+#   the .git/hooks/pre-commit file. That might obviate the need for this file.
+
+# HOW IT WORKS: There are three popular commands that perform commit operations:
+#
+#   - git-commit, git-rebase, and git-cherry-pick.
+#
+#   Each of these commands runs the pre-commit hook by default.
+#
+#   - To skip the hook, `git commit` and `git rebase` include a
+#     `--no-verify` option. But `git cherry-pick`, on the other
+#     hand, does not; to get around pre-commit, the file must be
+#     made absent (which you'll have to do manually, currently).
+
+[alias]
+
+  # *** See similar aliases in the top-level .gitconfig.
+  #
+  #   - These aliases are those aliases but with an added `--no-verify`. 
+  #
+  # -n, --no-verify / This option bypasses the pre-commit and commit-msg hooks.
+
+  # *** Commit
+
+  # Is `git ci` common/conventional? What about `git co`?
+  # - I'm a git-co-is-for-Check-Out person, which I guess
+  #   means git-ci is for Comm-It.
+  ci = commit --no-verify
+
+  # *** Commit with message
+
+  # Commit with message from the prompt. ci + message → cm.
+  # - 6 of 1: `git cm` ↔ `git ci -m` ↔ `git commit --message`.
+  cm = commit --no-verify --message
+
+  # Commit with message from the EDITOR.
+  # - Note that -v/--verbose seems like a misleading option name.
+  #   It means the commit template is verbose, and shows a diff
+  #   of what's being committed (which you can see with git-smart
+  #   `dcc` alias).
+  cv = commit --verbose --no-verify
+  # 2020-11-24: I almost wonder if `ce` makes more sense... commit + editor.
+  # - This author has `git ci -v` fairly well seared into their noggin, but
+  #   for some reason `cv` never clicked. Perhaps `git ce` will be a hit.
+  ce = commit --verbose --no-verify
+
+  # *** Amend commit
+
+  # Amend commit, and edit the message.
+  #
+  # - You could try the memory device: CommIt aMend.
+  #                                    c   i   m
+  #
+  #   But a better pneumonic might be: Commit Into last commit and update Message
+  #                                    c      i                           m
+  cim = commit --amend --no-verify
+
+  # Amend commit. Period. Think, "Commit INto" previous commit, perhaps.
+  cin = commit --amend --no-verify --no-edit
+
+[alias]
+
+  # Interactive, Auto-squash (and auto-fixup) Rebase, without hooks.
+  #
+  # - From man git-rebase:
+  #
+  #     --no-verify
+  #         This option bypasses the pre-rebase hook. See also githooks(5).
+  ria = rebase -i --autosquash --no-verify
+
+[alias]
+
+  # Use `git wip` to quickly-easily commit all staged and unstaged changes
+  # and untracked files.
+  wip = ! git add -A && git ci -n -m WIP
+
