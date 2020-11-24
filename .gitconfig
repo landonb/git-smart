@@ -731,10 +731,6 @@
   # (lb): Used 60% of the time (type message at prompt).
   cm = commit --message
 
-  # Use `git ci-` if you're too lazy to just type `git ci -m`.
-  # (lb): Used 0% of the time.
-  ci- = commit -m
-
   # - Some other commit alias ruminations:
   #   - Stage modified and deleted files, but not new files:
   #       git commit -a/--all
@@ -751,8 +747,6 @@
   #   (lb): Used 40% of the time (type message at prompt).
   cv = commit -v
 
-  # A quick --fixup to the last commit, and works with unstaged work.
-  cia = commit --amend --no-edit
 
   cim = commit --amend
 
