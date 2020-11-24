@@ -358,6 +358,17 @@
 #           https://www.atlassian.com/blog/git/advanced-git-aliases
 #       - Nonetheless, you'll see some shell code below wrapped in a
 #         function, and some code not. Just kinda depends.
+#       - Oh! I think unwrapped functions get arguments at the end, always,
+#         e.g., given the alias
+#           view = !echo \"FOO $@ BAZ\"
+#         then
+#           $ git view bar
+#           FOO bar BAZ bar
+#         So use the wrapper when necessary, e.g.,
+#           view = "! f() { echo \"FOO $@ BAZ\"; }; f"
+#         then it works more like one might expect:
+#           $ git view bar
+#           FOO bar BAZ
 #
 # NOTE: Shell code is run by POSIX (e.g., dash), not Bash, so
 #       avoid constructs such as [[ ]] unless you invoke Bash.
@@ -813,6 +824,27 @@
   #     https://stackoverflow.com/questions/2363197/
   #       can-i-get-a-list-of-files-marked-assume-unchanged
   ignored = !git ls-files -v | grep "^[[:lower:]]"
+
+# #######################################################################
+# ***                      Show File Alias(es)                        ***
+# #######################################################################
+
+[alias]
+
+  # Fetches and shows file from specific commit/branch, e.g., the long way:
+  #
+  #   git show develop:path/to/file.js | view -c 'set ft=javascript' -
+  #
+  # or the short way:
+  #
+  #   git view develop:path/to/file.js
+  #
+  # Note the final `-` so that Vim knows to read from stdin.
+  view = "! f() { \
+    local extension=\"${@##*.}\"; \
+    git show \"$@\" | \
+      view -c \"set ft=${extension}\" -; \
+  }; f"
 
 # #######################################################################
 # ***                          Diff Aliases                           ***
