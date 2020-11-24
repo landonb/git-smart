@@ -840,9 +840,16 @@
   #   git view develop:path/to/file.js
   #
   # Note the final `-` so that Vim knows to read from stdin.
+  #
+  # Note if you specify just the commit:path, this command will use the
+  # file extension for the Vim 'filetype' (so that syntax highlighting
+  # works); otherwise, you can specify the filetype as the second arg.
   view = "! f() { \
-    local extension=\"${@##*.}\"; \
-    git show \"$@\" | \
+    local extension=\"$2\"; \
+    if [ -z \"${extension}\" ]; then \
+      extension=\"${1##*.}\"; \
+    fi; \
+    git show \"$1\" | \
       view -c \"set ft=${extension}\" -; \
   }; f"
 
