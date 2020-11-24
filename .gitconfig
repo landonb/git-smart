@@ -750,8 +750,21 @@
   # as in, commit message using EDITOR.
   ce = commit --verbose
 
+  # ***
+
+  # Use `cim` and `cin` to amend the last commit, even with unstaged work.
+
+  # (lb): `commit --amend` the long way: --fixup + wip + rebase + pop1.
+
+  # (lb): 2020-11-24: At least I can say I use `cim` and `cin` a lot.
+  # - I first had `cin` aliased from `cia` (commit/ci + amend/a), but I
+  #   feel like `cin` complements `cim` better, and I like the idea of
+  #   c-in → commit-in → commit into last commit (and then cim is like
+  #   cim → commit-into-message → commit into last commit & edit message). #pneumonics
 
   cim = commit --amend
+
+  cin = commit --amend --no-edit
 
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
