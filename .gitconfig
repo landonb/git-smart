@@ -1030,6 +1030,10 @@
   # here's a shortcut to continue the rebase quickly.
   rc = rebase --continue
 
+  # Git cherry-pick --continue.
+  #     ░      ▒      ▓
+  cpc = cherry-pick --continue
+
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
