@@ -902,24 +902,72 @@
   # -------
 
   # Use `git rollback` to unwind the latest commit and unstage changes.
+  #
   # - Equivalent to (or just similar?):
+  #
   #     git undo && git reset HEAD *
-  # 2020-05-24: I find myself running rollback, then `git l`, so combine the two!
-  # Was:
-  #  rollback = reset --mixed @~1
-  # Now include a one-liner of the commit you land on after rolling back.
-  # Use case: I have multiple WIPs and want to rollback latest sane commit.
-  # FIXME/2020-06-15: Remove `rollback`, I think I've switched to `pop1` completely!
-  rollback = ! \
-    git reset --mixed @~1 && \
-    git --no-pager log -1 --pretty=oneline --abbrev-commit
-  # 2020-05-27: Getting lazy with age.
-  # - On second thought, any combo with 2 keys runs risk of being typed
-  #   and ENTERed without me thinking. I've done it before in other cases.
-  #    rb = rollback
+  #
+  # 2020-05-24: I find myself running rollback, but then
+  #             adding `git l`, so combine the two!
+  #
+  #   This was:
+  #
+  #     rollback = reset --mixed @~1
+  #
+  #   But now includes a one-liner of the commit you land
+  #   on after rolling back.
+  #
+  #   Use case: I have multiple WIPs and want to rollback
+  #   to the latest keeper commit.
+  #
+  #     rollback = ! \
+  #       git reset --mixed @~1 && \
+  #       git --no-pager log -1 --pretty=oneline --abbrev-commit
+  #
+  # 2020-05-27: Getting lazy with age. Rename `pop1`.
+  #
+  #   Let's call it `git pop1`, as in "pop 1 commit"
+  #   as opposed to `git rollback`
+  #
+  #   (I briefly considered `git rb` but fear such a
+  #   short alias risks being typed quickly and ENTERed
+  #   without second thought -- which I've done before
+  #   with other commands, running not the one I meant
+  #   to! -- so let's not wire this operation to too
+  #   short of an alias. Using 'pop' and a number is
+  #   still pretty short, at least typing 'pop' is very
+  #   quick.
+  #
   pop1 = ! \
     git reset --mixed @~1 && \
-    git --no-pager log -1 --pretty=oneline --abbrev-commit
+    git quip
+
+  # 2020-10-27: Let's keep the paradigm rolling, adding pop* 2-9.
+  popn = "! f() { \
+    echo 'git reflog'; \
+    echo '——————————'; \
+    git quip -g; \
+    \
+    echo; \
+    echo git reset --mixed @~${1}; \
+    echo '—————————————————————'; \
+    git reset --mixed @~${1}; \
+    \
+    echo; \
+    echo 'git log'; \
+    echo '———————'; \
+    git quip; \
+  }; f"
+  pop2 = "! git popn 2"
+  pop3 = "! git popn 3"
+  pop4 = "! git popn 4"
+  pop5 = "! git popn 5"
+  pop6 = "! git popn 6"
+  pop7 = "! git popn 7"
+  pop8 = "! git popn 8"
+  pop9 = "! git popn 9"
+
+  quip = ! git --no-pager log -1 --pretty=oneline --abbrev-commit
 
   # -------
 
