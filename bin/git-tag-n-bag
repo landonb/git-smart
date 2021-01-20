@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Not quite the nicest imagery, but tag and bag is used to "retire"
+# branches so they're still easily findable, but not so they're
+# noticeably in the way, and so that Git doesn't garbage collect them.
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# The tag-n-bag command uses three conventions when making the tag name:
+# - A common prefix is used to ensure all the tagged commits are grouped
+#   together, and so they don't mix with tags being used for another
+#   purpose.
+#   - E.g., a project might tag release with just the release number,
+#     e.g., '2.0.0', so you probably don't want the bagged tags to
+#     start with the date, e.g., '2021-01-19', because then the two
+#     types of tagged objects would appear interleaved in a tag list.
+# - The second convetion is to put the date of the latest commit next.
+# - And finally the third convention is simply that the branch name
+#   itself is used as the final part of the tag name.
+
+# YOU: Set your own tag prefix externally, or to the empty string to not use.
+
+# Ref: For legal tag name (object name) characters, see:
+#
+#        man git-check-ref-format
+
+# The tag name used on each branch is the three components,
+# a prefix, the latest commit date, and the branch name,
+# each separated by a delimiter that defaults to '--'.
+[ -z ${TAGNBAG_SEP+x} ] && TAGNBAG_SEP="--"
+
+# Some ideas for the prefix:
+# - Use the prefix to group all branches that you archive with the t-bag command.
+# - Consider using a prefix that starts with a letter later in the alphabet
+#   if you want the tags to appear alphabetically after whatever other tags
+#   you have. Or do they opposite if you want these tags to be listed first.
+# - You cannot start the name with a period.
+# - The underscore character is alphabetized before alpha characters.
+# - Unicode characters are alphabetized after alpha characters (i.e.,
+#   characters are alphabetized using their numeric character codes
+#   to sort).
+# - Some examples:
+#     [ -z ${TAGNBAG_PREFIX+x} ] && TAGNBAG_PREFIX="retired${TAGNBAG_SEP}"
+#     [ -z ${TAGNBAG_PREFIX+x} ] && TAGNBAG_PREFIX="🗄${TAGNBAG_SEP}"
+[ -z ${TAGNBAG_PREFIX+x} ] && TAGNBAG_PREFIX="✅${TAGNBAG_SEP}"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# 2020-12-02 15:08: tag-n-bag-it!
+# NOTE: 'HEAD' okay, b/c refs/heads/HEAD not a revision or PATH
+# 2020-12-04 12:07: MAYBE: I'm adding a delete from remote, too, not sure how necessary, though...
+#   I can at least check if remote branch exists locally
+#      git show-ref --verify --quiet refs/remotes/remote-name/branch-name
+#      git show-ref --verify --quiet refs/heads/branch-name
+# FIXME/2020-12-04 12:14: Make git-bag the file and remove all the line continuators.
+
+git_tag_n_bag () {
+  local branch_or_pattern="${1}"
+  local bagged_tag_prefix="${2:-${TAGNBAG_PREFIX}}"
+
+  if [ -z "${branch_or_pattern}" ]; then
+    >&2 echo "USAGE: git tag-n-bag <branch-name-or-pattern> [<tag-prefix>]"
+    return 1
+  fi
+
+  local bagged_count=0
+  local branch_name=""
+  local is_globbing=1
+  # Just a DEV switch for posterity: different code paths, same result.
+  local dx_use_for_loop=false
+
+  # Notes if using --branches (esp. if you set dx_use_for_loop=true):
+  # - NOTE: The `rev-parse` pattern is a glob, e.g., `pattern*` will match the
+  #         start of the branch name, whereas `*pattern*` will match anywhere.
+  #         - See also: `git --no-pager branch --list <pattern>`, but that
+  #           command's output includes leading whitespace.
+  # - NOTE: Per docs, "If the pattern does not contain a globbing character
+  #         (?, *, or [), it is turned into a prefix match by appending /*."
+  #         - Which means `--branches=foo` turns `foo` into `foo/*`
+  #           which won't work here -- we're trying to match the
+  #           base branch name, and not any sort of "parent path".
+  #         - So if user doesn't specify glob, do it for them, turning the
+  #           pattern into a prefix, but then fail if more than one branch
+  #           identified, because of the ambiguity.
+  local branch_pat="${branch_or_pattern}"
+  if ! printf '%s' "${branch_or_pattern}" | grep '[*?[]' > /dev/null; then
+    if ${dx_use_for_loop}; then
+      branch_pat="${branch_or_pattern}*"
+      is_globbing=0
+    else
+      branch_name=$(git rev-parse --abbrev-ref "refs/heads/${branch_or_pattern}")
+      git_tag_n_bag_branch "${branch_name}" "${bagged_tag_prefix}"
+      [ $? -eq 0 ] && let 'bagged_count += 1'
+      # Set the trinary to -1, sort of like using the three states of a
+      # Python bool: True, False, or None. -1 (or None) meaning: Do nothing.
+      is_globbing=-1
+    fi
+  fi
+
+  if [ ${is_globbing} -ge 0 ]; then
+    # NOTE: Leave the $() command unquoted, so splits on whitespace.
+    for branch_name in $(git rev-parse --abbrev-ref --branches="${branch_pat}"); do
+      [ ${is_globbing} -eq 1 ] || [ "${branch_name}" = "${branch_or_pattern}" ] || continue
+      git_tag_n_bag_branch "${branch_name}" "${bagged_tag_prefix}"
+      [ $? -eq 0 ] && let 'bagged_count += 1'
+    done
+  fi
+
+  git_tag_n_bag_report "${bagged_count}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_tag_n_bag_branch () {
+  local branch_name="${1}"
+  local bagged_tag_prefix="${2}"
+
+  local latest_date
+  latest_date=$(
+    git log \
+      --pretty=format:"%ad %h by %an, %s" \
+      --date=iso \
+      "refs/heads/${branch_name}" \
+      2> /dev/null \
+    | sort -r | head -1 | awk '{print $1}')
+
+  if [ -z "${latest_date}" ]; then
+    >&2 echo "UNEXPECTED: No such branch?!: ${branch_name}"
+    return 1
+  fi
+
+  # Tag the branch, or skip if tagged, or return early on error.
+  #
+  local tag_name="${bagged_tag_prefix}${latest_date}${TAGNBAG_SEP}${branch_name}"
+  #
+  if git_tag_exists "${tag_name}"; then
+    local tag_branch_sha1="$(git_lookup_tag_branch_sha1 "${tag_name}")"
+    local bag_branch_sha1="$(git rev-parse "refs/heads/${branch_name}")"
+    if [ "${tag_branch_sha1}" != "${bag_branch_sha1}" ]; then
+      >&2 echo "SKIPPING: Tag exists but at different commit than branch"
+      >&2 echo "- Tag: ${tag_name}"
+      >&2 echo "- Br.: ${branch_name}"
+      return 1
+    fi
+  else
+    git tag "${tag_name}" "refs/heads/${branch_name}"
+    if [ $? -ne 0 ]; then
+      >&2 echo "ERROR: Failed to ‘git tag ${tag_name} refs/heads/${branch_name}’"
+      return 1
+    fi
+  fi
+  #
+  echo "New Tag: ${tag_name}"
+
+  # Delete the branch.
+  #
+  local branch_sha1_short="$(git rev-parse --short "refs/tags/${tag_name}")"
+  # Outputs, e.g.: "Deleted branch foo-bar (was 9c6e0380)."
+  git branch -D "${branch_name}" > /dev/null
+  if [ $? -ne 0 ]; then
+    # This would be totally unexpected!
+    >&2 echo "ERROR: Failed to ‘git branch -D ${branch_name}’"
+    return 1
+  fi
+  #
+  echo "Deleted: ${branch_name} (was ${branch_sha1_short})"
+
+  # Delete remote, if exists.
+  if git show-ref --verify --quiet "refs/remotes/${remote_name}/${branch_name}"; then
+    git push "${remote_name}" ":${branch_name}"
+    if [ $? -ne 0 ]; then
+      >&2 echo "ERROR: Failed to ‘git push ${remote_name} :${branch_name}’"
+      return 1
+    fi
+    echo "Remove remote: ${remote_name}/${branch_name}"
+    echo "Bagged branch: ${branch_name}"
+  fi
+
+  return 0
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_tag_exists () {
+  git rev-parse "refs/tags/${1}" > /dev/null 2>&1
+}
+
+git_lookup_tag_branch_sha1 () {
+  local tag_name="$1"
+  local tag_sha1="$(git rev-parse "refs/tags/${tag_name}")"
+  local tag_commit="$(git rev-list -n 1 "${tag_sha1}")"
+  echo "${tag_commit}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_tag_n_bag_report () {
+  local bagged_count=$1
+
+  local branches
+  [ ${bagged_count} -ne 1 ] && branches="branches" || branches="branch"
+  echo "Tagged 'n bagged ${bagged_count} ${branches}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_tag_n_bag "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
