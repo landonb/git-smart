@@ -10,16 +10,20 @@ A collection of one dev's curated Git config and commands.
 USAGE
 #####
 
-Poke around the ``.gitconfig``, which is well annotated.
+Poke around the ``.gitconfig``, which is well annotated, to find most
+of the features.
 
-See also each of the scripts under ``bin/``. You're smart enough to figure it out!
+You'll find more complicated commands under ``bin/``.
+
+And there's a ``git`` wrapper at ``lib/git_safe.sh``, if you'd
+like to be prompted when running destructive Git operations.
 
 #####
 SETUP
 #####
 
-If you want to blindly install and use all these great aliases and commands,
-try something like this::
+If you trust what you see and want to install and use all these
+great aliases and commands, try something like this::
 
     # Clone this repo somewhere.
     git clone https://github.com/landonb/git-smart.git
@@ -63,7 +67,26 @@ e.g., at ``/usr/bin/git-undo``.
 - git-smart's ``git undo`` is a ``git reset --soft @~1``, whereas
   git-extras' version is a ``reset --hard``.
 
-  - In git-smart, the ``--hard`` reset is mapped to ``git rollback``.
+  - In git-smart, the ``--hard`` reset is aliased from ``git rollback``.
 
     Semantics!
+
+#######
+RELATED
+#######
+
+- Git-smart, this project:
+
+    `https://github.com/landonb/git-smart#💡
+    <https://github.com/landonb/git-smart#💡>`__
+
+- The Veggie Patch, an interactive rebase hook:
+
+    `https://github.com/landonb/git-veggie-patch#🥦
+    <https://github.com/landonb/git-veggie-patch#🥦>`__
+
+- My Merge Status, a beautiful, super-charged status command:
+
+   `https://github.com/landonb/git-my-merge-status#🌵
+   <https://github.com/landonb/git-my-merge-status#🌵>`__
 
