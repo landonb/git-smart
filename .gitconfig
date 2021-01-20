@@ -865,7 +865,7 @@
   # and `dcc`, and because `dc` is the calculator app, perhaps this git-dc
   # is not as useful/potentially confusing.
   dc = !git --no-pager diff --cached
-  # `dcc` like `dc` except no pager, dumps to terminal.
+  # `dcc` is like `dc`, except pages.
   dcc = !git diff --cached
 
   # Use `git dd` to dump the diff to the terminal, bypassing the pager.
