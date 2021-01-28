@@ -9,7 +9,7 @@
 GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone origin upstream}"
 
 os_is_macos () {
-  [ "$(uname)" == "Darwin" ]
+  [ "$(uname)" = "Darwin" ]
 }
 
 git_tracking_branch_remote () {
