@@ -49,6 +49,14 @@ git_open () {
       -e 's#\.git$##' \
     | head -n1 2> /dev/null \
   )
+
+  # NOTE: See also the sensible-open command,
+  #         https://github.com/landonb/sensible-open
+  #       which we wouldn't need unless we wanted to
+  #       support --incognito aka --private. (That is,
+  #       the --new-window argument is supported by
+  #       both Chrome and Firefox.)
+
   # NOTE: Using `&` to not block if browser not already running.
   # Suppress: "Opening in existing browser session."
   if ! os_is_macos; then
