@@ -64,13 +64,27 @@ git_open () {
     #   sensible-browser "${projurl}" > /dev/null &
     # but I find that a new window is generally what I want.
     # - For one, new window will always show up in mate-panel at the
-    #   end of the window list (predictable) rather than activating
+    #   end of the window list (predictably) rather than activating
     #   an existing mate-panel entry (at an unpredictable position).
+    # - For two, maybe your last used window has a ton of tabs open,
+    #   and you had some specific tab active, and you don't want to
+    #   lose your place by opening a new tab at the end of the list.
     sensible-browser --new-window "${projurl}" > /dev/null &
   else
     # Open in tab of existing window:
     #   open "${projurl}" > /dev/null &
-    open -n "${projurl}" --args --new-window > /dev/null &
+    # Open in tab in new window (must specify application):
+    #   open -na 'Google Chrome' --args --new-window "${projurl}" > /dev/null &
+    if type -t sensible-open > /dev/null; then
+      # https://github.com/landonb/sh-sensible-open
+      # MEH/2021-01-28: Include copy of sensible-open under (new) deps/.
+      sensible-open "${projurl}"
+    else
+      # Fallback to opening in tab of existing window (alternative
+      # would be to just use Chrome... or to add `sensible-open`
+      # under a new `deps/` directory and package with git-smart).
+      open "${projurl}" > /dev/null &
+    fi
   fi
 }
 
