@@ -80,9 +80,19 @@ git_open () {
       # MEH/2021-01-28: Include copy of sensible-open under (new) deps/.
       sensible-open "${projurl}"
     else
-      # Fallback to opening in tab of existing window (alternative
-      # would be to just use Chrome... or to add `sensible-open`
-      # under a new `deps/` directory and package with git-smart).
+      # Fallback to opening in tab of existing window.
+      # - We could call the browser by name to pass it an arg, e.g.,
+      #   `open -na 'Google Chrome' --args --new-window`, or
+      #   `open -na 'Firefox' --args --new-window`. But I don't
+      #   want to be explicit about the browser. Another option
+      #   would be to add `sensible-open` under a new `deps/`
+      #   directory and package with git-smart... but so far none
+      #   of the git-smart/bin commands have any dependencies, and
+      #   figuring that out seems messy (though maybe it's just a
+      #   readlink away, "$(dirname "$(readlink_f "$0")")/../deps").
+      #   In any case, a simple `open` is also fine.
+      #   - If a user asks for the new-window feature,
+      #     suggest installing sensible-open.
       open "${projurl}" > /dev/null &
     fi
   fi
