@@ -6,7 +6,8 @@
 
 # Open project web page for branch tracking remote, or for specified remote.
 
-GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone origin upstream}"
+# Similar: See `hub` conventions: https://hub.github.com/hub.1.html
+GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-upstream github origin proving release starter myclone}"
 
 os_is_macos () {
   [ "$(uname)" = "Darwin" ]
