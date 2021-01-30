@@ -9,13 +9,9 @@
 # or for specified remote.
 # - Secret sauce: Opens PR page if branch name indicates PR # (per convention).
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# USAGE: `git open [{remote}] [{PR-number}]`
 
-# - If branch is not tracking remote, and remote not specified, walks
-#   this list of remotes and uses the first one it finds that exists.
-# Similar: See `hub` conventions: https://hub.github.com/hub.1.html
-GITSMART_MYST_REMOTE_HIERARCHY="\
-${GITSMART_MYST_REMOTE_HIERARCHY:-upstream github origin proving release starter myclone}"
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # - The convention name of a review branch indicating the PR #.
 # SYNC_ME: GITSMART_REVIEW_FORMAT / See related command: git-begin-review.
@@ -28,7 +24,7 @@ _GS_BR_REVIEW_RE_PR_NUMBER='s/^review-([[:digit:]]+)--.*/\1/'
 git_open () {
   local remoteOrPRNumber="${1}"
 
-  local prNumber="$(pr_number_from_first_arg "${remoteOrPRNumber}")"
+  local prNumber="$(echo_number_or_empty_string "${remoteOrPRNumber}")"
   local remote
   remote="$(remote_from_arg_or_deduce "${remoteOrPRNumber}" "${prNumber}")" || exit $?
   [ -z "${prNumber}" ] && prNumber="${2}"
@@ -41,18 +37,20 @@ git_open () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-pr_number_from_first_arg () {
-  local remoteOrPRNumber="$1"
+# SYNC_ME: NOT_DRY: echo_number_or_empty_string
 
-  local prNumber=""
+echo_number_or_empty_string () {
+  local number_maybe="$1"
+
+  local number_or_empty=""
   if true &&
-    [ -n "${remoteOrPRNumber}" ] &&
-    echo "${remoteOrPRNumber}" | grep -e '^[[:digit:]]\+$' > /dev/null;
+    [ -n "${number_maybe}" ] &&
+    echo "${number_maybe}" | grep -e '^[[:digit:]]\+$' > /dev/null;
   then
-    prNumber="${remoteOrPRNumber}"
+    number_or_empty="${number_maybe}"
   fi
 
-  echo "${prNumber}"
+  echo "${number_or_empty}"
 }
 
 remote_from_arg_or_deduce () {
@@ -68,31 +66,7 @@ remote_from_arg_or_deduce () {
   fi
 
   # No arguments specified; try to deduce the remote.
-  remote="$(use_conventional_remote_maybe_and_must_exist "${remote}")" || return $?
-
-  echo "${remote}"
-}
-
-use_conventional_remote_maybe_and_must_exist () {
-  local remote="$1"
-
-  if [ -z "${remote}" ]; then
-    remote="$(git_tracking_branch_remote)"
-  fi
-
-  if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
-    for try_remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
-      if git remote get-url ${try_remote} &> /dev/null; then
-        remote="${try_remote}"
-        break
-      fi
-    done
-  fi
-
-  if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
-    >&2 echo 'ERROR: Unable to deduce remote; please specify.'
-    return 1
-  fi
+  remote="$(git lookup-remote "${remote}")" || return $?
 
   echo "${remote}"
 }
@@ -216,10 +190,6 @@ os_is_macos () {
 
 git_branch_name () {
   git rev-parse --abbrev-ref=loose HEAD 2> /dev/null
-}
-
-git_tracking_branch_remote () {
-  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

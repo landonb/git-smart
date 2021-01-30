@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Opens project web page for remote based on tracking remote of current branch;
+# or for remote deduced from conventional remote names hierarchy;
+# or for specified remote.
+# - Secret sauce: Opens PR page if branch name indicates PR # (per convention).
+
+# USAGE: `git open [{remote}] [{PR-number}]`
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# YOU: Declare your own GITSMART_MYST_REMOTE_HIERARCHY via, e.g., ~/.bashrc, if you want.
+
+# - If branch is not tracking remote, and remote not specified, walks
+#   this list of remotes and uses the first one it finds that exists.
+# - Similar: See `hub` conventions: https://hub.github.com/hub.1.html
+#   “The "origin", "github", and "upstream" remotes are searched *last*
+#    because hub assumes that it's more likely that the current branch
+#    is pushed to your fork rather than to the canonical repo.”
+#   (lb): Emphasis mine.
+#   See in hub sources: OriginNamesInLookupOrder
+GITSMART_MYST_REMOTE_HIERARCHY="\
+${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone upstream github origin}"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_lookup_remote () {
+  local remote_or_empty="${1}"
+
+  use_conventional_remote_maybe_and_must_exist "${remote_or_empty}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+use_conventional_remote_maybe_and_must_exist () {
+  local remote="$1"
+
+  if [ -z "${remote}" ]; then
+    remote="$(git_tracking_branch_remote)"
+  fi
+
+  if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
+    for try_remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
+      if git remote get-url ${try_remote} &> /dev/null; then
+        remote="${try_remote}"
+        break
+      fi
+    done
+  fi
+
+  if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
+    >&2 echo 'ERROR: Unable to deduce remote; please specify.'
+    return 1
+  fi
+
+  echo "${remote}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# SYNC_ME: NOT_DRY: Common git-smart functions, in lieu of assuming
+# they're defined in the current environment or wiring dependencies.
+
+git_tracking_branch_remote () {
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_lookup_remote "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
