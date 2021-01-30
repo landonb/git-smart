@@ -398,7 +398,6 @@
 # #######################################################################
 
 [alias]
-
   br = !git --no-pager branch
 
   # - Use `git brs` to show all branches, including remote branches.
@@ -528,7 +527,6 @@
 #   before the expansion if and only if the placeholder expands to a non-empty string.
 
 [alias]
-
   # Use `git l` to show the latest log message.
   # - (I tried other, longer names, such as `last`, `l1`, and `l`.
   #    But I like 'l' the best.
@@ -735,7 +733,6 @@
 # #######################################################################
 
 [alias]
-
   # Simple git-commit shortcut.
   ci = commit
 
@@ -782,7 +779,6 @@
 # #######################################################################
 
 [alias]
-
   st = status
 
   # -------
@@ -814,7 +810,6 @@
 # #######################################################################
 
 [alias]
-
   ls = ls-files
 
   # Use `git ignored` to show --assume-unchanged files.
@@ -830,7 +825,6 @@
 # #######################################################################
 
 [alias]
-
   # Fetches and shows file from specific commit/branch, e.g., the long way:
   #
   #   git show develop:path/to/file.js | view -c 'set ft=javascript' -
@@ -1005,7 +999,6 @@
 # #######################################################################
 
 [alias]
-
   # Use `git co` instead of `git checkout` because the latter is too much typing.
   co = checkout
 
@@ -1085,7 +1078,6 @@
 # #######################################################################
 
 [alias]
-
   # Show rebase recipe with '--fixup' commits ordered
   # and commanded to 'f'ixup.
   ria = rebase -i --autosquash
@@ -1129,7 +1121,6 @@
 # #######################################################################
 
 [alias]
-
   # Empirically speaking.
   whoami = config user.email
 
