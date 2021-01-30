@@ -4,35 +4,76 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-# Open project web page for branch tracking remote, or for specified remote.
+# Opens project web page for remote based on tracking remote of current branch;
+# or for remote deduced from conventional remote names hierarchy;
+# or for specified remote.
+# - Secret sauce: Opens PR page if branch name indicates PR # (per convention).
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# - If branch is not tracking remote, and remote not specified, walks
+#   this list of remotes and uses the first one it finds that exists.
 # Similar: See `hub` conventions: https://hub.github.com/hub.1.html
 GITSMART_MYST_REMOTE_HIERARCHY="\
 ${GITSMART_MYST_REMOTE_HIERARCHY:-upstream github origin proving release starter myclone}"
 
+# - The convention name of a review branch indicating the PR #.
+# SYNC_ME: GITSMART_REVIEW_FORMAT / See related command: git-begin-review.
+# E.g.,
+#  echo 'review-123--br-name--authname-2021-11-12-1' | sed -E 's/^review-([[:digit:]]+)--.*/\1/'
+_GS_BR_REVIEW_RE_PR_NUMBER='s/^review-([[:digit:]]+)--.*/\1/'
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 git_open () {
   local remoteOrPRNumber="${1}"
 
-  local remote=""
-  local prNumber=""
-  if true &&
-    [ -n "${remoteOrPRNumber}" ] &&
-    echo "${remoteOrPRNumber}" | grep -e '^[[:digit:]]' > /dev/null;
-  then
-    prNumber="${remoteOrPRNumber}"
-  else
-    remote="${remoteOrPRNumber}"
-    prNumber="${2}"
-  fi
-
-  remote="$(use_conventional_remote_if_not_specified "${remote}")" || exit $?
+  local prNumber="$(pr_number_from_first_arg "${remoteOrPRNumber}")"
+  local remote
+  remote="$(remote_from_arg_or_deduce "${remoteOrPRNumber}" "${prNumber}")" || exit $?
+  [ -z "${prNumber}" ] && prNumber="${2}"
+  [ -z "${prNumber}" ] && prNumber="$(pr_number_from_review_branch_only)"
 
   local gh_url="$(prepare_github_url "${remote}" "${prNumber}")"
 
   sensible_browser "${gh_url}"
 }
 
-use_conventional_remote_if_not_specified () {
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+pr_number_from_first_arg () {
+  local remoteOrPRNumber="$1"
+
+  local prNumber=""
+  if true &&
+    [ -n "${remoteOrPRNumber}" ] &&
+    echo "${remoteOrPRNumber}" | grep -e '^[[:digit:]]\+$' > /dev/null;
+  then
+    prNumber="${remoteOrPRNumber}"
+  fi
+
+  echo "${prNumber}"
+}
+
+remote_from_arg_or_deduce () {
+  local remoteOrPRNumber="$1"
+  local prNumber="$2"
+
+  local remote=""
+
+  if [ -z "${prNumber}" ]; then
+    # The first arg (possibly not specified) was not a PR number
+    # (was not start a string of digits).
+    remote="${remoteOrPRNumber}"
+  fi
+
+  # No arguments specified; try to deduce the remote.
+  remote="$(use_conventional_remote_maybe_and_must_exist "${remote}")" || return $?
+
+  echo "${remote}"
+}
+
+use_conventional_remote_maybe_and_must_exist () {
   local remote="$1"
 
   if [ -z "${remote}" ]; then
@@ -50,11 +91,21 @@ use_conventional_remote_if_not_specified () {
 
   if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
     >&2 echo 'ERROR: Unable to deduce remote; please specify.'
-    exit 1
+    return 1
   fi
 
   echo "${remote}"
 }
+
+pr_number_from_review_branch_only () {
+  local pr_number=""
+  local branch_name="$(git_branch_name)"
+  local possible_match=$(echo "${branch_name}" | sed -E ${_GS_BR_REVIEW_RE_PR_NUMBER})
+  [ "${possible_match}" != "${branch_name}" ] && pr_number="${possible_match}"
+  echo "${pr_number}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 prepare_github_url () {
   local remote="$1"
@@ -78,10 +129,13 @@ prepare_github_url () {
     | head -n1 2> /dev/null \
   )
 
+  # NOTE: GitHub redirects pull/ to issues/ if not such prNumber.
   [ -n "${prNumber}" ] && projurl="${projurl}/pull/${prNumber}"
 
   echo  "${projurl}"
 }
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 sensible_browser () {
   local projurl="$1"
@@ -151,13 +205,24 @@ sensible_browser_macos () {
   fi
 }
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# SYNC_ME: NOT_DRY: Common git-smart functions, in lieu of assuming
+# they're defined in the current environment or wiring dependencies.
+
 os_is_macos () {
   [ "$(uname)" = "Darwin" ]
+}
+
+git_branch_name () {
+  git rev-parse --abbrev-ref=loose HEAD 2> /dev/null
 }
 
 git_tracking_branch_remote () {
   git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
 }
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
   git_open "$@"
