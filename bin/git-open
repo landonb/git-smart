@@ -18,7 +18,17 @@ git_tracking_branch_remote () {
 }
 
 git_open () {
-  local remote="${1}"
+  local remoteOrPRNumber="${1}"
+
+  local remote=""
+  local prNumber=""
+  if "${remoteOrPRNumber}" | grep -e '^[[:digit:]]' > /dev/null; then
+    prNumber="${remoteOrPRNumber}"
+  else
+    remote="${remoteOrPRNumber}"
+    prNumber="${2}"
+  fi
+
   [ -z "${remote}" ] && remote="$(git_tracking_branch_remote)"
   if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
     for try_remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
@@ -50,6 +60,8 @@ git_open () {
       -e 's#\.git$##' \
     | head -n1 2> /dev/null \
   )
+
+  [ -n "${prNumber}" ] && projurl="${projurl}/pull/${prNumber}"
 
   # NOTE: See also the sensible-open command,
   #         https://github.com/landonb/sensible-open
