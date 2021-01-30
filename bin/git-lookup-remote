@@ -29,7 +29,7 @@ ${GITSMART_MYST_REMOTE_HIERARCHY:-proving release starter myclone upstream githu
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 git_lookup_remote () {
-  local remote_or_empty="${1}"
+  local remote_or_empty="$1"
 
   use_conventional_remote_maybe_and_must_exist "${remote_or_empty}"
 }
@@ -53,11 +53,21 @@ use_conventional_remote_maybe_and_must_exist () {
   fi
 
   if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
-    >&2 echo 'ERROR: Unable to deduce remote; please specify.'
+    if ! git_is_a_repo; then
+      >&2 echo 'ERROR: Unable to deduce remote. (HINT: You‘re not in a Git repo.)'
+    else
+      >&2 echo 'ERROR: Unable to deduce remote; please specify.'
+    fi
     return 1
   fi
 
   echo "${remote}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_is_a_repo () {
+  git rev-parse --git-dir > /dev/null 2>&1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -76,6 +86,6 @@ main () {
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
-  main "${@}"
+  main "$@"
 fi
 
