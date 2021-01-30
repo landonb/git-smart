@@ -860,6 +860,7 @@
   # is not as useful/potentially confusing.
   dc = !git --no-pager diff --cached
   # `dcc` is like `dc`, except pages.
+  # HINT/2021-01-30: (lb): I prefer a Bash `dcc` alias I setup to do the same.
   dcc = !git diff --cached
 
   # Use `git dd` to dump the diff to the terminal, bypassing the pager.
@@ -874,6 +875,7 @@
   df = !git --no-pager diff
   # - Because I've got `dff` aliased from Bash, I have same
   #   aliased from git, so I can wire my brain both ways.
+  # HINT/2021-01-30: (lb): I prefer a Bash `dff` alias I setup to do the same.
   dff = diff
 
 # #######################################################################
@@ -1065,7 +1067,7 @@
   # - I tried `git pu` for a spell, but it didn't stick, e.g.,
   #     pu = push -u origin HEAD
   #   which I think is because 'pu' is not as snappy as 'pup'.
-  #   Pneumonically speaking, remember that you want to set the
+  #   Mnemonically speaking, remember that you want to set the
   #   UPstream tracking information on Push, so it's called PUP.
   # - See also the more direct call to set just the tracking branch, e.g.,
   #     git branch -u <remote>/<branch>
