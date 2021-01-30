@@ -7,29 +7,38 @@
 # Open project web page for branch tracking remote, or for specified remote.
 
 # Similar: See `hub` conventions: https://hub.github.com/hub.1.html
-GITSMART_MYST_REMOTE_HIERARCHY="${GITSMART_MYST_REMOTE_HIERARCHY:-upstream github origin proving release starter myclone}"
-
-os_is_macos () {
-  [ "$(uname)" = "Darwin" ]
-}
-
-git_tracking_branch_remote () {
-  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
-}
+GITSMART_MYST_REMOTE_HIERARCHY="\
+${GITSMART_MYST_REMOTE_HIERARCHY:-upstream github origin proving release starter myclone}"
 
 git_open () {
   local remoteOrPRNumber="${1}"
 
   local remote=""
   local prNumber=""
-  if "${remoteOrPRNumber}" | grep -e '^[[:digit:]]' > /dev/null; then
+  if true &&
+    [ -n "${remoteOrPRNumber}" ] &&
+    echo "${remoteOrPRNumber}" | grep -e '^[[:digit:]]' > /dev/null;
+  then
     prNumber="${remoteOrPRNumber}"
   else
     remote="${remoteOrPRNumber}"
     prNumber="${2}"
   fi
 
-  [ -z "${remote}" ] && remote="$(git_tracking_branch_remote)"
+  remote="$(use_conventional_remote_if_not_specified "${remote}")" || exit $?
+
+  local gh_url="$(prepare_github_url "${remote}" "${prNumber}")"
+
+  sensible_browser "${gh_url}"
+}
+
+use_conventional_remote_if_not_specified () {
+  local remote="$1"
+
+  if [ -z "${remote}" ]; then
+    remote="$(git_tracking_branch_remote)"
+  fi
+
   if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
     for try_remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
       if git remote get-url ${try_remote} &> /dev/null; then
@@ -38,10 +47,18 @@ git_open () {
       fi
     done
   fi
+
   if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
     >&2 echo 'ERROR: Unable to deduce remote; please specify.'
     exit 1
   fi
+
+  echo "${remote}"
+}
+
+prepare_github_url () {
+  local remote="$1"
+  local prNumber="$2"
 
   # Replace `-e` rules:
   # - For ~/.ssh/config SSH aliases, e.g.,
@@ -63,52 +80,83 @@ git_open () {
 
   [ -n "${prNumber}" ] && projurl="${projurl}/pull/${prNumber}"
 
+  echo  "${projurl}"
+}
+
+sensible_browser () {
+  local projurl="$1"
+
+  if ! os_is_macos; then
+    sensible_browser_linux "${projurl}"
+  else
+    sensible_browser_macos "${projurl}"
+  fi
+}
+
+sensible_browser_linux () {
+  local projurl="$1"
+
+  # 2020-09-01: Default was to open in tab of existing window:
+  #
+  #   sensible-browser "${projurl}" > /dev/null &
+  #
+  # but I find that a new window is generally what I want.
+  #
+  # - For one, new window will always show up in mate-panel at the
+  #   end of the window list (predictably) rather than activating
+  #   an existing mate-panel entry (at an unpredictable position).
+  #
+  # - For two, maybe your last used window has a ton of tabs open,
+  #   and you had some specific tab active, and you don't want to
+  #   lose your place by opening a new tab at the end of the list.
+
   # NOTE: See also the sensible-open command,
   #         https://github.com/landonb/sensible-open
   #       which we wouldn't need unless we wanted to
   #       support --incognito aka --private. (That is,
-  #       the --new-window argument is supported by
-  #       both Chrome and Firefox.)
+  #       the following --new-window argument is the
+  #       same for both Chrome and Firefox.)
 
   # NOTE: Using `&` to not block if browser not already running.
   # Suppress: "Opening in existing browser session."
-  if ! os_is_macos; then
-    # 2020-09-01: Default was to open in tab of existing window:
-    #   sensible-browser "${projurl}" > /dev/null &
-    # but I find that a new window is generally what I want.
-    # - For one, new window will always show up in mate-panel at the
-    #   end of the window list (predictably) rather than activating
-    #   an existing mate-panel entry (at an unpredictable position).
-    # - For two, maybe your last used window has a ton of tabs open,
-    #   and you had some specific tab active, and you don't want to
-    #   lose your place by opening a new tab at the end of the list.
-    sensible-browser --new-window "${projurl}" > /dev/null &
+  sensible-browser --new-window "${projurl}" > /dev/null &
+}
+
+sensible_browser_macos () {
+  local projurl="$1"
+
+  # Open in tab of existing window:
+  #   open "${projurl}" > /dev/null &
+  # Open in tab in new window (must specify application):
+  #   open -na 'Google Chrome' --args --new-window "${projurl}" > /dev/null &
+  if type -t sensible-open > /dev/null; then
+    # https://github.com/landonb/sh-sensible-open
+    # MEH/2021-01-28: Include copy of sensible-open under (new) deps/.
+    sensible-open "${projurl}"
   else
-    # Open in tab of existing window:
-    #   open "${projurl}" > /dev/null &
-    # Open in tab in new window (must specify application):
-    #   open -na 'Google Chrome' --args --new-window "${projurl}" > /dev/null &
-    if type -t sensible-open > /dev/null; then
-      # https://github.com/landonb/sh-sensible-open
-      # MEH/2021-01-28: Include copy of sensible-open under (new) deps/.
-      sensible-open "${projurl}"
-    else
-      # Fallback to opening in tab of existing window.
-      # - We could call the browser by name to pass it an arg, e.g.,
-      #   `open -na 'Google Chrome' --args --new-window`, or
-      #   `open -na 'Firefox' --args --new-window`. But I don't
-      #   want to be explicit about the browser. Another option
-      #   would be to add `sensible-open` under a new `deps/`
-      #   directory and package with git-smart... but so far none
-      #   of the git-smart/bin commands have any dependencies, and
-      #   figuring that out seems messy (though maybe it's just a
-      #   readlink away, "$(dirname "$(readlink_f "$0")")/../deps").
-      #   In any case, a simple `open` is also fine.
-      #   - If a user asks for the new-window feature,
-      #     suggest installing sensible-open.
-      open "${projurl}" > /dev/null &
-    fi
+    # Fallback to opening in tab of existing window.
+    # - We could call the browser by name to pass it an arg, e.g.,
+    #   `open -na 'Google Chrome' --args --new-window`, or
+    #   `open -na 'Firefox' --args --new-window`. But I don't
+    #   want to be explicit about the browser. Another option
+    #   would be to add `sensible-open` under a new `deps/`
+    #   directory and package with git-smart... but so far none
+    #   of the git-smart/bin commands have any dependencies, and
+    #   figuring that out seems messy (though maybe it's just a
+    #   readlink away, "$(dirname "$(readlink_f "$0")")/../deps").
+    #   In any case, a simple `open` is also fine.
+    #   - If a user asks for the new-window feature,
+    #     suggest installing sensible-open.
+    open "${projurl}" > /dev/null &
   fi
+}
+
+os_is_macos () {
+  [ "$(uname)" = "Darwin" ]
+}
+
+git_tracking_branch_remote () {
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null | /usr/bin/env sed -e 's#/.*$##'
 }
 
 main () {
