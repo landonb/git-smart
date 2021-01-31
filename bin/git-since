@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Use `git since` to show the log history since the last common ancestor
+# between two branches.
+# - If no branches are specified, finds the ancestor of 'release'
+#   and the current branch.
+# - If a single branch is specified, finds the ancestor of 'release'
+#   and the named branch.
+# - If two branches are specified, finds the ancestor of the two
+#   named branches.
+# MAYBE/2020-07-01: Rather than assume "release" branch, iterate through a
+# list of "core" branches, e.g., see git-cleanbr's ${GITSMART_CORE_BRANCHES},
+# and identify the "progenitor" branch (see git-my-merge-status for meaning
+# of progenitor branch). But I don't use this command often (at all), so do
+# not really care. [2021-01-30: See also git-lookup-remote.]
+
+# USAGE: `git since [{remote}] [{branch}]`
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_since () {
+  local oth_br=${1:-release}
+
+  local cur_br=$(git rev-parse --abbrev-ref HEAD)
+  local ref_br=${2:-${cur_br}}
+
+  local common_ancestor=$(git merge-base ${ref_br} ${oth_br})
+
+  git log ${common_ancestor}..HEAD
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_since "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+

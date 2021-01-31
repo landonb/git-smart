@@ -707,27 +707,6 @@
 
   # -------
 
-  # Use `git since` to show the log history since the last common ancestor
-  # between two branches.
-  # - If no branches are specified, finds the ancestor of 'release'
-  #   and the current branch.
-  # - If a single branch is specified, finds the ancestor of 'release'
-  #   and the named branch.
-  # - If two branches are specified, finds the ancestor of the two
-  #   named branches.
-  # MAYBE/2020-07-01: Rather than assume "release" branch, iterate through a
-  # list of "core" branches, e.g., see git-cleanbr's ${GITSMART_CORE_BRANCHES},
-  # and identify the "progenitor" branch (see git-my-merge-status for meaning
-  # of progenitor branch). But I don't use this command often (at all), so do
-  # not really care.
-  since = "! f () { \
-    oth_br=${1:-release}; \
-    local cur_br=$(git rev-parse --abbrev-ref HEAD); \
-    ref_br=${2:-${cur_br}}; \
-    local common_ancestor=$(git merge-base ${ref_br} ${oth_br}); \
-    git log ${common_ancestor}..HEAD; \
-  }; f"
-
 # #######################################################################
 # ***                         Commit Aliases                          ***
 # #######################################################################
