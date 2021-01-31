@@ -13,24 +13,16 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# - The convention name of a review branch indicating the PR #.
-# SYNC_ME: GITSMART_REVIEW_FORMAT / See related command: git-begin-review.
-# E.g.,
-#  echo 'review-123--br-name--authname-2021-11-12-1' | sed -E 's/^review-([[:digit:]]+)--.*/\1/'
-_GS_BR_REVIEW_RE_PR_NUMBER='s/^review-([[:digit:]]+)--.*/\1/'
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
-
 git_open () {
-  local remoteOrPRNumber="${1}"
+  local remote_or_pr_number="${1}"
 
-  local prNumber="$(echo_number_or_empty_string "${remoteOrPRNumber}")"
+  local pr_number="$(echo_number_or_empty_string "${remote_or_pr_number}")"
   local remote
-  remote="$(remote_from_arg_or_deduce "${remoteOrPRNumber}" "${prNumber}")" || exit $?
-  [ -z "${prNumber}" ] && prNumber="${2}"
-  [ -z "${prNumber}" ] && prNumber="$(pr_number_from_review_branch_only)"
+  remote="$(remote_from_arg_or_deduce "${remote_or_pr_number}" "${pr_number}")" || exit $?
+  [ -z "${pr_number}" ] && pr_number="${2}"
+  [ -z "${pr_number}" ] && pr_number="$(git pr-number-from-branch-name)"
 
-  local gh_url="$(prepare_github_url "${remote}" "${prNumber}")"
+  local gh_url="$(prepare_github_url "${remote}" "${pr_number}")"
 
   sensible_browser "${gh_url}"
 }
@@ -54,15 +46,15 @@ echo_number_or_empty_string () {
 }
 
 remote_from_arg_or_deduce () {
-  local remoteOrPRNumber="$1"
-  local prNumber="$2"
+  local remote_or_pr_number="$1"
+  local pr_number="$2"
 
   local remote=""
 
-  if [ -z "${prNumber}" ]; then
+  if [ -z "${pr_number}" ]; then
     # The first arg (possibly not specified) was not a PR number
     # (was not start a string of digits).
-    remote="${remoteOrPRNumber}"
+    remote="${remote_or_pr_number}"
   fi
 
   # No arguments specified; try to deduce the remote.
@@ -71,19 +63,11 @@ remote_from_arg_or_deduce () {
   echo "${remote}"
 }
 
-pr_number_from_review_branch_only () {
-  local pr_number=""
-  local branch_name="$(git_branch_name)"
-  local possible_match=$(echo "${branch_name}" | sed -E ${_GS_BR_REVIEW_RE_PR_NUMBER})
-  [ "${possible_match}" != "${branch_name}" ] && pr_number="${possible_match}"
-  echo "${pr_number}"
-}
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 prepare_github_url () {
   local remote="$1"
-  local prNumber="$2"
+  local pr_number="$2"
 
   # Replace `-e` rules:
   # - For ~/.ssh/config SSH aliases, e.g.,
@@ -93,7 +77,7 @@ prepare_github_url () {
   #   git@github.com:username/project.git → https://username/project
   #   git://github.com:username/project.git → https://username/project
   #   ssh://github.com:username/project.git → https://username/project
-  local projurl=$( \
+  local remote_url=$( \
     git remote get-url ${remote} \
     | sed -E \
       -e 's#git@github_[^:]+:#git@github.com:#' \
@@ -103,30 +87,32 @@ prepare_github_url () {
     | head -n1 2> /dev/null \
   )
 
-  # NOTE: GitHub redirects pull/ to issues/ if not such prNumber.
-  [ -n "${prNumber}" ] && projurl="${projurl}/pull/${prNumber}"
+  # NOTE: GitHub redirects pull/ to issues/ if not such pr_number.
+  # See also: `hub pr show 1234` will open browser, too,
+  #            but requires GITHUB_TOKEN=XXXX be set.
+  [ -n "${pr_number}" ] && remote_url="${remote_url}/pull/${pr_number}"
 
-  echo  "${projurl}"
+  echo  "${remote_url}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 sensible_browser () {
-  local projurl="$1"
+  local remote_url="$1"
 
   if ! os_is_macos; then
-    sensible_browser_linux "${projurl}"
+    sensible_browser_linux "${remote_url}"
   else
-    sensible_browser_macos "${projurl}"
+    sensible_browser_macos "${remote_url}"
   fi
 }
 
 sensible_browser_linux () {
-  local projurl="$1"
+  local remote_url="$1"
 
   # 2020-09-01: Default was to open in tab of existing window:
   #
-  #   sensible-browser "${projurl}" > /dev/null &
+  #   sensible-browser "${remote_url}" > /dev/null &
   #
   # but I find that a new window is generally what I want.
   #
@@ -147,20 +133,20 @@ sensible_browser_linux () {
 
   # NOTE: Using `&` to not block if browser not already running.
   # Suppress: "Opening in existing browser session."
-  sensible-browser --new-window "${projurl}" > /dev/null &
+  sensible-browser --new-window "${remote_url}" > /dev/null &
 }
 
 sensible_browser_macos () {
-  local projurl="$1"
+  local remote_url="$1"
 
   # Open in tab of existing window:
-  #   open "${projurl}" > /dev/null &
+  #   open "${remote_url}" > /dev/null &
   # Open in tab in new window (must specify application):
-  #   open -na 'Google Chrome' --args --new-window "${projurl}" > /dev/null &
+  #   open -na 'Google Chrome' --args --new-window "${remote_url}" > /dev/null &
   if type -t sensible-open > /dev/null; then
     # https://github.com/landonb/sh-sensible-open
     # MEH/2021-01-28: Include copy of sensible-open under (new) deps/.
-    sensible-open "${projurl}"
+    sensible-open "${remote_url}"
   else
     # Fallback to opening in tab of existing window.
     # - We could call the browser by name to pass it an arg, e.g.,
@@ -175,7 +161,7 @@ sensible_browser_macos () {
     #   In any case, a simple `open` is also fine.
     #   - If a user asks for the new-window feature,
     #     suggest installing sensible-open.
-    open "${projurl}" > /dev/null &
+    open "${remote_url}" > /dev/null &
   fi
 }
 
@@ -186,10 +172,6 @@ sensible_browser_macos () {
 
 os_is_macos () {
   [ "$(uname)" = "Darwin" ]
-}
-
-git_branch_name () {
-  git rev-parse --abbrev-ref=loose HEAD 2> /dev/null
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
