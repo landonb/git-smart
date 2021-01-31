@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Creates a fixup commit and then rebases it where it needs to be.
+#
+# Similar to the following individual steps:
+#
+#   git add {some-changes}
+#   git commit --no-verify --fixup={commit}
+#   git add -A && git ci -m WIP
+#   git rebase -i --autosquash {commit}^
+#   # Save the file
+#   git pop1  # Undo the WIP.
+
+# USAGE: git fup {commit}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_fixup_and_rebase () {
+  local commit="$1"
+
+  set -e
+
+  # Aka `git fu`.
+  git commit --no-verify --fixup ${commit}
+
+  local pop_after=false
+  if [ -n "$(git status --porcelain)" ]; then
+    # Untracked, Unstaged, or Staged changes not committed.
+    pop_after=true
+    # Aka `git wip`
+    git add -A
+    git commit -m WIP
+  fi
+
+  # Have the interactive rebase sequence editor complete automatically
+  # by specifying the Bash `:` no-op.
+  # See:
+  #   https://stackoverflow.com/questions/29094595/
+  #     git-interactive-rebase-without-opening-the-editor
+
+  # Aka `git ria ${commit}^`
+  GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^
+
+  if ${pop_after}; then
+    # Aka `git pop1`
+    git reset --mixed @~1
+    git --no-pager log -1 --pretty=oneline --abbrev-commit
+  fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_fixup_and_rebase "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
