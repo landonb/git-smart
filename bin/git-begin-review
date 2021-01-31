@@ -1,0 +1,275 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Creates (if necessary, or just checks out) a branch to review someone's work (e.g., PR).
+
+# USAGE: `git begin-review [{branch|PR-number}] [{remote}]`
+
+# ***
+
+# CONVENTION: This is another of my (lb's) commands that follows some sort of
+# broader 'git flow' or coventions I've adopted to make Git usage more fluid.
+#
+# - For example, if I pass this command the branch name 'feature-my-coworkers-work',
+#   a new branch is created, named with a common prefix, as well as useful postfix
+#   identifiers, e.g., 'review--my-coworkers-branch--author-YYYY-MM-DD-1'.
+#
+# - You can also pass a PR number, e.g., `git begin-review 123` might also
+#   create a similarly named branch, but with the PR number encoded in it:
+#     'review-123--my-coworkers-branch--author-YYYY-MM-DD-1'.
+#
+# - How does this help?
+#
+#   - If you use tab-complete, review branches won't tab-compete for tab-complete.
+#     E.g., if I name my work starting with 'feature-', then when I type
+#     `git br f<Tab>`, I'll only see my branches, and not any review branches.
+#
+#   - If you review someone's work, and then request changes, you can easily diff
+#     the changes they eventually make. E.g.,:
+#
+#       git fetch {work-remote}
+#
+#       git review coworkers-branch
+#       # Creates e.g., 'review-123--coworkers-branch--jdoe-2021-01-30-1'.
+#
+#       git open
+#       # Update PR, request changes.
+#
+#       # Some time later.
+#       git fetch {work-remote}
+#       git review coworkers-branch
+#       # Creates e.g., 'review-123--coworkers-branch--jdoe-2021-01-30-2'.
+#
+#       # List branches any copy the first review branch
+#       git br
+#       # And then diff to see that the request was honored.
+#       # You can paste the branch, type dot-dot, paste again,
+#       # and then backspace once and increment the review counter.
+#       git diff <Ctrl-v>..<Ctrl-v><Backspace>2<CR>
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# YOU: Declare your own GITSMART_REVIEW_FORMAT via, e.g., ~/.bashrc, if you want.
+
+_GS_BR_REVIEW_FMT='review${PR_DELIM}${PR_NUMBER}--${BRANCH_NAME}--${AUTHOR}${AU_DELIM}${DATE_NOW}-${DATE_COUNT}'
+
+GITSMART_REVIEW_FORMAT="${GITSMART_REVIEW_FORMAT:-${_GS_BR_REVIEW_FMT}}"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_begin_review () {
+  local branch_or_pr_number="$1"
+  local remote_or_empty="$2"
+
+  local remote=""
+  local branch=""
+
+  local pr_number=""
+  if [ -z "${branch_or_pr_number}" ]; then
+    # No arguments; try to get PR number from current branch name.
+    pr_number="$(git pr-number-from-branch-name)"
+  else
+    pr_number="$(echo_number_or_empty_string "${branch_or_pr_number}")"
+  fi
+
+  if [ -z "${pr_number}" ] && [ -n "${branch_or_pr_number}" ]; then
+    # Specified argument(s) should be specify branch (and maybe remote).
+    # Or, single argument passed might specify both, e.g., remote/branch.
+    local branch_after_remote=$( \
+      echo "${branch_or_pr_number}" \
+      | sed -E 's/[^\/]*\/(.*)/\1/'
+    )
+    if [ "${branch_after_remote}" != "${branch_or_pr_number}" ]; then
+      remote=$( \
+        echo "${branch_or_pr_number}" \
+        | sed -E 's/([^\/]*)\/.*/\1/'
+      )
+      if git_remote_exists "${remote}"; then
+        # Slash found in branch name, and name before slash is valid remote.
+        branch="${branch_after_remote}"
+        # remote previously parsed and set.
+      else
+        # Slash in passed name, but not a recognized remote;
+        # assumes slash happens to be in the branch name, and
+        # uses remote (maybe) passes as second argument ($2).
+        branch="${branch_or_pr_number}"
+        # Will set remote later.
+      fi
+    else
+      # No slash in passed name, so maybe remote at second argument ($2).
+      branch="${branch_or_pr_number}"
+      # Will set remote later.
+    fi
+  fi
+
+  # ***
+
+  if [ -z "${pr_number}" ] && [ -z "${branch}" ]; then
+    >&2 echo "USAGE: $(basename "$0") [{branch|PR-number}] [{remote}]"
+    exit 1
+  fi
+
+  # ***
+
+  # (lb) I don't see a way to tell `hub` which remote to use, other than
+  # it deducing it from the existing repo remotes, so we'll just deduce
+  # the same, and hopefully our remotes align.
+  if [ -z "${remote}" ]; then
+    remote="$(git lookup-remote "${remote_or_empty}")" || return $?
+  fi
+
+  # ***
+
+  if [ -n "${pr_number}" ]; then
+    # Get branch from PR.
+    must_define_hub
+    must_define_token
+    # Note: I checked the "official" `gh` command, but did not find
+    # commands that I could use similar to what `hub` offers.
+    local remote_colon_branch="$(hub pr show -f %H ${pr_number} 2> /dev/null)"
+
+    if [ -z "${remote_colon_branch}" ]; then
+      >&2 echo "ERROR: No branch found for PR number: ${pr_number}"
+      hub pr show -f %H ${pr_number}
+      exit 1
+    fi
+
+    remote=$(echo "${remote_colon_branch}" | sed -E 's/:.*$//')
+    branch=$(echo "${remote_colon_branch}" | sed -E 's/^.*://')
+
+    if [ -z "${remote}" ] || [ -z "${branch}" ]; then
+      >&2 echo "ERROR: Unexpected $(hub pr show -f %H ${pr_number}) response: ${remote_colon_branch}"
+      exit 1
+    fi
+  else
+    # ${branch} is set. Try to deduce PR number (okay if cannot).
+    if type hub > /dev/null 2>&1 && [ -n "${GITHUB_TOKEN}" ] ; then
+      # FIXME/2021-01-30: (lb): Does this work without remote specified?
+      #                         Or any differently?
+      #   local pr_numbers="$(hub pr list -f %I%n -b "${branch}")"
+      # NOTE: There's a similar pr-show that includes newline (%n) by default.
+      # FIXME/2021-01-30: How does pr-show handle multiple matches?
+      #   local pr_numbers="$(hub pr show -f %I -h "${remote}:${branch}")"
+      local pr_numbers="$(hub pr list -f %I%n -b "${remote}:${branch}")"
+      if [ -n "${pr_numbers}" ]; then
+        if [ $(echo "${pr_numbers}" | wc -l) -gt 1 ]; then
+          # HINT: To help debug `hub`:
+          #   HUB_VERBOSE=1 hub pr list -b "${remote}:${branch}" -f %I%
+          >&2 hub pr list -b "${remote}:${branch}" -f %I%
+          >&2 echo "hub pr list -b \"${remote}:${branch}\" -f %I%"
+          >&2 echo "WARNING: Unknown PR number: Multiple matches found for ${branch}."
+        else
+          pr_number="${pr_numbers}"
+        fi
+      fi
+    fi
+  fi
+
+  # ***
+
+  # Refresh in case we need review branch to get author id.
+  git fetch "${remote}"
+
+  # ***
+
+  local branch_ref="${remote}/${branch}"
+
+  # Prefer the author's GH logon, which will be the most consistent
+  # identifier. Fallback to using the author email, for no particular
+  # reason.
+  local author=""
+  if [ -n "${pr_number}" ]; then
+    # %au is author (GitHub) login name.
+    author="$(hub pr show -f %au ${pr_number})"
+  fi
+  if [ -z "${author}" ]; then
+    # Note that the Git log is easily manipulated, so neither name nor
+    # email will be as consistent as an author's GitHub login name.
+    if ${GITSMART_REVIEW_FALLBACK_NAME:-false}; then
+      # %ae is author email from commit.
+      author="$(git --no-pager log -1 --pretty=format:'%ae' "${branch_ref}" | sed -E 's/@.*//')"
+    else
+      # %an is author name from commit.
+      author="$(git --no-pager log -1 --pretty=format:'%an' "${branch_ref}" | tr '[:space:]' '-')"
+    fi
+  fi
+
+  # ***
+
+  # Prepare format template variables.
+
+  local sep="-"
+
+  local PR_NUMBER=""
+  [ -n "${pr_number}" ] && PR_NUMBER="${pr_number}" && PR_DELIM="${sep}"
+
+  local BRANCH_NAME="${branch}"
+
+  local AUTHOR=""
+  [ -n "${author}" ] && AUTHOR="${author}" && AU_DELIM="${sep}"
+
+  local DATE_NOW="$(date "+%Y${sep}%m${sep}%d")"
+
+# FIXME/2021-01-30 17:30: Making this complicated now... or maybe a | sort is the tricket.
+  local DATE_COUNT=1
+
+  local review_branch="$(eval printf "${GITSMART_REVIEW_FORMAT}")"
+
+  echo "${review_branch}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+must_define_hub () {
+  type hub > /dev/null 2>&1 && return
+
+  >&2 echo 'USAGE: Please install `hub` to get branch name from PR number.'
+  exit 1
+}
+
+must_define_token () {
+  [ -n "${GITHUB_TOKEN}" ] && return
+
+  >&2 echo 'USAGE: Please set the GITHUB_TOKEN for `hub`'
+  >&2 echo "- If you need a token, visit:"
+  >&2 echo
+  >&2 echo "    https://github.com/settings/tokens"
+  exit 1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# SYNC_ME: NOT_DRY: echo_number_or_empty_string
+
+echo_number_or_empty_string () {
+  local number_maybe="$1"
+
+  local number_or_empty=""
+  if true &&
+    [ -n "${number_maybe}" ] &&
+    echo "${number_maybe}" | grep -e '^[[:digit:]]\+$' > /dev/null;
+  then
+    number_or_empty="${number_maybe}"
+  fi
+
+  echo "${number_or_empty}"
+}
+
+git_remote_exists () {
+  local remote="$1"
+  git remote get-url ${remote} &> /dev/null
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_begin_review "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
