@@ -4,33 +4,132 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-# Use `git since` to show the log history since the last common ancestor
-# between two branches.
-# - If no branches are specified, finds the ancestor of 'release'
-#   and the current branch.
+# Use `git since` to show changes since the last common ancestor
+# between two branches, usually the current branch and the trunk.
+# - If no branches are specified, finds the ancestor of the
+#   upstream branch and the current branch.
+#   - The upstream branch is assumed to be named 'release'.
+#     - FIXME/2021-01-30: Ideally, this command would honor the
+#       GITSMART_CORE_BRANCHES list that other commands use to
+#       determine the trunk branch name.
 # - If a single branch is specified, finds the ancestor of 'release'
 #   and the named branch.
 # - If two branches are specified, finds the ancestor of the two
 #   named branches.
+# - The command defaults to `git diff`, but `git log` can be specified
+#   with `--log` or simply `-l`. Or if you'd like to see the changes in
+#   tig, try `--tig` or `-t`.
+
+# USAGE: `git since [{upstream-branch}] [{feature-branch}] [--diff|-d|--log|-l|--tig|-t]`
+
 # MAYBE/2020-07-01: Rather than assume "release" branch, iterate through a
 # list of "core" branches, e.g., see git-cleanbr's ${GITSMART_CORE_BRANCHES},
 # and identify the "progenitor" branch (see git-my-merge-status for meaning
 # of progenitor branch). But I don't use this command often (at all), so do
 # not really care. [2021-01-30: See also git-lookup-remote.]
 
-# USAGE: `git since [{remote}] [{branch}]`
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 git_since () {
-  local oth_br=${1:-release}
+  _git_since_command_parse_args "$@"
+
+  local oth_br=${_GS_SINCE_BRANCH_A:-release}
 
   local cur_br=$(git rev-parse --abbrev-ref HEAD)
-  local ref_br=${2:-${cur_br}}
+  local ref_br=${_GS_SINCE_BRANCH_B:-${cur_br}}
+
+  if [ -z "${oth_br}" ] || [ "${oth_br}" = "${ref_br}" ]; then
+    oth_br="$(git_tracking_branch)"
+  fi
+
+  if [ -z "${oth_br}" ]; then
+    local remote="$(git lookup-remote)"
+    if [ -n "${remote}" ]; then
+      oth_br="${remote}/${oth_br}"
+    fi
+  fi
+
+  must_branch_exists "${oth_br}" "Upstream" || return $?
+  must_branch_exists "${ref_br}" "Feature" || return $?
 
   local common_ancestor=$(git merge-base ${ref_br} ${oth_br})
 
-  git log ${common_ancestor}..HEAD
+  eval "${_GS_SINCE_COMMAND:-git diff} ${common_ancestor}..HEAD"
+}
+
+_git_since_command_parse_args () {
+  _GS_SINCE_BRANCH_A=""
+  _GS_SINCE_BRANCH_B=""
+  _GS_SINCE_COMMAND=""
+
+  while [ $# -gt 0 ]; do
+    case $1 in
+      -d | --diff)
+        _GS_SINCE_COMMAND='git diff'
+        shift
+        ;;
+      -l | --log)
+        _GS_SINCE_COMMAND='git log'
+        shift
+        ;;
+      -t | --tig)
+        _GS_SINCE_COMMAND='tig'
+        shift
+        ;;
+      -h | --help)
+        echo "USAGE: $0 [-d|--diff | -l|--log | -t|--tig] [<upstream-branch>] [<feature-branch>]"
+        exit 0
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        _git_since_command_parse_branch_arg "$1"
+        shift
+        ;;
+    esac
+  done
+
+  # In case short-circuited by '--', finish now.
+  for branch_name in "$@"; do
+    _git_since_command_parse_branch_arg "${branch_name}"
+  done
+}
+
+_git_since_command_parse_branch_arg () {
+  local branch_name="$1"
+
+  if [ -z "${_GS_SINCE_BRANCH_A}" ]; then
+    _GS_SINCE_BRANCH_A="${branch_name}"
+  elif [ -z "${_GS_SINCE_BRANCH_B}" ]; then
+    _GS_SINCE_BRANCH_B="${branch_name}"
+  else
+    >&2 echo "WARNING: Ignoring extra parameter: ${branch_name}"
+  fi
+}
+
+must_branch_exists () {
+  local branch="$1"
+  local friendly="$2"
+
+  git_branch_exists "${branch}" && return
+
+  >&2 echo "ERROR: ${friendly} branch not found: ${branch}"
+  return 1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_branch_exists () {
+  local branch_name="$1"
+
+  git show-ref --verify --quiet refs/heads/${branch_name} ||
+    git show-ref --verify --quiet refs/remotes/${branch_name}
+}
+
+git_tracking_branch () {
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
