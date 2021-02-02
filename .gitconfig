@@ -1003,9 +1003,41 @@
   # any changes to the project submodules).
   sup = submodule update --init --remote
 
-  # Use `git up` to stash changes, pull, rebase, and pop the stash.
-  # - Benefit (IMO): Runs rebase; not merge like pull does by default.
-  up = pull --rebase --autostash
+  # 2021-02-01: Only took 10+ years to figure this one out! (And now I can
+  # stop running `git fetch {upstream} && git rebase {upstream}/{branch}`!)
+  #
+  # - Note other aliases also defined by git-smart (or by my private cfg)
+  #   that risk being confused with this alias (e.g., they have similar
+  #   initials, `push release` → `pr`, just like `pull --rebase` → `pr`):
+  #
+  #     pr = push release HEAD
+  #     pur = push -u release HEAD
+  #
+  #   Hopefully I can keep these straight... should be easy, the pull
+  #   command is run without specifying a remote or branch, so it makes
+  #   sense it can be the one one-character alias that starts with 'p'.
+  #
+  # 2021-02-01: Oh, HAHA, and here I thought I was being clever! Turns out
+  # I added a `git up` alias as early as 2016, which is better that what I
+  # was originally thinking for `git p`:
+  #
+  #     p = pull --rebase
+  #
+  # So let's rename `up` instead, and hopefully now I'll remember it's here!
+  #
+  # HISTORY: This alias was named `git up`, but I long ago forgot it existed.
+  # That, or I didn't realize its advantage. Which is greatly. So let's shorten
+  # it to just 'p'. This also helps with mnemonics, as 'pull' starts with 'p',
+  # whereas 'up' has no obvious connection (unless you think of reversing the
+  # first two characters in 'pull'; or maybe it was meant for you to think that
+  # you were incorporating changes from upstream? In any case, confusion gone).
+  #
+  # USAGE: Use `git p` to stash changes, pull, rebase, and pop the stash.
+  #
+  # - Benefit (IMO): Runs rebase, and not merge, like pull does by default.
+  #   (Specifically, I never merge feature work; only rebase.) Also stashes.
+  #
+  p = pull --rebase --autostash
 
   # -------
 
