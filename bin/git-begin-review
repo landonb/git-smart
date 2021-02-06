@@ -171,8 +171,21 @@ git_begin_review_init_particulars () {
       return 1
     fi
 
-    REVIEW_REMOTE=$(echo "${remote_colon_branch}" | sed -E 's/:.*$//')
-    REVIEW_BRANCH=$(echo "${remote_colon_branch}" | sed -E 's/^.*://')
+    if echo "${remote_colon_branch}" | grep -q -E ':'; then
+      local parsed_remote
+
+      parsed_remote=$(echo "${remote_colon_branch}" | sed -E 's/:.*$//')
+      REVIEW_BRANCH=$(echo "${remote_colon_branch}" | sed -E 's/^.*://')
+
+      if [ "${REVIEW_REMOTE}" != "${parsed_remote}" ]; then
+        >&2 printf "WEIRD: Remote guessed “%s” but \`hub pr show\` says “%s”\n" \
+          "${REVIEW_REMOTE}" \
+          "${parsed_remote}"
+      fi
+      REVIEW_REMOTE="${parsed_remote}"
+    else
+      REVIEW_BRANCH="${remote_colon_branch}"
+    fi
 
     if [ -z "${REVIEW_REMOTE}" ] || [ -z "${REVIEW_BRANCH}" ]; then
       >&2 echo "ERROR: Unexpected $(hub pr show -f %H ${REVIEW_PR_NUM}) response: ${remote_colon_branch}"
