@@ -1123,7 +1123,12 @@
 
   # If the rebase pauses and you need to resolve a conflict,
   # here's a shortcut to continue the rebase quickly.
-  rc = rebase --continue
+  # - Noice! I almost never care about editing message during rebase, as
+  #   I'm usually just resolving conflicts, or I already ran --amend.
+  #   - GIT_EDITOR=true courtesy:
+  #       https://stackoverflow.com/questions/43489971/
+  #         how-to-suppress-the-editor-for-git-rebase-continue
+  rc = !GIT_EDITOR=true git rebase --continue
 
   # Git cherry-pick --continue.
   #     ░      ▒      ▓
