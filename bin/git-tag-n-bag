@@ -92,7 +92,12 @@ git_tag_n_bag () {
       branch_pat="${branch_or_pattern}*"
       is_globbing=0
     else
-      branch_name=$(git rev-parse --abbrev-ref "refs/heads/${branch_or_pattern}")
+      # Resolve the branch name from a name or pattern. Note that if the branch is
+      # not found, rev-parse echoes the input string ("refs/heads/${br_or_patt})" to
+      # stdout, and it prints a 'fatal' warning and usage help to stdout. Here we
+      # unconditionally set branch_name to that echoed string, valid or not, and pass it
+      # to git_tag_n_bag_branch, which will return 1 if the name or pattern was invalid.
+      branch_name=$(git rev-parse --abbrev-ref "refs/heads/${branch_or_pattern}" 2> /dev/null)
       git_tag_n_bag_branch "${branch_name}" "${bagged_tag_prefix}"
       [ $? -eq 0 ] && let 'bagged_count += 1'
       # Set the trinary to -1, sort of like using the three states of a
@@ -129,7 +134,7 @@ git_tag_n_bag_branch () {
     | sort -r | head -1 | awk '{print $1}')
 
   if [ -z "${latest_date}" ]; then
-    >&2 echo "UNEXPECTED: No such branch?!: ${branch_name}"
+    >&2 echo "SKIPPED: No such ref.: ${branch_name}"
     return 1
   fi
 
@@ -141,20 +146,20 @@ git_tag_n_bag_branch () {
     local tag_branch_sha1="$(git_lookup_tag_branch_sha1 "${tag_name}")"
     local bag_branch_sha1="$(git rev-parse "refs/heads/${branch_name}")"
     if [ "${tag_branch_sha1}" != "${bag_branch_sha1}" ]; then
-      >&2 echo "SKIPPING: Tag exists but at different commit than branch"
-      >&2 echo "- Tag: ${tag_name}"
-      >&2 echo "- Br.: ${branch_name}"
+      >&2 echo "SKIPPED: Tag exists but at different commit than branch"
+      >&2 echo "- Tag named: ${tag_name}"
+      >&2 echo "- on Branch: ${branch_name}"
       return 1
     fi
+    echo "Endured: ${tag_name}"
   else
     git tag "${tag_name}" "refs/heads/${branch_name}"
     if [ $? -ne 0 ]; then
       >&2 echo "ERROR: Failed to ‘git tag ${tag_name} refs/heads/${branch_name}’"
       return 1
     fi
+    echo "New Tag: ${tag_name}"
   fi
-  #
-  echo "New Tag: ${tag_name}"
 
   # Delete the branch.
   #
@@ -167,7 +172,7 @@ git_tag_n_bag_branch () {
     return 1
   fi
   #
-  echo "Deleted: ${branch_name} (was ${branch_sha1_short})"
+  echo "Deleted: ${branch_name} (from ${branch_sha1_short})"
 
   # Delete remote, if exists.
   if git show-ref --verify --quiet "refs/remotes/${remote_name}/${branch_name}"; then
@@ -203,7 +208,7 @@ git_tag_n_bag_report () {
 
   local branches
   [ ${bagged_count} -ne 1 ] && branches="branches" || branches="branch"
-  echo "Tagged 'n bagged ${bagged_count} ${branches}"
+  echo "-Tagged 'n bagged- (${bagged_count}) ${branches}."
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
