@@ -20,7 +20,11 @@
 #   with `--log` or simply `-l`. Or if you'd like to see the changes in
 #   tig, try `--tig` or `-t`.
 
-# USAGE: `git since [{upstream-branch}] [{feature-branch}] [--diff|-d|--log|-l|--tig|-t]`
+# USAGE: git since [{upstream-branch}] [{feature-branch}] [command]`
+#
+# - Where command is one of: [--diff|-d|--log|-l|--tig|-t|--print]
+#
+# - E.g.: `git since upstream/develop -d`
 
 # MAYBE/2020-07-01: Rather than assume "release" branch, iterate through a
 # list of "core" branches, e.g., see git-cleanbr's ${GITSMART_CORE_BRANCHES},
@@ -76,8 +80,12 @@ _git_since_command_parse_args () {
         _GS_SINCE_COMMAND='tig'
         shift
         ;;
+      -p | --print)
+        _GS_SINCE_COMMAND='echo'
+        shift
+        ;;
       -h | --help)
-        echo "USAGE: $0 [-d|--diff | -l|--log | -t|--tig] [<upstream-branch>] [<feature-branch>]"
+        echo "USAGE: $0 [-d|--diff | -l|--log | -t|--tig| -p|--print] [<upstream-branch>] [<feature-branch>]"
         exit 0
         ;;
       --)
