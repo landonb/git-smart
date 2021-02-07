@@ -199,6 +199,10 @@ _git_safe () {
     # ~/.huskyrc later when it's run by husky-run.
     . "${HOME}/.huskyrc" --source
 
+    # You're running this single-threaded like, right.
+    # - Clean up should an earlier touchfile not have been removed.
+    [ -f "${USER_HUSKY_RC_SKIP_INDICATOR}" ] && /bin/rm "${USER_HUSKY_RC_SKIP_INDICATOR}"
+
     # There are 2 delete remote branch variants we can ignore on:
     #
     #   git push --delete/-d ...
@@ -218,6 +222,7 @@ _git_safe () {
         #  printf "%s\n" "Get out here and surrender before I get my expletives deleted."
         >&2 printf "%s\n" "Oh, expletive deleted."
         touch "${USER_HUSKY_RC_SKIP_INDICATOR}"
+        break
       fi
     done
     #
@@ -246,12 +251,27 @@ _git_safe () {
   fi
 
   if ! ${disallowed}; then
+    # MAYBE/2021-02-04: I wrote a pre-push that uses `ps -ocommand=` to
+    # fetch the parent process's arguments, so it can figure out whether
+    # to bypass hooks (because --delete) on its own. So it might be (maybe)
+    # a better idea to replace husky's .git/hooks/pre-push with that file,
+    # instead of dealing with (and maintaining) this overly complicated
+    # git-safe wrapper business.
     _git_husky_hooks_pre_push_touch_bypass "$@"
   fi
 
+  local exit_code=0
+
   if ! ${disallowed}; then
     HUSKY_SKIP_HOOKS=${skip_hooks} command git "$@"
+    exit_code=$?
+
+    # This function did not actually check if the current project even
+    # uses husky, so perhaps ~/.huskyrc never ran, so let us clean up.
+    [ -f "${USER_HUSKY_RC_SKIP_INDICATOR}" ] && /bin/rm "${USER_HUSKY_RC_SKIP_INDICATOR}"
   fi
+
+  return ${exit_code}
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
