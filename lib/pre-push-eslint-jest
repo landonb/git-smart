@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT
+
+# This pre-push hook stops the push if lint blathers or if jest fails.
+
+# USAGE: Place at .git/hooks/pre-push
+#          and ensure executable
+#        (or add a symlink to this file in git-smart).
+
+# ***
+
+# LEARN: Find more on hooks:
+#
+#          man 5 githooks
+
+# ***
+
+# SHARE: Modern Git lets us publish hooks in the repo without needing
+#        each developer to place them under .git/hooks after checkout.
+#        Instead, set config indicating where they live, e.g., if the
+#        hooks are stored under .githooks/ then call:
+#
+#               git config core.hooksPath .githooks
+#
+#        - Alternatively, make a task in your build tooling.
+#
+#          You could use the following in, e.g., package.json or Makefile:
+#
+#            - Modern Git:
+#
+#               git config core.hooksPath .githooks
+#
+#            - Older <2.9:
+#
+#               find .git/hooks -type l -exec rm {} \;
+#               find .githooks -type f -exec ln -sf ../../{} .git/hooks/ \;
+#
+# - A great suggestion courtesy:
+#
+#     https://www.viget.com/articles/two-ways-to-share-git-hooks-with-your-team/
+
+# ***
+
+# First, get the command arguments to check if --delete
+# option was specified, in which case do not run checks.
+# - We need this because Git passes, e.g., $1=remote and $2=remote-url,
+#   but does not indicate branch names, or whether --delete specified.
+PUSH_COMMAND="$(ps -ocommand= -p ${PPID})"
+
+# This regex checks for -d/--delete option,
+# including the old school :delete variant.
+WILL_DELETE_BRANCH='( \-d| \-\-delete| :)'
+
+ALLOW_FULL_FORCE_PUSH='( \-\-force)'
+
+# Run checks, and return nonzero if errors observed.
+# - Use -z to fail on not only ESLint errors, but also warnings (on any output).
+# - Use --bail to fail Jest on first failed test rather than wasting Dev's time.
+# - Note that Bash uses the result of the command (because it's the last one in
+#   this file) as the script's return value (aka the exit code; or $?).
+run_checks() {
+  if [[ ${PUSH_COMMAND} =~ ${WILL_DELETE_BRANCH} ]]; then
+    return 0
+  fi
+
+  # 2021-02-05: A little walk-around, for when you really --mean it.
+  if [[ ${PUSH_COMMAND} =~ ${ALLOW_FULL_FORCE_PUSH} ]]; then
+    echo "I'm going to allow this (skipping checks!)"
+    return 0
+  fi
+
+  echo "Running checks..."
+
+  local lint_errors="$(npx eslint '**/*.{js,jsx}')"
+  if [ -n "${lint_errors}" ]; then
+    >&2 echo "${lint_errors}"
+    >&2 echo "You‘ve got lint errors to fix first!"
+  elif ! npx jest --bail --no-coverage; then
+    >&2 echo "Looks like you‘ve broken more than my heart"
+  else
+    return 0
+  fi
+
+  return 1
+}
+
+run_checks
+
