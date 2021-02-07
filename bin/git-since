@@ -20,7 +20,7 @@
 #   with `--log` or simply `-l`. Or if you'd like to see the changes in
 #   tig, try `--tig` or `-t`.
 
-# USAGE: git since [{upstream-branch}] [{feature-branch}] [command]`
+# USAGE: git since [{upstream-ref}] [{feature-ref}] [command]`
 #
 # - Where command is one of: [--diff|-d|--log|-l|--tig|-t|--print]
 #
@@ -37,33 +37,42 @@
 git_since () {
   _git_since_command_parse_args "$@"
 
-  local oth_br=${_GS_SINCE_BRANCH_A:-release}
+  local upstream_ref=${_GS_SINCE_REF_A:-release}
 
-  local cur_br=$(git rev-parse --abbrev-ref HEAD)
-  local ref_br=${_GS_SINCE_BRANCH_B:-${cur_br}}
+  local active_branch=$(git rev-parse --abbrev-ref HEAD)
+  local feature_work=${_GS_SINCE_REF_B:-${active_branch}}
 
-  if [ -z "${oth_br}" ] || [ "${oth_br}" = "${ref_br}" ]; then
-    oth_br="$(git_tracking_branch)"
+  if [ -z "${upstream_ref}" ] || [ "${upstream_ref}" = "${feature_work}" ]; then
+    # Rather than compare against itself, compare against its remote counterpart.
+    upstream_ref="$(git_tracking_branch)"
   fi
 
-  if [ -z "${oth_br}" ]; then
+  if [ -z "${upstream_ref}" ]; then
+    # Use the remote tracking branch remote, or deduce from conventional
+    # hierarchy ('upstream', 'origin', 'github', etc.).
     local remote="$(git lookup-remote)"
     if [ -n "${remote}" ]; then
-      oth_br="${remote}/${oth_br}"
+      upstream_ref="${remote}/${upstream_ref}"
     fi
   fi
 
-  must_branch_exists "${oth_br}" "Upstream" || return $?
-  must_branch_exists "${ref_br}" "Feature" || return $?
+  # SPIKE/2021-02-05: What happens on ambiguous ref?
+  # - E.g., if 'release' branch and 'release' remote,
+  #   which one does git-diff, git-log, and tig use?
 
-  local common_ancestor=$(git merge-base ${ref_br} ${oth_br})
+  must_verify_ref "${upstream_ref}" "Reference" || return $?
+  must_verify_ref "${feature_work}" "Feature" || return $?
+
+  local common_ancestor=$(git merge-base ${feature_work} ${upstream_ref})
+
+  # >&2 echo "common_ancestor=${common_ancestor}"
 
   eval "${_GS_SINCE_COMMAND:-git diff} ${common_ancestor}..HEAD"
 }
 
 _git_since_command_parse_args () {
-  _GS_SINCE_BRANCH_A=""
-  _GS_SINCE_BRANCH_B=""
+  _GS_SINCE_REF_A=""
+  _GS_SINCE_REF_B=""
   _GS_SINCE_COMMAND=""
 
   while [ $# -gt 0 ]; do
@@ -85,7 +94,7 @@ _git_since_command_parse_args () {
         shift
         ;;
       -h | --help)
-        echo "USAGE: $0 [-d|--diff | -l|--log | -t|--tig| -p|--print] [<upstream-branch>] [<feature-branch>]"
+        echo "USAGE: $0 [-d|--diff | -l|--log | -t|--tig| -p|--print] [<upstream-ref>] [<feature-ref>]"
         exit 0
         ;;
       --)
@@ -93,47 +102,77 @@ _git_since_command_parse_args () {
         break
         ;;
       *)
-        _git_since_command_parse_branch_arg "$1"
+        _git_since_command_parse_ref_arg "$1"
         shift
         ;;
     esac
   done
 
   # In case short-circuited by '--', finish now.
-  for branch_name in "$@"; do
-    _git_since_command_parse_branch_arg "${branch_name}"
+  for ref_name in "$@"; do
+    _git_since_command_parse_ref_arg "${ref_name}"
   done
 }
 
-_git_since_command_parse_branch_arg () {
-  local branch_name="$1"
+_git_since_command_parse_ref_arg () {
+  local ref_name="$1"
 
-  if [ -z "${_GS_SINCE_BRANCH_A}" ]; then
-    _GS_SINCE_BRANCH_A="${branch_name}"
-  elif [ -z "${_GS_SINCE_BRANCH_B}" ]; then
-    _GS_SINCE_BRANCH_B="${branch_name}"
+  if [ -z "${_GS_SINCE_REF_A}" ]; then
+    _GS_SINCE_REF_A="${ref_name}"
+  elif [ -z "${_GS_SINCE_REF_B}" ]; then
+    _GS_SINCE_REF_B="${ref_name}"
   else
-    >&2 echo "WARNING: Ignoring extra parameter: ${branch_name}"
+    >&2 echo "WARNING: Ignoring extra parameter: ${ref_name}"
   fi
 }
 
-must_branch_exists () {
-  local branch="$1"
+must_verify_ref () {
+  local ref_name="$1"
   local friendly="$2"
 
-  git_branch_exists "${branch}" && return
+  git_is_valid_ref "${ref_name}" && return
 
-  >&2 echo "ERROR: ${friendly} branch not found: ${branch}"
+  >&2 echo "ERROR: ${friendly} reference not found: ${ref_name}"
   return 1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-git_branch_exists () {
-  local branch_name="$1"
+# 2021-02-05: I really don't remember why I was being so strict here...
+# - Maybe it was just to indicate *which* object is invalid, i.e.,
+#     git diff foo..bar
+#   would produce the error:
+#     fatal: ambiguous argument 'foo..bar':
+#       unknown revision or path not in the working tree.
+#   So at least this check lets us tell user which ref is invalid.
 
-  git show-ref --verify --quiet refs/heads/${branch_name} ||
-    git show-ref --verify --quiet refs/remotes/${branch_name}
+# We could check for specific refs by object type, e.g.,
+#
+#   git show-ref --verify --quiet refs/heads/${ref_name} ||
+#     git show-ref --verify --quiet refs/remotes/${ref_name} ||
+#     git show-ref --verify --quiet refs/tags/${ref_name}
+#
+# But we also want to allow SHA1 refs, so...:
+#
+# A few ideas to check for valid SHA1 object.
+#
+#   # Check that reference resolves to a commit.
+#   test "$(git cat-file -t "${ref_name}")" == commit
+#
+#   # Check that reference valid, printing on error only, e.g.,
+#   #   fatal: Not a valid object name {}
+#   git cat-file -e "${ref_name}^{commit}" > /dev/null
+#
+#   # Check valid ref, printing on success only (the resolved SHA1).
+#   [ -z "$(git rev-parse -q --verify "${ref_name}^{commit}")" ]
+#
+# https://stackoverflow.com/questions/18515488/
+#   how-to-check-if-the-commit-exists-in-a-git-repository-by-its-sha-1
+
+git_is_valid_ref () {
+  local ref_name="$1"
+
+  [ -n "$(git rev-parse --verify --quiet "${ref_name}^{commit}")" ]
 }
 
 git_tracking_branch () {
