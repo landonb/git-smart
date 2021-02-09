@@ -36,7 +36,7 @@
 #   don't want to get around using an alternative method, such as either
 #   removing or renaming the .git/hooks/pre-commit file to disable it,
 #   or using the HUSKY_SKIP_HOOKS=1 environ to disable hooks, if your
-#   project uses Husky; see below for more on these alternatives).
+#   project uses Husky. See below for more on these alternatives).
 
 # HOW IT WORKS:
 #
@@ -68,28 +68,10 @@
 #
 #         HUSKY_SKIP_HOOKS=1 cherry-pick ...
 #
-#   - This gitconfig does not address the cherry-pick issue.
-#
-#     - See instead the safe Git wrapper, and the Husky pre-hook:
-#
-#           git-smart/lib/git_safe.sh
-#           git-smart/lib/.huskyrc
-#
-#       - Essentially, the safe wrapper defines a shell function named
-#         `git` that preprocesses each Git command before calling the actual
-#         `git` executable. If the shell function detects the cherry-pick
-#         command, it'll call Git with HUSKY_SKIP_HOOKS=1.
-#
-#       - An alternative solution might be to use dotenv and a `.envrc`
-#         file in each project where you want to set HUSKY_SKIP_HOOKS=1.
-#         Except then you'd disable all hooks for all Git commands, and
-#         maybe you don't want to do that.
-#
-#       - Another alternative is to avoid the cherry-pick command and to
-#         use the rebase command to pick instead. (E.g., you could run
-#         `git rebase -i --no-verify HEAD` and then add the commit(s)
-#         you want to bring into the branch using the interactive rebase
-#         file.)
+#     - Another alternative is to avoid the cherry-pick command and to use the
+#       rebase command to pick instead. (E.g., you can add the commit(s) that
+#       you want to bring into the branch using an interactive rebase instead,
+#       e.g., run `git rebase -i --no-verify HEAD` and then add your picks.
 
 [alias]
 
