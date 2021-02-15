@@ -6,9 +6,12 @@
 
 # Creates a fixup commit and then rebases it where it needs to be.
 #
-# Similar to the following individual steps:
+# Assuming you've added the files you want fixed-up, e.g.,
 #
 #   git add {some-changes}
+#
+# Then running `git fup {commit}` is similar to the following steps:
+#
 #   git commit --no-verify --fixup={commit}
 #   git add -A && git ci -m WIP
 #   git rebase -i --autosquash {commit}^
