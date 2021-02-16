@@ -318,9 +318,6 @@
 # they are not any, I'll git-fetch and then git-merge deliberately. If
 # I ever git-pull, I'm anticipating it'll be like `git merge --ff-only`.
 
-[pull]
-  ff = only
-
 # #######################################################################
 # ***              Ever-expanding Git Aliases Collection              ***
 # #######################################################################
@@ -983,6 +980,8 @@
   # Use `git co` instead of `git checkout` because the latter is too much typing.
   co = checkout
 
+  # -------
+
   # Use `git po` to push to the most commonly pushed remote (probably), "origin".
   # And use `git pu` to push to another commonly used remote name, "upstream".
   po = push origin HEAD
@@ -993,11 +992,15 @@
   pp = push proving HEAD
   pr = push release HEAD
 
+  # -------
+
   # Use `git re` to show the URL of each remote after its name.
   # 2020-03-11: Check out the new `bin/git-re` tidy remote reporter!
   # - LATER: Remove this alias. For now, telling YOU where to look.
   #  re = remote -v
   r = re
+
+  # -------
 
   # Run `git sup` periodically (or maybe after every git-pull) to process
   # any changes to the project submodules).
@@ -1085,6 +1088,15 @@
   # 2020-07-01: I never use this command. Let's disable it.
   # - (I'll instead use, e.g., `git pp -u`, if I have to.)
   #  pup = push --set-upstream origin HEAD
+
+# ***
+
+# 2021-02-01: See recently added `git p` alias (--rebase --autostash).
+# - Because I *only* rebase (I don't like merge commits) this setting
+#   ensures that pull fails unless if it can --ff-only.
+
+[pull]
+  ff = only
 
 # #######################################################################
 # ***              Redoing Commits and Rewriting History              ***
