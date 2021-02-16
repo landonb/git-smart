@@ -245,7 +245,7 @@
   untracked = red
 
 # #######################################################################
-# ***                          diff N merge                           ***
+# ***                              diff                               ***
 # #######################################################################
 
 [diff]
@@ -299,24 +299,313 @@
 [diff "zip"]
   textconv = unzip -v
 
-# Choose which merge tool to use by default.
-# Options:
-#   tool = meld
-#   tool = vimdiff
-#   tool = diffconflicts
+# #######################################################################
+# ***                             merge                               ***
+# #######################################################################
+
+# *** VIM-MERGETOOL
+
+# (Skip this section unless you want to know all about vim-mergetool!)
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# 2021-02-15: I tried using git-mergetool years ago, but it never stuck.
+#
+# - I didn't like that the default view (whether Vimdiff or meld) shows
+#   you three files, but that the automatically resolved hunks still show
+#   up in the diff (which makes finding and resolving the unresolved
+#   conflicts more difficult, and less obvious). So it felt like I was
+#   doing *more* work than if I just edited the conflict file directly
+#   (and removed the <<< === >>> conflict delimiters manually, too).
+#
+#   - E.g., you'll see the "ours" version (mainline branch) on the left,
+#     and the "theirs" version on the right (e.g., your feature branch),
+#     and the merged result in the middle.
+#
+#   - But, unfortunately, the merged result highlights hunks for conflicts
+#     that Git has already resolved, because those hunks still differ from
+#     either or both the files on the left and right. That's just how such
+#     a three-way works out!
+#
+#   - To see for yourself: `git mergetool --tool=meld`.
+#
+# But today I finally dug a little deeper, and I found the perfect solution!
+#
+# - Check out vim-mergetool, which solves the problem by not bothering with
+#   the $LOCAL or $REMOTE versions. Rather, it uses the conflict file, which
+#   git-rebase leaves for you to fix, and makes a copy. Then, it removes the
+#   "their" hunks from the first file, and removes the "our" hunks from the
+#   second, copied, file; and also the <<< === >>> delimiters from both.
+#   Finally, it shows you the diff between those two files, with the first,
+#   editable "ours" file on the left, and the unmodifiable "theirs" version
+#   on the right. How simple is that, and how perfect! You only see the
+#   unresolved conflicts, and you don't have to bother with the delimiters,
+#   either.
+#
+# - See next for the vim-mergetool config, followed by discussion of the
+#   other mergetools, and finally, after that, more about (a lot more about)
+#   vim-mergetool usage (though not as long as the vim-mergetool README! =⟩
+#   (as if I'm one to talk!)).
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# You'll need vim-mergetool for the following settings:
+#
+#   https://github.com/samoshkin/vim-mergetool
+#
+# Oh, and you'll need to use Vim. And I realize this ~/.gitconfig
+# is generally editor-agnostic, but not for this setting!
+
+# PRIMARY USAGE: `git mergetool`
 
 [merge]
-  tool = meld
+  tool = vim_mergetool
+  conflictstyle = diff3
 
-# `git mergetool` makes intermediate *.orig files but
-# doesn't delete them unless we tell it to delete them.
+[mergetool "vim_mergetool"]
+  cmd = vim -f -c "MergetoolStart" "$MERGED" "$BASE" "$LOCAL" "$REMOTE"
+  # "When trustExitCode = false, checks if MERGED file was modified.
+  #  When trustExitCode = true, checks exit code of merge tool process."
+  trustExitCode = true
 
 [mergetool]
+  # Tell `git mergetool` to remove its intermediate files when finished.
   keepBackup = false
 
-# (lb): I rarely use pull. If I forsee conflicts, or am not positive
-# they are not any, I'll git-fetch and then git-merge deliberately. If
-# I ever git-pull, I'm anticipating it'll be like `git merge --ff-only`.
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# *** Other mergetool tools.
+
+# Some other merge tools that I demoed:
+#
+#   [merge]
+#     tool = meld
+#
+#   [merge]
+#     tool = vimdiff
+#     conflictstyle = diff3
+#
+#   # https://github.com/tpope/vim-fugitive
+#   [merge]
+#     tool = fugitive
+#     conflictstyle = merge
+#
+#   # "A better vimdiff mergetool for Git" circa 2012.
+#   #  See: git-smart/bin/diffconflicts
+#   [merge]
+#     tool = diffconflicts
+
+# There are two configurations that make the most sense with meld:
+#   [mergetool "meld"]
+#     cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+#     cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+# The second one, using $MERGED, is nice because it contains resolved
+# conflicts that Git could figure out automatically. But that resolved
+# code still diffs against either the $LOCAL or $REMOTE. As such, it's
+# not exactly obvious when you're done, e.g., you won't end up with all
+# three files in meld looking the same and not having any conflicts.
+# Instead, you'll have to manually inspect all the diffs, decide that
+# you're done and there's nothing more to edit, and then save and quit.
+
+# The vimdiff tool gives a similar experience to meld in terms of what you
+# see, and needing to mentally parse conflicts Git has already resolved.
+#   [mergetool "vimdiff"]
+#     cmd = vimdiff --noplugin "$LOCAL" "$MERGED" "$REMOTE"
+
+# vim-fugitive can also mergetool (what can't it do! love that plug). But
+# it suffers from same issues as `meld` and `vimdiff`, and shows you the
+# automatically resolved conflicts mixed in with those that are unresolved.
+# - See this post for more help:
+#     https://vi.stackexchange.com/questions/3985/git-mergetool-vimdiff-command
+#   The basic suggestion is to call Gdiffsplit when Vim starts, e.g.,:
+#     cmd = vim "+Gdiffsplit" $MERGED
+#   but I like also calling `Git mergetool`.
+# Consider:
+#   [mergetool "fugitive"]
+#     cmd = vim "+Gdiffsplit" "+'Git mergetool'" $MERGED
+# - Hints:
+#   - The + is like -c, and runs the command.
+#   - The `Gdiff[split]` (from vim-fugitive) starts the diff.
+#   - The `Git mergetool` (from vim-fugitive) populates quickfix with conflicts.
+#   - You'll see all the conflicts, including what Git has already resolved.
+#   - You can navigate with vim-unimpaired's `[Q` to go to first quickfix item.
+#     (I expected `[q` to also work, but alas, not for me (though maybe my fault)).
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# *** vim-mergetool in-depth.
+
+# *** STARTING MERGETOOL
+#
+# If you've rebased and have conflicts, you can start from a terminal:
+#
+#     git mergetool
+#
+# Alternatively, open a file that has conflicts and run vim-mergetool:
+#
+#     :MergetoolStart
+
+# *** RUNTIME USAGE
+#
+# - You can still run `:Git mergetool` (from vim-fugitive) if you want
+#   to see conflicts in quickfix, but `:MergetoolStart` already folds
+#   the file and shows only the remaining, unresolved conflicts.
+#
+# - You can use [c and ]c to jump between conflicts.
+#
+# - If you run `:Git mergetool`, [Q and ]Q work (and maybe [q and ]q ?).
+#
+# - The right-hand side is the "theirs" commit, aka your feature branch.
+#
+# - The left-hand side is the "ours" commit, aka the mainline (e.g., if
+#   you had called `git rebase upstream/develop`, then 'upstream/develop').
+#
+# - The right-hand side is read-only, so of the two built-in Vimdiff
+#   commands, `:diffget` and `:diffput`, you can only `:diffget` into
+#   the left-hand window, where has the focus to start.
+#
+#   - Type `do` to get the diff chunk from the right-hand side. (Think
+#     mnemonic *diff obtain* (because `dg` is used by another command.)
+#
+#   - If you happen to move the cursor to the right-hand side,
+#     use `dp` to *put* a diff chunk into the left-hand buffer.
+
+# *** FINISHING MERGETOOL
+
+# - You can `:MergetoolStop` when finished, and you'll be prompted
+#   to save changes or not. Answer yes and mergetool will accept
+#   your changes and stage the file. Or answer no and mergetool
+#   will revert the file, so that it includes the original
+#   unresolved changes (both sides' hunks and hunk delimiters).
+#
+#   If you just want to save and have the file staged, you can
+#   skip `:MergetoolStop` and just write the left-hand file
+#   and quit, and mergetool will silently process the file.
+#
+# - If you realize you made a mistake after saving or otherwise
+#   telling mergetool to accept the changes, you can revert the
+#   file using the checkout command, so you can merge again. E.g.,
+#
+#     git checkout -m -- {file}
+#
+#   The -m option will unstage the file and revert it to the
+#   unresolved state with the unresolved hunks. (Or you might
+#   be able to `git rebase --abort` and start the rebase over,
+#   but `git co -m {file}` is more to the point.)
+
+# *** HOW MERGETOOL PREPS
+
+# - Note that the left-hand buffer is the original source file (that will
+#   be added to staging) and is not a copy like the right-hand buffer. So
+#   once :MergetoolStart has started and you're looking at the diff, the
+#   file is already changed.
+#
+#   - As such, if you undo (e.g., press Ctrl-z) in the original file
+#     buffer, you will revert the changes that vim-mergetool made, and
+#     the file will be its original self, with both the "our" and "theirs"
+#     hunks, and with the <<< === >>> delimiters. Just like Vim left it
+#     after the rebase.
+#
+#   - But if you start the merge, then save and exit immediately without
+#     editing, you'll effectively have accepted all the "our" changes,
+#     and ignored all the "theirs".
+#
+#   - Or, you can use `:MergetoolStop`, which will ask if the edit was a
+#     success, and you can answer "no" to revert the file, or "yes" to
+#     add the file to staging (and then you can continue the rebase,
+#     e.g., run `git rebase --continue`, perhaps).
+
+# *** FOLDING REMINDER
+
+# - Be aware that you might want to expand folds (zR) while diffing,
+#   especially after editing, as changes you make might be clipped
+#   or hidden by a fold.
+
+# *** QUITING REMINDER
+
+# - You can quit quickly by saving the file, and then using `:qa`
+#   to close all windows and quit Vim.
+#
+#   - Or, to not save, `:qa!` quits all windows and Vim, NQA.
+#
+#     You can also use `ZQ` to quickly close and quit each window
+#     individually.
+#
+#   (The author reminds themselves this because they mostly use
+#    non-standard <Alt-f e> and <Alt-f x> mappings to close all
+#    files and quit Vim (remnants of my Windows days, what can
+#    I say). And while I use `:q` or `ZZ` aplenty, I cannot say
+#    the same for `:qa` or `ZQ`.)
+
+# *** MERGING *BOTH* HUNKS
+
+# - Note that Vim has not plumbed an "accept both ours and theirs"
+#   option. I guess because it's rare? Though I think I've combined
+#   quite a few diff hunks in my devtime. Seems like it'd be useful.
+#
+#   - To combine hunks, there are two approaches I find the fastest:
+#
+#     - One option is to copy the left hand hunk, and then obtain the
+#       right-hand hunk (which overwrites the left-side), and paste.
+#
+#     - Another option is to use undo to revert the vim-mergetool
+#       edits to the left-hand buffer, and then edit manually,
+#       possibly using \dx (custom mapping; or see the regex below)
+#       to remove the <<< === >>>s.
+#
+#   - Approach #1: Yank, Obtain, Put:
+#
+#     - Manually copy the hunk on the left, then press `do` to
+#       'obtain' the other hunk. Then paste what you had just
+#       copied. This will also have removed the <<< === >>>
+#       delimiters.
+#
+#       - To copy, probably count lines, then with cursor on the
+#         first line (in any column), type number of lines minus
+#         one (because the first line is inherently included), press
+#         `y`, and then either Down arrow or `j`. E.g., if the "ours"
+#         hunk is 5 lines, press `4yj`, then `do`, then `p` to put
+#         the yanked hunk.
+#
+#   - Approach #2: Manually Edit:
+#
+#     - You could use the undo trick after starting the vim-mergetool
+#       to bring back the conflict hunks. But it's probably easier to
+#       just edit the file normally, and to use a regex substitute to
+#       find conflicts to edit and to remove the <<< === >>> delimiters.
+#
+#     - Using the following :global command removes all conflict
+#       delimiters (the :g will run `d` on all matching lines):
+#
+#         :g/^<\{7}\|^|\{7}\|^=\{7}\|^>\{7}/d
+#
+#       - Thanks to tecfu for that command!:
+#         https://github.com/tpope/vim-fugitive/issues/1022
+#
+#     - Alternatively, you can run the substitute command
+#       to the same effect:
+#
+#         :.,$s/^\(<\{7}\|^|\{7}\|^=\{7}\|^>\{7}\).*\n//g
+#
+#     - Or, if you want to be prompted for each match, run:
+#
+#         :.,$s/^\(<\{7}\|^|\{7}\|^=\{7}\|^>\{7}\).*\n//gc
+#
+#     - I like the confirmational substitute command (the last
+#       one) so much that I made a home for it at `\dx`, e.g.,:
+#
+#         autocmd DiffUpdated * if &diff | nnoremap <leader>dx
+#           \ :.,$s/^\(<\{7}\\|^\|\{7}\\|^=\{7}\\|^>\{7}\).*\n//gc<CR>
+#
+#       - Then, e.g., if I started :MergetoolStart but see that I need
+#         to manually combine hunks, I could Ctrl-z to undo the initial
+#         merge step, and then I'd press \dx to jump to and remove each
+#         set of hunk delimiters, editing and resolving each pair of
+#         conflicting hunks along the way.
+
+# - And that's `git mergetool` using `vim-mergetool` explained in 300 lines!
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # #######################################################################
 # ***              Ever-expanding Git Aliases Collection              ***
