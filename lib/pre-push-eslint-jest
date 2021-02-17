@@ -72,19 +72,28 @@ run_checks() {
     return 0
   fi
 
+  # FTREQ/2021-02-16 10:10: Bail early if upstream at same commit.
+
   echo "Running checks..."
+
+  if [ -n "$(git status --porcelain=v1)" ]; then
+    >&2 echo "You‘ve got uncommitted changes!"
+    return 1
+  fi
 
   local lint_errors="$(npx eslint '**/*.{js,jsx}')"
   if [ -n "${lint_errors}" ]; then
     >&2 echo "${lint_errors}"
     >&2 echo "You‘ve got lint errors to fix first!"
-  elif ! npx jest --bail --no-coverage; then
-    >&2 echo "Looks like you‘ve broken more than my heart"
-  else
-    return 0
+    return 1
   fi
 
-  return 1
+  if ! npx jest --bail --no-coverage; then
+    >&2 echo "Looks like you‘ve broken more than my heart"
+    return 1
+  fi
+
+  return 0
 }
 
 run_checks
