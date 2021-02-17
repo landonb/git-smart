@@ -1267,6 +1267,18 @@
 
 [alias]
   # Use `git co` instead of `git checkout` because the latter is too much typing.
+  # - Note that git-checkout completion includes remote branch names in
+  #   completion, which could be annoying, especially if there are lots
+  #   of remote branches, and if your convention is to prefix the upstream
+  #   remote name, anyway. (E.g., I always checkout a remote branch using
+  #   the command `git co -b some-branch upstream/some-branch`, and would
+  #   never use the shorthand, `git co some-branch`.)
+  #   - Consider using a Bash environment setting to disable this behavior:
+  #       GIT_COMPLETION_CHECKOUT_NO_GUESS=1
+  #   - You can also run `git co --no-guess` (or `git switch --no-guess`),
+  #     but that option is not honored via aliasing. (So if you want to
+  #     always disable this behavior for this alias, you must use the
+  #     Bash environment approach.)
   co = checkout
 
   # -------
