@@ -1019,8 +1019,13 @@
   #
   #   (lb): Used 40% of the time (type message at prompt).
   cv = commit -v
+  # 2021-02-21: I'm adding this... out of curiosity; and cynically.
+  # I predict that I'll remove it the next time I read this comment
+  # and realize I had never used it. (See next comment re: git-ce.)
+  civ = commit -v
   # 2020-11-24: `git cv` not sticking, let's give `git ce` a whirl,
   # as in, commit message using EDITOR.
+  # 2021-02-19: Heh? I've only been using `git cv`, never `git ce`...
   ce = commit --verbose
 
   # ***
