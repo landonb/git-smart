@@ -138,7 +138,7 @@ git_rebase_buble_commit_noninteractive () {
     git rebase -i ${ci_before}
 }
 
-# ***
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
   git-rebase-bubble-commit "${@}"

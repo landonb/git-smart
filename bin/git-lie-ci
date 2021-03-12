@@ -41,6 +41,8 @@ git-ci-fakedate () {
   export GIT_AUTHOR_DATE=
 }
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 main () {
   git-ci-fakedate "$@"
 }

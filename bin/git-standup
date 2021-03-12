@@ -31,6 +31,8 @@ git_standup () {
   git log --since "$since" --oneline --branches=* --author="$AUTHOR"
 }
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 main () {
   git_standup "$@"
 }

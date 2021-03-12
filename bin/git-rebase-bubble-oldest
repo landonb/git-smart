@@ -21,6 +21,8 @@ git_rebase_bubble_oldest () {
     1" $1
 }
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 main () {
   git_rebase_bubble_oldest
 }
