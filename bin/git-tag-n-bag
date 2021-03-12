@@ -35,14 +35,20 @@
 
 # Some ideas for the prefix:
 # - Use the prefix to group all branches that you archive with the t-bag command.
-# - Consider using a prefix that starts with a letter later in the alphabet
-#   if you want the tags to appear alphabetically after whatever other tags
-#   you have. Or do they opposite if you want these tags to be listed first.
+# - Tags are usually alphabetized when show, so consider how the prefix affects
+#   ordering. E.g., you could choose a prefix that starts with a letter later in
+#   the alphabet if you want the tags to appear alphabetically after most other
+#   tags you have. Or do they opposite if you want these tags to be listed first.
 # - You cannot start the name with a period.
 # - The underscore character is alphabetized before alpha characters.
 # - Unicode characters are alphabetized after alpha characters (i.e.,
 #   characters are alphabetized using their numeric character codes
 #   to sort).
+# - You might want to avoid using a number or 'v' to start the prefix, to avoid
+#   the tag-n-bag tags being grouped alongide similarly-prefixed version tags.
+# - The author prefers to use a Unicode character, as you'll almost never need to
+#   type one of the bagged tag names, and it'll keep the bag tags grouped after
+#   other, more normally named tags (i.e., those tag names you can easily type).
 # - Some examples:
 #     [ -z ${TAGNBAG_PREFIX+x} ] && TAGNBAG_PREFIX="retired${TAGNBAG_SEP}"
 #     [ -z ${TAGNBAG_PREFIX+x} ] && TAGNBAG_PREFIX="🗄${TAGNBAG_SEP}"
