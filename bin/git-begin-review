@@ -244,10 +244,18 @@ git_format_review_branch_name () {
     # email will be as consistent as an author's GitHub login name.
     if ${GITSMART_REVIEW_FALLBACK_NAME:-false}; then
       # %ae is author email from commit.
-      author="$(git --no-pager log -1 --pretty=format:'%ae' "${branch_ref}" | sed -E 's/@.*//')"
+      author="$(git --no-pager log -1 --pretty=format:'%ae' "${branch_ref}")"
+      # Strip the @domain.
+      author="$(echo "${author}" | sed -E 's/@.*//')"
     else
       # %an is author name from commit.
-      author="$(git --no-pager log -1 --pretty=format:'%an' "${branch_ref}" | tr '[:space:]' '-')"
+      author="$(git --no-pager log -1 --pretty=format:'%an' "${branch_ref}")"
+      # This field is free-form, but let's try to normalize it a little, so that
+      # double-clicking a branch name selects the whole branch name (i.e., let's
+      # replace non-word characters).
+      # - Normalize "Last, First" → "Last-First".
+      # - Also replaces any sequence of spaces with a dash.
+      author="$(echo "${author}" | sed 's/[,[:space:]]\+/-/')"
     fi
   fi
 
