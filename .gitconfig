@@ -833,7 +833,17 @@
   #     character does the word 'log' start with? It's an 'l'! Finally, I
   #     think I will use this option frequently (I've already started),
   #     so let's go ahead and use up a single character alias! Worth it!!)
-  l = !git --no-pager log -1
+  #  l = !git --no-pager log -1
+  l = "! f() { git --no-pager log -${1:-1}; }; f"
+  l1 = "! f() { git --no-pager log -1; }; f"
+  l2 = "! f() { git --no-pager log -2; }; f"
+  l3 = "! f() { git --no-pager log -3; }; f"
+  l4 = "! f() { git --no-pager log -4; }; f"
+  l5 = "! f() { git --no-pager log -5; }; f"
+  l6 = "! f() { git --no-pager log -6; }; f"
+  l7 = "! f() { git --no-pager log -7; }; f"
+  l8 = "! f() { git --no-pager log -8; }; f"
+  l9 = "! f() { git --no-pager log -9; }; f"
 
   # Git command to show tag creation dates.
   # - Optional: Add --graph to see branching lines. E.g.,
