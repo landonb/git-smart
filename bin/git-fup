@@ -36,7 +36,7 @@ git_fixup_and_rebase () {
     pop_after=true
     # Aka `git wip`
     git add -A
-    git commit -m WIP
+    git commit --no-verify -m WIP
   fi
 
   # Have the interactive rebase sequence editor complete automatically
