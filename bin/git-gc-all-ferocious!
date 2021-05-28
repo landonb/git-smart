@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Destructively compacts a Git repo — Removes unreferenced blobs.
+#
+# - Courtesy Sam Watkins et al:
+#
+#   https://stackoverflow.com/a/14729486
+
+# USAGE:
+#
+# - You'll probably want to make a copy of the project first!
+#
+# - Then it's Easy peasy:
+#
+#     git gc-all-ferocious!
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_gc_all_ferocious () {
+  set -e
+
+  confirm_project () {
+    command -v realpath2 >/dev/null 2>&1 || (
+      echo "Missing dependency: \`realpath\`" && return 1
+    )
+
+    . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+
+    git_insist_git_repo
+  }
+
+  confirm_command () {
+    printf '%s' "Are you absolutely sure? [y/n] "
+
+    read yorn
+
+    if [ "${yorn#y}" = "${yorn}" ] && [ "${yorn#Y}" = "${yorn}" ]; then
+      printf '%s\n' "I was worried there for a sec."
+
+      exit 1
+    fi
+  }
+
+  git_remove_remote_refs () {
+    # SAVVY: I like this subshell hack to avoid needing to cd out again.
+    #        (I need to remember to pull this trick out of my Bash hat.)
+    #        Thanks to:
+    #          https://github.com/jbq/Dotfiles/blob/master/bin/git-gc-all-ferocious
+    (
+      cd .git
+      /bin/rm -rf refs/remotes/ refs/original/ *_HEAD logs/
+    )
+  }
+
+  git_delete_object_refs () {
+    git for-each-ref --format="%(refname)" refs/original/ \
+      | xargs -n1 --no-run-if-empty git update-ref -d
+  }
+
+  git_purge_object_blobs () {
+    git \
+      -c gc.reflogExpire=0 \
+      -c gc.reflogExpireUnreachable=0 \
+      -c gc.rerereresolved=0 \
+      -c gc.rerereunresolved=0 \
+      -c gc.pruneExpire=now \
+      gc "$@"
+  }
+
+  # Verify .git/.
+  confirm_project
+  # Ask for conf.
+  confirm_command
+  # Purge, purge!
+  git_remove_remote_refs
+  git_delete_object_refs
+  git_purge_object_blobs "$@"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_gc_all_ferocious "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
