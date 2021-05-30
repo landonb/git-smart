@@ -1164,7 +1164,7 @@
   # is not as useful/potentially confusing.
   dc = !git --no-pager diff --cached
   # `dcc` is like `dc`, except pages.
-  # HINT/2021-01-30: (lb): I prefer a Bash `dcc` alias I setup to do the same.
+  # HINT/2021-01-30: (lb): I prefer a Bash `dcc` alias I setup that does the same.
   dcc = !git diff --cached
 
   # Use `git dd` to dump the diff to the terminal, bypassing the pager.
@@ -1176,10 +1176,11 @@
   #   Bash alias to my user environment
   #     # <somewhere deep inside my .bashrc>
   #     alias dff='git diff'
+  #   But here's `git df` if you want it dumped to the terminal, not paged.
   df = !git --no-pager diff
-  # - Because I've got `dff` aliased from Bash, I have same
-  #   aliased from git, so I can wire my brain both ways.
-  # HINT/2021-01-30: (lb): I prefer a Bash `dff` alias I setup to do the same.
+  # - This `git dff` is here for parity with a Bash `dff` alias I use,
+  #   in the off chance I type it the long way.
+  # HINT/2021-01-30: (lb): I prefer a Bash `dff` alias I setup that does the same.
   dff = diff
 
 # #######################################################################
@@ -1345,6 +1346,8 @@
   # Run `git sup` periodically (or maybe after every git-pull) to process
   # any changes to the project submodules).
   sup = submodule update --init --remote
+
+  # -------
 
   # 2021-02-01: Only took 10+ years to figure this one out! (And now I can
   # stop running `git fetch {upstream} && git rebase {upstream}/{branch}`!)
