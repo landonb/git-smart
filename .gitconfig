@@ -1057,6 +1057,18 @@
   # - Note this other way to do the same:
   #     commit --amend --reuse-message=HEAD
 
+  # Here's a clever way to change the last commit's author, courtesy:
+  #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig
+  # (although I added argument verification).
+  # *Credit an author on the latest commit*
+  credit = "! f() { \
+    true \
+    && [ -n \"$1\" ] \
+    && [ -n \"$2\" ] \
+    && git commit --amend --author \"$1 <$2>\" -C HEAD \
+    || echo \"USAGE: git credit <name> <email>\"; \
+  }; f"
+
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
 # #######################################################################
