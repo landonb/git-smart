@@ -1052,7 +1052,10 @@
 
   cim = commit --amend
 
+  # Amend the staged changes to the latest commit.
   cin = commit --amend --no-edit
+  # - Note this other way to do the same:
+  #     commit --amend --reuse-message=HEAD
 
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
