@@ -1115,6 +1115,15 @@
   #       can-i-get-a-list-of-files-marked-assume-unchanged
   ignored = !git ls-files -v | grep "^[[:lower:]]"
 
+  # From Marius Gedminas, a command to see files that are .gitignore'd,
+  # but I have git-ignored showing --assume-unchanged files, so I guess
+  # I'll call this git-excluded.
+  #   https://github.com/mgedmin/dotfiles/blob/master/gitconfig
+  # Note: This command shows every file. For a more concise report
+  # that only shows excluded paths (and not the files therein), try:
+  #   git status --ignored
+  excluded = ls-files --others -i --exclude-standard
+
 # #######################################################################
 # ***                      Show File Alias(es)                        ***
 # #######################################################################
