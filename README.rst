@@ -90,3 +90,8 @@ RELATED
    `https://github.com/landonb/git-my-merge-status#🌵
    <https://github.com/landonb/git-my-merge-status#🌵>`__
 
+- Awesome suite of powerful Git commands:
+
+  `https://github.com/tj/git-extras
+  <https://github.com/tj/git-extras>`__
+
