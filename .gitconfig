@@ -1062,6 +1062,10 @@
 
   cim = commit --amend
 
+  # Like `git cim`, but leave staged changes staged.
+  # https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L167-L168
+  reword = commit --amend --only -v
+
   # Amend the staged changes to the latest commit.
   cin = commit --amend --no-edit
   # - Note this other way to do the same:
