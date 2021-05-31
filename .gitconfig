@@ -788,6 +788,16 @@
   # - git-gone is inherently aliased because found on PATH.
   #    gone = !${GITSMART_BIN:-${HOME}/.local/bin}/git-gone \"$@\"
 
+  # -------
+
+  # Upstream branch name. From:
+  #   https://gist.github.com/pksunkara/988716#file-config-L86
+  bu = !git rev-parse --abbrev-ref --symbolic-full-name "@{u}"
+  # Number of commits ahead or behind upstream branch. From:
+  #   https://gist.github.com/pksunkara/988716#file-config-L260-L261
+  ahead = !git rev-list --right-only --count $(git bu)...HEAD
+  behind = !git rev-list --left-only --count $(git bu)...HEAD
+
 # #######################################################################
 # ***                         Logging Aliases                         ***
 # #######################################################################
