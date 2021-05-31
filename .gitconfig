@@ -1625,3 +1625,11 @@
   #
   #  templateDir = ~/.config/git/template/
 
+# #######################################################################
+# ***                     Interactive Rebase Tool                     ***
+# #######################################################################
+
+[sequence]
+  # https://github.com/MitMaro/git-interactive-rebase-tool
+  editor = interactive-rebase-tool
+
