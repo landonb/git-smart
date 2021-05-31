@@ -726,6 +726,7 @@
   # the branch label I use in private repositories I don't publish), and not
   # the current branch, either.
   #   https://gist.github.com/jantimon/5b9fd9330f38d076a374c03fcbb788e1
+  # (jantimon/{} is technically not licensed: No license info.)
   cleanup = "! f () { \
     local tracking_br_rem tracking_remote; \
     tracking_br_rem=$(git rev-parse --abbrev-ref --symbolic-full-name @{u}); \
@@ -792,6 +793,7 @@
 
   # Upstream branch name. From:
   #   https://gist.github.com/pksunkara/988716#file-config-L86
+  # (pksunkara/988716 is technically not licensed: No license info.)
   bu = !git rev-parse --abbrev-ref --symbolic-full-name "@{u}"
   # Number of commits ahead or behind upstream branch. From:
   #   https://gist.github.com/pksunkara/988716#file-config-L260-L261
@@ -1069,6 +1071,7 @@
 
   # Like `git cim`, but leave staged changes staged.
   # https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L167-L168
+  # (https://github.com/mgedmin/dotfiles is technically not licensed: No license file.)
   reword = commit --amend --only -v
 
   # Amend the staged changes to the latest commit.
@@ -1079,6 +1082,7 @@
   # Here's a clever way to change the last commit's author, courtesy:
   #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig
   # (although I added argument verification).
+  # (https://github.com/jessfraz/dotfiles has a license file! It's MIT.)
   # *Credit an author on the latest commit*
   credit = "! f() { \
     true \
@@ -1204,6 +1208,7 @@
 
   # Show "unreleased" changes, i.e., changes since the most recent release tag.
   # Inspired by: https://gist.github.com/sethvargo/d10a81f219f6469889269af2076b4d39
+  # (sethvargo/{} is technically not licensed: No license info.)
   # See also (sans fetch): https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L123-L124
   unreleased = "!git fetch --tags && git diff $(git latest-version)"
   # *show commits after the last release*
