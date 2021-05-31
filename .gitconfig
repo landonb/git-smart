@@ -1219,6 +1219,15 @@
   #  (default: HISTORY.rst) / used by other aliases such as 'git unreleased-changelog'*
   changelog-filename = "!f() { git config alias.changelog.filename \"$@\" || echo HISTORY.rst; }; f"
 
+  # From: https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L232-L235
+  # *show me a diff of all the changes made on this branch (useful after git pr or git mr)*
+  # *(I do not understand why diff needs the third dot and log absolutely cannot accept the third dot)*
+  branch-diff = !git diff $(git main-branch)@{u}...
+  branch-log = !git log $(git main-branch)@{u}..
+  # From: https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L192-L194
+  # *git main-branch [name] -- get or set the name of the default branch (usually ['release'])*
+  main-branch = "!f() { git config alias.main-branch.name \"$@\" || echo release; }; f"
+
 # #######################################################################
 # ***                     Undo and Undodo Commits                     ***
 # #######################################################################
