@@ -1399,6 +1399,13 @@
   #
   p = pull --rebase --autostash
 
+  # See also related option:
+  #
+  #   git config --global branch.autosetuprebase always
+  #
+  # which configures each new branch to automatically run rebase on
+  # pull, rather than merge. (But I still like the `git p` alias.)
+
   # -------
 
   # Use `git bump` to quickly run a common rebase operation.
