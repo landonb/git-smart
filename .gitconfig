@@ -1525,9 +1525,28 @@
 [alias]
   # Empirically speaking.
   whoami = config user.email
+  # To include the name, from https://github.com/mgedmin/dotfiles/blob/master/gitconfig:
+  #   whoami = !git var GIT_COMMITTER_IDENT | sed 's/ [0-9]\\+ [-+0-9]\\+$//'
+  # Or even, from https://gist.github.com/pksunkara/988716#file-config-L257:
+  whoami2 = !sh -c 'git --no-pager log -i -1 --author=\"$1\" --pretty=\"format:%an <%ae>%n\"' -
 
   # SHA of the very first commit.
   first-commit = rev-list --max-parents=0 HEAD
+
+  # https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L243-L244
+  # *show current commit SHA; try also*:
+  #   git sha --short
+  #   git sha [--short] somebranch
+  sha = "!f() { \
+    rev=HEAD; \
+    for a; do \
+      case \"$a\" in \
+        -*) ;; \
+        *) rev=;; \
+      esac; \
+    done; \
+    git rev-parse \"$@\" $rev; \
+  }; f"
 
 # #######################################################################
 # ***                  Your Private .gitconfig.local                  ***
