@@ -11,6 +11,10 @@
 
 # USAGE: `git open [{remote}] [{PR-number}]`
 
+# MAYBE: For handling Windows PowerShell, see this similar Git command:
+#
+#   https://github.com/tj/git-extras/blob/master/bin/git-browse
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 git_open () {
