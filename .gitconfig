@@ -1595,8 +1595,28 @@
 # #######################################################################
 
 [init]
-  # The template directory's contents are copied to a new working tree's
-  # .git/ directory. We could also adds hooks, an info/exclude, etc., but
-  # (for now) we just copy the HEAD file, which specifies the default branch.
-  templateDir = ~/.config/git/template/
+  # New to Git v2.28 (2020-07-26), there is an easier way to set the default
+  # branch name: Use init.defaultBranch, rather than copying from a template.
+  # - Here I'll show how to do both. Because templateDir is still interesting.
+  # - Obviously, your preferred default branch name likely differs from mine!
+  # - Note that you can enable both, but templateDir will beat defaultBranch.
+  #
+  # Use a default branch name other than Git's ahistoric default.
+  defaultBranch = release
+  #
+  # If you're not running Git v2.28 yet and would like to change the default
+  # branch name, uncomment the following, and be sure to install the template
+  # from this repo to your user's config directory. When you run `git init`,
+  # the template directory contents will be copied to the new working tree's
+  # .git/ directory.
+  # - You might also want to use the templateDir to ensure that the same
+  #   hooks are always setup on git-init, or even an info/exclude file.
+  # - For some examples setting up hooks using the template, refer to:
+  #     https://git-template.readthedocs.io/en/latest/
+  # - The template directory is pretty basic if you just want to set the
+  #   default branch name. E.g.,
+  #     $ cat ~/.config/git/template/HEAD
+  #     ref: refs/heads/release
+  #
+  #  templateDir = ~/.config/git/template/
 
