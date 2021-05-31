@@ -1212,6 +1212,13 @@
   # word differences vertically (over 2 lines) rather than horizontally.
   dword = diff --word-diff --color-words
 
+  # From: https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L126-L131
+  # *show changelog since the last release*
+  unreleased-changelog = !git diff $(git latest-version) -- $(git changelog-filename)
+  # *git changelog-filename [name] -- get or set the filename of the changelog file
+  #  (default: HISTORY.rst) / used by other aliases such as 'git unreleased-changelog'*
+  changelog-filename = "!f() { git config alias.changelog.filename \"$@\" || echo HISTORY.rst; }; f"
+
 # #######################################################################
 # ***                     Undo and Undodo Commits                     ***
 # #######################################################################
