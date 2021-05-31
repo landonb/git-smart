@@ -1206,6 +1206,12 @@
   unreleased-short = !git shortlog $(git latest-version)..
   unreleased-log = !git log $(git latest-version)..
 
+  # Show word differences on the same line.
+  # 2021-05-30: We'll see if I find this useful or not: it might make lines
+  # longer that I'd prefer, or maybe I'll find that I prefer to compare
+  # word differences vertically (over 2 lines) rather than horizontally.
+  dword = diff --word-diff --color-words
+
 # #######################################################################
 # ***                     Undo and Undodo Commits                     ***
 # #######################################################################
