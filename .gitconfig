@@ -1499,9 +1499,17 @@
   #         how-to-suppress-the-editor-for-git-rebase-continue
   rc = !GIT_EDITOR=true git rebase --continue
 
+  # MAYBE/2021-05-30: Time to add an --abort shortcut?
+  #  rba = rebase --abort
+
   # Git cherry-pick --continue.
   #     ░      ▒      ▓
   cpc = cherry-pick --continue
+
+  # Automatic conflict resolution.
+  # From: https://gist.github.com/pksunkara/988716#file-config-L263-L264
+  ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+  theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
