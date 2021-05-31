@@ -10,13 +10,35 @@
 
   email = XXX@users.noreply.github.com
 
-  # See: gpg --list-secret-keys --with-colons
-  #
-  #   signingkey = XXXXXXXXXXXXXXXX
-
-[commit]
-
-  # gpgSign = true
+# *** Commit signing
+#
+# YOU: (1a) Generate a key with `gpg --gen-key`.
+#      (1b) Use the same 'noreply' email used for user.email.
+#      (2a) Print the public key with `gpg --armor --export user-id <email-or-ID>`.
+#      (2b) Paste the public key to https://github.com/settings/gpg/new.
+#      - Then choose either to use it globally (probably not the most ideal):
+#      (3a) Paste the key ID below (you can use just the last 8 digits).
+#      (3b) Uncomment signingkey and gpgSign.
+#      - But a better solution is probably to apply the option only to
+#        those projects that use that email address, e.g.,
+#      (3a) Configure myrepos
+#         [/path/to/the_project]
+#         checkout =
+#           git clone 'git@github.com:your_user/the_project.git' 'project'
+#           mr -d ${MR_REPO} wiresigning
+#         wiresigning =
+#           git config user.name "your_user"
+#           git config user.email "your_user@users.noreply.github.com"
+#           git config user.signingkey XXXXXXXX
+#           git config commit.gpgSign true
+#
+# [user]
+#
+#   signingkey = XXXXXXXX
+#
+# [commit]
+#
+#   gpgSign = true
 
 [include]
 
