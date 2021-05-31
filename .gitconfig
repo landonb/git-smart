@@ -1197,6 +1197,15 @@
   # HINT/2021-01-30: (lb): I prefer a Bash `dff` alias I setup that does the same.
   dff = diff
 
+  # Show "unreleased" changes, i.e., changes since the most recent release tag.
+  # Inspired by: https://gist.github.com/sethvargo/d10a81f219f6469889269af2076b4d39
+  # See also (sans fetch): https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L123-L124
+  unreleased = "!git fetch --tags && git diff $(git latest-version)"
+  # *show commits after the last release*
+  # Inspired by: https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L119-L121
+  unreleased-short = !git shortlog $(git latest-version)..
+  unreleased-log = !git log $(git latest-version)..
+
 # #######################################################################
 # ***                     Undo and Undodo Commits                     ***
 # #######################################################################
