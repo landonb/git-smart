@@ -1092,6 +1092,21 @@
     || echo \"USAGE: git credit <name> <email>\"; \
   }; f"
 
+  # *** Obscure or obtuse commit commands, why not!
+
+  # 2021-06-11: A friend has a coworker that uses the commit message
+  # convention, "{user}'s first commit", "{user}'s second commit", etc.
+  # HAHAHA. So I send this improvement, just commit a random message.
+  cirand = "! f() { \
+    rand_msg=$( \
+      curl -L -s http://whatthecommit.com/ | \
+         grep -A 0 '<p>' | \
+         tail -1 | \
+         sed 's/<p>//' \
+    ); \
+    git commit -m \"$rand_msg\"; \
+  }; f"
+
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
 # #######################################################################
