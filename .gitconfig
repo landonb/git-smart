@@ -1094,6 +1094,17 @@
 
   # *** Obscure or obtuse commit commands, why not!
 
+  # Create a commit with a simple message -- ‰ -- Which I use to delimit
+  # my charm or WIP commits, so I can group related commits and make it
+  # easier to digest the tig display when I'm working with dozens of DEV
+  # commits applied to whatever feature branch on which I'm hacking.
+  # 2021-06-11 17:46: Some name ideas:
+  #   git delim-commit, but tab completion conflicts with git del[ete*] commands;
+  #   git hr-commit, but not super discoverable;
+  #   git cihr, is more discoverage with `git ci<TAB>`...;
+  #   or even `git cihrule`, because you're likely to tab-complete anyway.
+  cihrule = commit --allow-empty -m ‰
+
   # 2021-06-11: A friend has a coworker that uses the commit message
   # convention, "{user}'s first commit", "{user}'s second commit", etc.
   # HAHAHA. So I send this improvement, just commit a random message.
