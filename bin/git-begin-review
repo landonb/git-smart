@@ -71,7 +71,7 @@
 # YOU: Declare GITSMART_REVIEW_* environs if you want to customize branch name.
 
 _GS_BR_REVIEW_PREFIX='review${PR_DELIM}${PR_NUMBER}--${BRANCH_NAME}--${AUTHOR}${AU_DELIM}'
-_GS_BR_REVIEW_UNIQUE='${DATE_NOW}-${BRANCH_COUNT}'
+_GS_BR_REVIEW_UNIQUE='${DATE_NOW}--${BRANCH_COUNT}'
 
 # Such that review branch named '${GITSMART_REVIEW_PREFIX}${GITSMART_REVIEW_UNIQUE}'
 GITSMART_REVIEW_PREFIX="${GITSMART_REVIEW_PREFIX:-${_GS_BR_REVIEW_PREFIX}}"
@@ -265,18 +265,17 @@ git_format_review_branch_name () {
 
   # Prepare format template variables.
 
-  local sep="-"
-
   local PR_NUMBER=""
-  [ -n "${REVIEW_PR_NUM}" ] && PR_NUMBER="${REVIEW_PR_NUM}" && PR_DELIM="${sep}"
+  [ -n "${REVIEW_PR_NUM}" ] && PR_NUMBER="${REVIEW_PR_NUM}" && PR_DELIM="-"
 
   local BRANCH_NAME="${REVIEW_BRANCH}"
 
   local AUTHOR=""
-  [ -n "${author}" ] && AUTHOR="${author}" && AU_DELIM="${sep}"
+  [ -n "${author}" ] && AUTHOR="${author}" && AU_DELIM="--"
 
   local review_prefix="$(eval printf "${GITSMART_REVIEW_PREFIX}")"
 
+  local sep="-"
   local DATE_NOW="$(date "+%Y${sep}%m${sep}%d")"
 
   # (lb): Making this somewhat complicated now...
