@@ -51,9 +51,14 @@ git_fixup_and_rebase () {
   GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^
 
   if ${pop_after}; then
-    # Aka `git pop1`
-    git reset --mixed @~1
-    git --no-pager log -1 --pretty=oneline --abbrev-commit
+    # FIXME/2021-05-03: Does this run when there are conflicts and the rebase stops??
+    echo "Was rebase successful? (FIXME: Ensure non popping on conflict) [y/n]"
+    read yorn
+    if [ "${yorn#y}" != "${yorn}" ] || [ "${yorn#Y}" != "${yorn}" ]; then
+      # Aka `git pop1`
+      git reset --mixed @~1
+      git --no-pager log -1 --pretty=oneline --abbrev-commit
+    fi
   fi
 }
 
