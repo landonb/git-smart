@@ -235,10 +235,12 @@ git_format_review_branch_name () {
   # identifier. Fallback to using the author email, for no particular
   # reason.
   local author=""
+
   if [ -n "${REVIEW_PR_NUM}" ]; then
     # %au is author (GitHub) login name.
     author="$(hub pr show -f %au ${REVIEW_PR_NUM})"
   fi
+
   if [ -z "${author}" ]; then
     # Note that the Git log is easily manipulated, so neither name nor
     # email will be as consistent as an author's GitHub login name.
@@ -301,6 +303,7 @@ must_define_hub () {
   type hub > /dev/null 2>&1 && return
 
   >&2 echo 'USAGE: Please install `hub` to get branch name from PR number.'
+
   return 1
 }
 
@@ -311,6 +314,7 @@ must_define_token () {
   >&2 echo "- If you need a token, visit:"
   >&2 echo
   >&2 echo "    https://github.com/settings/tokens"
+
   return 1
 }
 
@@ -334,6 +338,7 @@ echo_number_or_empty_string () {
 
 git_branch_exists () {
   local branch_name="$1"
+
   git show-ref --verify --quiet refs/heads/${branch_name}
 }
 
