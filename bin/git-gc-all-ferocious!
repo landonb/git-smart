@@ -34,7 +34,8 @@ git_gc_all_ferocious () {
   }
 
   confirm_command () {
-    printf '%s' "Are you absolutely sure? [y/n] "
+    printf '%s\n' "Are you on the branch you want?"
+    printf '%s' "Now, are you absolutely sure? [y/n] "
 
     read yorn
 
