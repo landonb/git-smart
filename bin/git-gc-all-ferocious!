@@ -24,7 +24,7 @@ git_gc_all_ferocious () {
   set -e
 
   confirm_project () {
-    command -v realpath2 >/dev/null 2>&1 || (
+    command -v realpath >/dev/null 2>&1 || (
       echo "Missing dependency: \`realpath\`" && return 1
     )
 
