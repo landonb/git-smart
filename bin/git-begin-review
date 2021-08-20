@@ -281,9 +281,18 @@ git_format_review_branch_name () {
   # (lb): Making this somewhat complicated now...
   # Assumes the count component is always last.
 
+  # Get list of branches with matching prefix;
+  #   strip count, excluding leading 0's and --description-suffix;
+  #   sort count numbers; and
+  #   pick last number.
+  # NOTE: The --description-suffix is a double-dash followed by
+  #       any character combination excluding digits.
+  # DEV: Uncomment for a little debug help:
+  #   >&2 echo "review_prefix=${review_prefix}"
+  #   >&2 echo "git rev-parse --abbrev-ref --branches="${review_prefix}*""
   local last_count=$(
     git rev-parse --abbrev-ref --branches="${review_prefix}*" \
-      | sed -E 's/^.*\-([[:digit:]]+)$/\1/' \
+      | sed -E 's/^.*\-\-[0]*([[:digit:]]+)(--[^0-9]*)?$/\1/' \
       | sort -n -r \
       | head -1
   )
