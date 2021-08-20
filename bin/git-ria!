@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# USAGE: git ria! {commit}
+
+# WHY: Because you installed git-interactive-rebase-tool
+#        https://github.com/MitMaro/git-interactive-rebase-tool
+#      but want to run a normal rebase through your text editor.
+#
+#      I.e., `git ria` (or `git rebase -i`) opens rebase-tool,
+#      but sometimes you just want to do things manually in Vim
+#      (or whatever $EDITOR is).
+#
+# HINT: This command also collapses the dozen or so commented
+#       hint lines at the end of the todo list, so you can jump
+#       to the last `pick` command easily (e.g., w/ Vim's `G`).
+#       - If you'd like to see full hints instead, run:
+#           git-helpful
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# 2021-08-06: My first implementation used autosquash and ye olde $EDITOR.
+#
+#   git -c sequence.editor="${EDITOR}" rebase -i --autosquash "$@"
+#
+# But then recently I've found myself needing to bubble up feature commits
+# past a bunch of don't-push-me-up DEV commits, to follow the latest trunk
+# commit. But I've got dozens of DEV commits (what I call "charms") in some
+# of my projects, so I've been using the Vim `G` motion to jump to the end
+# of the todo file, but then I have to move up through all the trailing
+# comment lines that Git adds (via `append_todo_help`) to reach the `pick`
+# lines that I want to bubble up. So let's just remove all the hint lines!
+#
+# Here's a look at all the rebase commands mentioned by the hints we strip:
+# - The commands that work on a commit (e.g., "pick <commit>")
+#   you probably already know by heart: 
+#     pick|reword|edit|squash|fixup|drop
+# - Though perhaps the fixup options you don't use too often:
+#     fixup <commit>    keeps previous commit message (commonest usage);
+#     fixup -C <commit> uses this commit's commit message;
+#     fixup -c <commit> opens the editor.
+# - I think (but have not verified) that `edit` and `break` are similar --
+#   `edit` will "stop for amending", whereas `break` will "stop here" --
+#   but `edit` is used with a <commit> (breaks after the commit is applied);
+#   and `break` is used on its own line (e.g., put it between two `pick`'s).
+# - The `exec <command>` command seems powerful, but I've never thought
+#   of a reason to use it. So I've never used it. But it's there.
+# - I've always been able to avoid rebasing over merges, which is
+#   an advanced interactive rebase feature, which is saying a lot,
+#   because the interactive rebase feature itself is an advanced skill.
+#   But the three commands, label, reset, and merge, are used to rebase
+#   across a merge.
+#   - If you're curious, refer to REBASING MERGES in `man git-rebase`.
+#     See also the `git rebase --rebase-merges` command, which will
+#     construct a rebase todo with the `label`, `reset`, and `merge`
+#     commands populated amongst the `pick` commands.
+# - If you wanted a complete shortened cheat sheet, including merge
+#   rebase commands, consider:
+#     [pick|reword|edit|squash|fixup[-C|-c]|drop <sha>]|[exec <cmd>][break|noop]|[label <n>|reset <n>|merge [-C <#>|-c <#>] <n> [# <1ln>]]
+#   but I've chosen to exclude the 3 advanced-advanced commands in
+#   the cheatsheet we'll append to the todo list below, replacing
+#   the longform hints. This way, if you `G` [Vim] to the bottom of
+#   the todo file and then press <Shift-Up>, you'll select the last
+#   `pick` command (or use whatever keyboard motion you use to select
+#   lines; I've just got Shift-Up/Down wired to selecting by line, so
+#   that's where my muscle memory's at).
+
+git_ria! () {
+  GIT_SEQUENCE_EDITOR='f () { \
+    sed -i -e "/^#/d" -e "/^$/d" "$1"; \
+    echo "# [pick|reword|edit|squash|fixup[-C|-c]|drop <commit>]|[exec <cmd>]|[break]" >> "$1"; \
+    editor-vim-0-0-insert "$1"; \
+  }; f "$1"' git rebase -i --autosquash "$@"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_ria! "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
