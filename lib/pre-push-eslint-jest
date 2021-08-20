@@ -56,6 +56,8 @@ RE_DELETES_BRANCH='( \-d| \-\-delete| :)'
 
 RE_UNABBREV_FORCE='( \-\-force)'
 
+RE_REFSPEC_IS_TAG='( refs/tags/)'
+
 # Run checks, and return nonzero if errors observed.
 # - Use -z to fail on not only ESLint errors, but also warnings (on any output).
 # - Use --bail to fail Jest on first failed test rather than wasting Dev's time.
@@ -71,6 +73,13 @@ run_checks() {
     echo "I'm going to allow this (skipping checks!)"
     return 0
   fi
+
+  if [[ ${PUSH_COMMAND} =~ ${RE_REFSPEC_IS_TAG} ]]; then
+    echo "You can push tags for free! (skipping checks)"
+    return 0
+  fi
+
+  # 2021-07-20: Allow pushing tags without checks.
 
   # FTREQ/2021-02-16 10:10: Bail early if upstream at same commit.
 
