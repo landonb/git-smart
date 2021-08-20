@@ -1607,6 +1607,14 @@
   theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
 
 # #######################################################################
+# ***                     Interactive Rebase Tool                     ***
+# #######################################################################
+
+[sequence]
+  # https://github.com/MitMaro/git-interactive-rebase-tool
+  editor = interactive-rebase-tool
+
+# #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
 
@@ -1676,12 +1684,4 @@
   #     ref: refs/heads/release
   #
   #  templateDir = ~/.config/git/template/
-
-# #######################################################################
-# ***                     Interactive Rebase Tool                     ***
-# #######################################################################
-
-[sequence]
-  # https://github.com/MitMaro/git-interactive-rebase-tool
-  editor = interactive-rebase-tool
 
