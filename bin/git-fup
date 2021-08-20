@@ -27,6 +27,8 @@ git_fixup_and_rebase () {
 
   set -e
 
+  must_not_have_unstaged_hard_link_changes
+
   # Aka `git fu`.
   git commit --no-verify --fixup ${commit}
 
@@ -52,6 +54,38 @@ git_fixup_and_rebase () {
     # Aka `git pop1`
     git reset --mixed @~1
     git --no-pager log -1 --pretty=oneline --abbrev-commit
+  fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# BEWARE: git-reset is not nice to hard links -- if we were to WIP-commit
+# uncommitted changes from a hard link, a git-reset breaks the hard link.
+#
+# - So examine changed files, and check if any have +1 links:
+#     find . ! -name . -prune -links +1  # report files in current directory
+#     find . ! -name . -prune ! -type d -links +1  # exclude directories
+#     find . ! -name . ! -type d -links +1  # descend into directories
+#   Check a single file instead...
+#     find ${file} -prune ! -type d -links +1
+#   List staged files (which we don't care about; these get fup'ed):
+#     git --no-pager diff --name-only --cached
+#     git --no-pager diff --name-only --staged  # Newer Git alias option
+#   List modified, unstaged files (what we want to check for links):
+#     git ls-files -m  # aka `git ls-files --modified`
+#     git --no-pager diff --name-only
+#   Altogether now:
+#     git --no-pager diff --name-only | xargs -I {} find {} -links +1 | wc -l
+
+must_not_have_unstaged_hard_link_changes () {
+  if [ -n "$( \
+    git --no-pager diff --name-only | xargs -I {} find {} -links +1 \
+  )" ]; then
+    echo "ERROR: Cannot process: There are hard links with unstaged changes."
+    echo "       This command clobbers such hard links. You don't want that."
+    echo "       HINT: Commit hard linked changes first, then retry git-fup."
+
+    return 1
   fi
 }
 
