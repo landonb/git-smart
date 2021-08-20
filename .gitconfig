@@ -1491,6 +1491,11 @@
 
   # -------
 
+  pff = pull --ff-only
+  puff = pull --ff-only
+
+  # -------
+
   # Use `git bump` to quickly run a common rebase operation.
   # - Without arguments, checks out the 'develop' branch, fetches from
   #   the 'upstream' remote; and rebases 'develop' atop 'upstream/develop'.
