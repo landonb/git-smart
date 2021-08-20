@@ -52,9 +52,9 @@ PUSH_COMMAND="$(ps -ocommand= -p ${PPID})"
 
 # This regex checks for -d/--delete option,
 # including the old school :delete variant.
-WILL_DELETE_BRANCH='( \-d| \-\-delete| :)'
+RE_DELETES_BRANCH='( \-d| \-\-delete| :)'
 
-ALLOW_FULL_FORCE_PUSH='( \-\-force)'
+RE_UNABBREV_FORCE='( \-\-force)'
 
 # Run checks, and return nonzero if errors observed.
 # - Use -z to fail on not only ESLint errors, but also warnings (on any output).
@@ -62,12 +62,12 @@ ALLOW_FULL_FORCE_PUSH='( \-\-force)'
 # - Note that Bash uses the result of the command (because it's the last one in
 #   this file) as the script's return value (aka the exit code; or $?).
 run_checks() {
-  if [[ ${PUSH_COMMAND} =~ ${WILL_DELETE_BRANCH} ]]; then
+  if [[ ${PUSH_COMMAND} =~ ${RE_DELETES_BRANCH} ]]; then
     return 0
   fi
 
   # 2021-02-05: A little walk-around, for when you really --mean it.
-  if [[ ${PUSH_COMMAND} =~ ${ALLOW_FULL_FORCE_PUSH} ]]; then
+  if [[ ${PUSH_COMMAND} =~ ${RE_UNABBREV_FORCE} ]]; then
     echo "I'm going to allow this (skipping checks!)"
     return 0
   fi
