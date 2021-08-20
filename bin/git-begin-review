@@ -290,6 +290,7 @@ git_format_review_branch_name () {
 
   BRANCH_COUNT=1
   [ -n "${last_count}" ] && let 'BRANCH_COUNT = last_count + 1'
+  BRANCH_COUNT="$(eval printf '%02d' "${BRANCH_COUNT}")"
 
   local review_unique="$(eval printf "${GITSMART_REVIEW_UNIQUE}")"
 
