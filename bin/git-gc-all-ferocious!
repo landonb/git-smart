@@ -58,8 +58,14 @@ git_gc_all_ferocious () {
   }
 
   git_delete_object_refs () {
-    git for-each-ref --format="%(refname)" refs/original/ \
-      | xargs -n1 --no-run-if-empty git update-ref -d
+    if [ "$(uname)" = "Darwin" ]; then
+      # --no-run-if-empty is not a thing
+      git for-each-ref --format="%(refname)" refs/ \
+        | xargs -n1 git update-ref -d
+    else
+      git for-each-ref --format="%(refname)" refs/ \
+        | xargs -n1 --no-run-if-empty git update-ref -d
+    fi
   }
 
   git_purge_object_blobs () {
