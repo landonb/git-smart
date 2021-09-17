@@ -51,7 +51,7 @@ great aliases and commands, try something like this::
     # Edit HEAD to set a different default branch name, then copy it.
     /bin/cp "${git_smart_dir}/.config/git/template/HEAD" .
 
-    # Sanity check.
+    # Reality check.
     git whoami
 
 #######
