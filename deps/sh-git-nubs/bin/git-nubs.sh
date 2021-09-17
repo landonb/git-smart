@@ -173,6 +173,30 @@ git_latest_version_basetag () {
     head -n1
 }
 
+latest_version_fulltag () {
+  local basevers="$1"
+
+  git tag -l "${basevers}*" -l "v${basevers}*" |
+    /usr/bin/env sed -E "s/${GITSMART_RE_VERSPARTS}/\6,\1.\2.\4\5\6/" |
+    sort -r -n |
+    head -n1 |
+    /usr/bin/env sed -E "s/^[^,]*,//"
+}
+
+git_latest_version_tag () {
+  local basevers="$(git_latest_version_basetag)"
+
+  # See if basevers really tagged or if gleaned from alpha.
+  if git show-ref --tags -- "${basevers}" > /dev/null; then
+    fullvers="${basevers}"
+  else
+    # Assemble alpha-number-prefixed versions to sort and grab largest alpha.
+    fullvers="$(latest_version_fulltag "${basevers}")"
+  fi
+
+  [ -z "${fullvers}" ] || echo "${fullvers}"
+}
+
 # ***
 
 git_last_version_tag_describe_safe () {
