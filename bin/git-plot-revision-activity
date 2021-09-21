@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Inspired by: https://github.blog/2021-08-16-highlights-from-git-2-33/#all-that
+#
+#   [See terminal capture image.]
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+check_deps () {
+  check_dep 'feedgnuplot'
+
+  # Check $(git --version) >= 2.33.0, because --no-commit-header;
+  # or try command and expect non-zero exit (but limit output so
+  # command is not slow on big repo).
+  git rev-list --no-commit-header --max-count=1 HEAD > /dev/null 2>&1 ||
+    ( >&2 echo "ERROR: Requires Git >= v2.33.0." && return 1 )
+}
+
+check_dep () {
+  if ! command -v $1 > /dev/null 2>&1; then
+    >&2 printf '\r%s\n' "WARNING: Missing dependency: ‘$1’"
+    false
+  else
+    true
+  fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_plot_revision_activity () {
+  local author="$1"
+
+  # Either works: user.email, or user.name.
+  [ -z "${author}" ] && author="$(git config user.name)"
+
+  local rev_list="$(git rev-list --no-commit-header --format=%as --author="${author}" HEAD)"
+
+  [ -z "${rev_list}" ] &&
+    >&2 echo "ERROR: No revisions found, or unknown author." &&
+    return 1
+
+  echo "${rev_list}" |
+    cut -d- -f1 |
+    feedgnuplot --unset grid --histogram 0 --terminal 'dumb' --exit
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  set -e
+
+  check_deps
+
+  git_plot_revision_activity "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
