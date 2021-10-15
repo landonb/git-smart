@@ -70,16 +70,53 @@ git_remote_assemble_cache () {
   #   done <<< "$(git remote -v)"
 }
 
+# Prints the remote name and URL, right-aligning each remote name in a column.
 callback_print_remote_info () {
-  local name=$1
+  local remote="$1"
+  local url="$2"
 
-  eval "printf '%${GITSMART_ALIGNT}${GITSMART_MAX_WIDTH}s${GITSMART_COLSEP}%s' '${name}'"
+  eval "printf '%${GITSMART_ALIGNT}${GITSMART_MAX_WIDTH}s${GITSMART_COLSEP}%s\n' '${remote}' '${url}'"
+}
+
+# Runs the git fetch command, being particular about messaging.
+callback_process_git_cmd_fetch () {
+  local remote="$1"
+
+  local cmd_resp
+  local err_code
+
+  # Print a "Fetching" message that we'll overwrite later.
+  printf "Fetching ${remote}..."
+
+  cmd_resp="$(git fetch "${remote}" 2>&1)"
+  err_code=$?
+
+  # Remove error lines associated with offline remote, because git
+  # prints 5 lines for each offline remote, which the author finds
+  # takes too much attention to process. It's quicker for the user
+  # to parse a simple "✗" or "✓" to see if the fetch failed or not.
+  cmd_resp="$(
+    echo "${cmd_resp}" |
+      grep -v \
+        -e "^fatal: '.*' does not appear to be a git repository$" \
+        -e "^fatal: Could not read from remote repository.$" \
+        -e "^$" \
+        -e "^Please make sure you have the correct access rights$" \
+        -e "^and the repository exists.$"
+  )"
+
+  # Overwrite the "Fetching" message. Print command reponse,
+  # if any, followed by command success (✓) or failure (✗).
+  printf '\r'
+  [ -n "${cmd_resp}" ] && echo "${cmd_resp}"
+  [ ${err_code} -eq 0 ] && printf "✓ " || printf "✗ "
+  # Add spaces to overwrite "Fetched " and "..." (minus new "✓ ").
+  printf "${remote}          "
+  printf '\n'
 }
 
 remotes_process_and_pretty_print_tidy () {
   local git_cmd="$1"
-
-  [ "${git_cmd}" = "fetch" ] && echo "Fetching remotes..."
 
   for remote in \
     'proving' \
@@ -98,24 +135,30 @@ remotes_process_and_pretty_print_tidy () {
         -e 'upstream' \
       | sort \
   ); do
+    # Return if no URL recorded for remote.
     ! [ ${GITSMART_REMOTE_CACHE[${remote}]+x} ] && continue
 
-    callback_print_remote_info "${remote}"
-
-    if [ -n "${git_cmd}" ]; then
-      # Run the git command, ignoring stderr, and indicate success.
-      eval "git ${git_cmd} ${remote}" 2> /dev/null
-      [ $? -eq 0 ] && printf "✓" || printf "✗"
-    else
-      # Print the remote URL.
-      printf "${GITSMART_REMOTE_CACHE[${remote}]}"
+    if [ -z "${git_cmd}" ]; then
+      # Print the remote name and remote URL.
+      callback_print_remote_info "${remote}" "${GITSMART_REMOTE_CACHE[${remote}]}"
+    elif [ "${git_cmd}" = "fetch" ]; then
+      # Run git-fetch on each remote.
+      callback_process_git_cmd_fetch "${remote}"
     fi
-
-    printf '\n'
   done
 }
 
+must_recognize_optional_remotes_command () {
+  local git_cmd="$1"
+
+  if [ -n "${git_cmd}" ] && [ "${git_cmd}" != "fetch" ]; then
+    >&2 echo "ERROR: Unrecognized git command: “${git_cmd}”"
+    exit 1
+  fi
+}
+
 git_remotes_process () {
+  must_recognize_optional_remotes_command "$@"
   git_remote_assemble_cache
   remotes_process_and_pretty_print_tidy "$@"
 }
