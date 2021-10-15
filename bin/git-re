@@ -26,6 +26,7 @@ declare -A -x GITSMART_REMOTE_CACHE
 update_first_column_max () {
   local name=$1
   local name_len=$(printf %s "${name}" | wc --chars)
+
   [ ${name_len} -gt ${GITSMART_MAX_WIDTH} ] && GITSMART_MAX_WIDTH=${name_len}
 }
 
@@ -33,12 +34,14 @@ git_remote_assemble_cache () {
   local last_op=''
   local last_url=''
   local line=''
+
   while IFS= read -r line; do
     # 3 parts: name; url; "(fetch)" or "(push)".
     set -- ${line}
     local name=$1
     local url=$2
     local op=$3
+
     if [ "${op}" = "(fetch)" ]; then
       [ -n "${last_op}" ] && [ "${last_op}" != "(push)" ] && \
         >&2 "Unexpected: Previous line's op not “(push)”."
@@ -70,11 +73,13 @@ git_remote_assemble_cache () {
 callback_print_remote_info () {
   local name=$1
   local url=$2
+
   eval "printf '%${GITSMART_ALIGNT}${GITSMART_MAX_WIDTH}s${GITSMART_COLSEP}%s\n' '${name}' '${url}'"
 }
 
 pretty_print_tidy_remote_list () {
   local callback=$1
+
   for remote in \
     'proving' \
     'release' \
