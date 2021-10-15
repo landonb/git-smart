@@ -78,8 +78,6 @@ callback_print_remote_info () {
 }
 
 pretty_print_tidy_remote_list () {
-  local callback=$1
-
   for remote in \
     'proving' \
     'release' \
