@@ -85,7 +85,15 @@ pretty_print_tidy_remote_list () {
     'myclone' \
     'origin' \
     'upstream' \
-    $(git remote | grep -v -e 'proving' -e 'release' -e 'starter' -e 'myclone' -e 'origin' -e 'upstream' | sort \
+    $(git remote \
+      | grep -v \
+        -e 'proving' \
+        -e 'release' \
+        -e 'starter' \
+        -e 'myclone' \
+        -e 'origin' \
+        -e 'upstream' \
+      | sort \
   ); do
     ! [ ${GITSMART_REMOTE_CACHE[${remote}]+x} ] && continue
     callback_print_remote_info "${remote}" "${GITSMART_REMOTE_CACHE[${remote}]}"
