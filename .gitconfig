@@ -1529,8 +1529,11 @@
   # - (lb): Or perhaps we just ignore errors, eh.
   #   - Original call:
   #       fap = fetch --all --prune
-  #   - But instead toss stderr:
-  fap = "!f() { git fetch --all --prune 2> /dev/null; }; f"
+  #   - We could instead just toss stderr:
+  #       fap = "!f() { git fetch --all --prune 2> /dev/null; }; f"
+  #   - Or better yet fetch in same order as git-re prints remotes,
+  #     and indicate if success status of each fetch:
+  fap = re fetch
 
   # Use `git pup` to push a branch and add tracking information (e.g., to
   # be used on a later `git pull`, or for `git status` to tell you things).

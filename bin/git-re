@@ -72,12 +72,15 @@ git_remote_assemble_cache () {
 
 callback_print_remote_info () {
   local name=$1
-  local url=$2
 
-  eval "printf '%${GITSMART_ALIGNT}${GITSMART_MAX_WIDTH}s${GITSMART_COLSEP}%s\n' '${name}' '${url}'"
+  eval "printf '%${GITSMART_ALIGNT}${GITSMART_MAX_WIDTH}s${GITSMART_COLSEP}%s' '${name}'"
 }
 
-pretty_print_tidy_remote_list () {
+remotes_process_and_pretty_print_tidy () {
+  local git_cmd="$1"
+
+  [ "${git_cmd}" = "fetch" ] && echo "Fetching remotes..."
+
   for remote in \
     'proving' \
     'release' \
@@ -96,20 +99,32 @@ pretty_print_tidy_remote_list () {
       | sort \
   ); do
     ! [ ${GITSMART_REMOTE_CACHE[${remote}]+x} ] && continue
-    callback_print_remote_info "${remote}" "${GITSMART_REMOTE_CACHE[${remote}]}"
+
+    callback_print_remote_info "${remote}"
+
+    if [ -n "${git_cmd}" ]; then
+      # Run the git command, ignoring stderr, and indicate success.
+      eval "git ${git_cmd} ${remote}" 2> /dev/null
+      [ $? -eq 0 ] && printf "✓" || printf "✗"
+    else
+      # Print the remote URL.
+      printf "${GITSMART_REMOTE_CACHE[${remote}]}"
+    fi
+
+    printf '\n'
   done
 }
 
-git_remote_list_tidy () {
+git_remotes_process () {
   git_remote_assemble_cache
-  pretty_print_tidy_remote_list
+  remotes_process_and_pretty_print_tidy "$@"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
   reveal_biz_vars
-  git_remote_list_tidy "$@"
+  git_remotes_process "$@"
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
