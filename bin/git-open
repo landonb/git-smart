@@ -135,9 +135,10 @@ sensible_browser_linux () {
   #       the following --new-window argument is the
   #       same for both Chrome and Firefox.)
 
-  # NOTE: Using `&` to not block if browser not already running.
-  # Suppress: "Opening in existing browser session."
-  sensible-browser --new-window "${remote_url}" > /dev/null &
+  # NOTE: - Using `&` to not block if browser not already running.
+  #       - Using `>` to suppress "Opening in existing browser session."
+  #       - Specify Default user profile so Chrome doesn't use last accessed.
+  sensible-browser --new-window "${remote_url}" --profile-directory=Default > /dev/null &
 }
 
 sensible_browser_macos () {
