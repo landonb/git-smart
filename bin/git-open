@@ -162,7 +162,7 @@ sensible_browser_macos () {
     #   directory and package with git-smart... but so far none
     #   of the git-smart/bin commands have any dependencies, and
     #   figuring that out seems messy (though maybe it's just a
-    #   readlink away, "$(dirname "$(readlink_f "$0")")/../deps").
+    #   realpath away, "$(dirname -- "$(realpath -- "$0")")/../deps").
     #   In any case, a simple `open` is also fine.
     #   - If a user asks for the new-window feature,
     #     suggest installing sensible-open.
