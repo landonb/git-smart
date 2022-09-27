@@ -138,7 +138,7 @@ remotes_process_and_pretty_print_tidy () {
     # Return if no URL recorded for remote.
     ! [ ${GITSMART_REMOTE_CACHE[${remote}]+x} ] && continue
 
-    if [ -z "${git_cmd}" ]; then
+    if [ -z "${git_cmd}" ] || [ "${git_cmd}" = "pwd" ]; then
       # Print the remote name and remote URL.
       callback_print_remote_info "${remote}" "${GITSMART_REMOTE_CACHE[${remote}]}"
     elif [ "${git_cmd}" = "fetch" ]; then
@@ -151,16 +151,29 @@ remotes_process_and_pretty_print_tidy () {
 must_recognize_optional_remotes_command () {
   local git_cmd="$1"
 
-  if [ -n "${git_cmd}" ] && [ "${git_cmd}" != "fetch" ]; then
+  if [ -n "${git_cmd}" ] &&
+      [ "${git_cmd}" != "fetch" ] &&
+      [ "${git_cmd}" != "pwd" ] ; then
     >&2 echo "ERROR: Unrecognized git command: “${git_cmd}”"
     exit 1
   fi
 }
 
 git_remotes_process () {
+  local git_cmd="$1"
+
   must_recognize_optional_remotes_command "$@"
   git_remote_assemble_cache
+
+  if [ "${git_cmd}" = "pwd" ]; then
+    pwd
+  fi
+
   remotes_process_and_pretty_print_tidy "$@"
+
+  if [ "${git_cmd}" = "pwd" ]; then
+    printf '\n'
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
