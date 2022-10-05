@@ -701,6 +701,9 @@
 
 [alias]
   br = !git --no-pager branch
+  # If you don't want coloration/coloring, and if you don't want the ` *`
+  # before the current branch, or `  ` before other branches, try:
+  #   br = !git --no-pager branch --format='%(refname:short)'
 
   # - Use `git brs` to show all branches, including remote branches.
   # - git-brs is inherently aliased because found on PATH.
