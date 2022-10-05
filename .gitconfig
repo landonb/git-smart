@@ -1249,7 +1249,12 @@
   #     # <somewhere deep inside my .bashrc>
   #     alias dff='git diff'
   #   But here's `git df` if you want it dumped to the terminal, not paged.
-  df = !git --no-pager diff
+  # MAYBE/2022-10-05: I also never use `git df`. I usually use `dff` (Bash
+  # alias to `git dff`). And I think I'd forgotten about this --no-pager
+  # alternative, so I added `git dfd` (and made a Bash `dfd` alias).
+  df = dfd
+  # For parity with `git dcd`, which if the --no-pager equiv. of `git dcc`.
+  dfd = !git --no-pager diff
   # - This `git dff` is here for parity with a Bash `dff` alias I use,
   #   in the off chance I type it the long way.
   # HINT/2021-01-30: (lb): I prefer a Bash `dff` alias I setup that does the same.
