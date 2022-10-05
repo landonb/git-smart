@@ -887,6 +887,9 @@
       --pretty='format:%C(green)%ad %C(red)%h %C(reset)%D' \
       --date=short
 
+  # Show just the date of the latest commit.
+  d1 = "! f() { git --no-pager log -1 --format=%cd --date=format:%Y-%m-%d; }; f"
+
   # -------
 
   # Show how many times each file has been edited, aka churn.
