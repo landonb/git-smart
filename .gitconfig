@@ -1439,7 +1439,25 @@
   # and "release" instead of "origin" and "upstream". See mega-comment in
   # my git-my-merge-status project for the reason for the innovation.
   pp = push proving HEAD
-  pr = push release HEAD
+  # 2022-10-05: (lb): Refuse to push 'liminal' branches to 'release' upstream.
+  # - This is my convention: I use so-called 'liminal' branches to demo changes,
+  #   or to ensure they're backed up, but with the caveat that I'll rebase those
+  #   changes eventually. So I don't want anyone building from those changes!
+  #   - Basically, pushing `liminal` to my personal repo (where I've got my
+  #     forks of projects) is fine, but I don't want to push `liminal` branches
+  #     to the release repo.
+  # Basically, idea is to push to 'release' remote, e.g.,
+  #   pr = push release HEAD
+  # But not to push unconventional branches thereunto.
+  pr = "!f() { \
+    local release_br=\"$(git main-branch)\"; \
+    if [ \"${release_br}\" == \"release\" ] \
+      || [ \"${release_br}\" == \"develop\" ]; then \
+      git push release HEAD; \
+    else \
+      >&2 echo \"ERROR: \\`git pr\\` is restricted to branches named 'release' and 'develop'.\"; \
+    fi; \
+  }; f"
 
   # -------
 
