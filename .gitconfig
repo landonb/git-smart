@@ -1434,14 +1434,17 @@
   #     Bash environment approach.)
   co = checkout
 
-  # Use `git po` to push to the most commonly pushed remote (probably), "origin".
-  po = push origin HEAD
-  # And use `git pu` to push to another commonly used remote name, "upstream".
-  # FIXME/2022-10-05: I don't use this remote name any more, do I?
-  #  pu = push upstream HEAD
+  # DATED/2022-10-05: I don't use either 'origin' nor 'upstream' remote names
+  # any more, and I don't want them relied upon herein. git-smart centers
+  # around a lot of the author's conventions, and I no longer use these.
+  #   # Use `git po` to push to the most commonly pushed remote (probably), "origin".
+  #   po = push origin HEAD
+  #   # And use `git pu` to push to another commonly used remote name, "upstream".
+  #   pu = push upstream HEAD
+
   # 2020-06-18: (lb): My latest workflow adopts the remote names "proving"
-  # and "release" instead of "origin" and "upstream". See mega-comment in
-  # my git-my-merge-status project for the reason for the innovation.
+  # and "release" instead of "origin" and "upstream".
+  # CXREF: mega-comment in my git-my-merge-status project for why the innovation.
   pp = push proving HEAD
   # 2022-10-05: (lb): Refuse to push 'liminal' branches to 'release' upstream.
   # - This is my convention: I use so-called 'liminal' branches to demo changes,
