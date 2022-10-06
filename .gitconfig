@@ -775,7 +775,11 @@
   #        on Linux returns the --abbrev-ref=loose form, e.g., "my_branch", but
   #        on macOS it runs like --abbrev-ref=strict, e.g., "heads/my_branch".
   #        We want to be consistent, and to show the simpler name.
+  # 2022-10-05: This is poorly-named. I didn't recall this existed...
   cur = rev-parse --abbrev-ref=loose HEAD
+  # 2022-10-05: Until I devise a better name, perhaps a TAB-completion reminder:
+  cur-br = rev-parse --abbrev-ref=loose HEAD
+  # FIXME/2022-10-05 20:07: Find a better alias, and consolidate previous 2 commands.
 
   # -------
 
