@@ -1232,37 +1232,26 @@
 
 [alias]
 
-  # Use `git dc` to show a diff of what's already been *staged* (which
-  # is what you'd see at the bottom of a `git commit -v` edit session).
-  # 2020-03-22: On second thought, because I have Bash aliases at `dff`
-  # and `dcc`, and because `dc` is the calculator app, perhaps this git-dc
-  # is not as useful/potentially confusing.
-  dc = !git --no-pager diff --cached
-  # `dcc` is like `dc`, except pages.
-  # HINT/2021-01-30: (lb): I prefer a Bash `dcc` alias I setup that does the same.
-  dcc = !git diff --cached
-  dcd = !git --no-pager diff --cached
-
-  # Use `git dd` to dump the diff to the terminal, bypassing the pager.
-  dd = !git --no-pager diff \"$@\"
-
-  # Use `git df` to run diff... if you're that lazy you can't type two
-  # additional characters.
+  # Use `git dff` to run git-diff... or, better yet, add yourself a Bash
+  # alias, becaues you'll probably use this command often.
   # - I git-diff fairly frequently, so I've added an even easier
   #   Bash alias to my user environment
   #     # <somewhere deep inside my .bashrc>
   #     alias dff='git diff'
-  #   But here's `git df` if you want it dumped to the terminal, not paged.
-  # MAYBE/2022-10-05: I also never use `git df`. I usually use `dff` (Bash
-  # alias to `git dff`). And I think I'd forgotten about this --no-pager
-  # alternative, so I added `git dfd` (and made a Bash `dfd` alias).
-  df = dfd
-  # For parity with `git dcd`, which if the --no-pager equiv. of `git dcc`.
-  dfd = !git --no-pager diff
-  # - This `git dff` is here for parity with a Bash `dff` alias I use,
-  #   in the off chance I type it the long way.
-  # HINT/2021-01-30: (lb): I prefer a Bash `dff` alias I setup that does the same.
-  dff = diff
+  # - Note we don't use `git df`, because `df` is an historic *nix command,
+  #   and we don't want to confuse the user.
+  # HINT/2021-01-30: (lb): I use Bash `dff` alias I setup that does same.
+  dff = !git diff \"$@\"
+  # For parity with `git dcd`, this is the --no-pager equiv. of `git dff`.
+  dfd = !git --no-pager diff \"$@\"
+
+  # Use `git dcc` to show a diff of what's already been *staged* (which
+  # is what you'd see at the bottom of a `git commit -v` edit session).
+  # - Note that `dc` is the *nix calculator app, so we use `git dcc`.
+  # HINT/2021-01-30: (lb): I use Bash `dcc` alias I setup that does same.
+  dcc = !git diff --cached \"$@\"
+  # This `dcd` is like `dc`, except doesn't page; it just dumps to the term.
+  dcd = !git --no-pager diff --cached \"$@\"
 
   # Show "unreleased" changes, i.e., changes since the most recent release tag.
   # Inspired by: https://gist.github.com/sethvargo/d10a81f219f6469889269af2076b4d39
