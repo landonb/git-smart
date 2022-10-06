@@ -1453,13 +1453,18 @@
   #   - Basically, pushing `liminal` to my personal repo (where I've got my
   #     forks of projects) is fine, but I don't want to push `liminal` branches
   #     to the release repo.
-  # Basically, idea is to push to 'release' remote, e.g.,
-  #   pr = push release HEAD
-  # But not to push unconventional branches thereunto.
-  pr = "!f() { \
-    local release_br=\"$(git main-branch)\"; \
-    if [ \"${release_br}\" == \"release\" ] \
-      || [ \"${release_br}\" == \"develop\" ]; then \
+  # - Also, the 'release' upstream shouldn't have any cruft.
+  #   - It seems like 'release' and 'develop' branches are sufficient.
+  # - So rather than push any-old branch:
+  #     pr = push release HEAD
+  #   We'll check the current branch and adjust accordingly.
+  # - (Alternatively, we could make `git pr` on push the 'release' branch, e.g.,:
+  #     local current_br=\"$(git main-branch)\"; \
+  #    but then `git pr` works different from `git pp`, so maybe let's not.)
+  # git-pr: Push to 'release' remote, but reject unconventional branches thereunto.
+  pr = "! f() { \
+    local current_br=\"$(git rev-parse --abbrev-ref=loose HEAD)\"; \
+    if [ \"${current_br}\" = \"release\" ] || [ \"${current_br}\" = \"develop\" ]; then \
       git push release HEAD; \
     else \
       >&2 echo \"ERROR: \\`git pr\\` is restricted to branches named 'release' and 'develop'.\"; \
