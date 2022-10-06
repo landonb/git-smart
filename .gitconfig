@@ -1430,12 +1430,11 @@
   #     Bash environment approach.)
   co = checkout
 
-  # -------
-
   # Use `git po` to push to the most commonly pushed remote (probably), "origin".
-  # And use `git pu` to push to another commonly used remote name, "upstream".
   po = push origin HEAD
-  pu = push upstream HEAD
+  # And use `git pu` to push to another commonly used remote name, "upstream".
+  # FIXME/2022-10-05: I don't use this remote name any more, do I?
+  #  pu = push upstream HEAD
   # 2020-06-18: (lb): My latest workflow adopts the remote names "proving"
   # and "release" instead of "origin" and "upstream". See mega-comment in
   # my git-my-merge-status project for the reason for the innovation.
