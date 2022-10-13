@@ -25,6 +25,8 @@
 git_fixup_and_rebase () {
   local commit="$1"
 
+  local wip_commit_message="WIP"
+
   set -e
 
   must_not_have_unstaged_hard_link_changes
@@ -33,12 +35,12 @@ git_fixup_and_rebase () {
   git commit --no-verify --fixup ${commit}
 
   local pop_after=false
-  if [ -n "$(git status --porcelain)" ]; then
+  if [ -n "$(git_status_porcelain)" ]; then
     # Untracked, Unstaged, or Staged changes not committed.
     pop_after=true
     # Aka `git wip`
     git add -A
-    git commit --no-verify -m WIP
+    git commit --no-verify -m "${wip_commit_message}"
   fi
 
   # Have the interactive rebase sequence editor complete automatically
@@ -50,16 +52,61 @@ git_fixup_and_rebase () {
   # Aka `git ria ${commit}^`
   GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^
 
+  # Here we pop the temporary "WIP" commit that we made before the rebase.
+  # - But beware a failed rebase -- we don't want to pop the latest commit
+  #   if the rebase stopped to ask the user to intervene, because that's
+  #   nor our temporary commit.
+  # - Most likely, we only need to check that the repo is tidy. If it's
+  #   not tidy, the rebase failed.
+  # - But we'll also do an extra paranoid check (or is it due diligence?)
+  #   and verify that the latest commit has a "WIP" message (which isn't
+  #   foolproof, and if we check after checking git-status, the fail-branch
+  #   will likely never run, but at least we can say we tried).
   if ${pop_after}; then
-    # FIXME/2021-05-03: Does this run when there are conflicts and the rebase stops??
-    echo "Was rebase successful? (FIXME: Ensure non popping on conflict) [y/n]"
+    if [ -n "$(git_status_porcelain)" ]; then
+      echo
+      echo "OOPS! It looks like the rebase stopped."
+      echo "- Reason: Git status reports the project is not tidy."
+      echo "- Resolution: You're gonna have to take it from here!"
+      return
+    fi
+    echo
+
+    if [ "$(git_latest_commit_message)" != "${wip_commit_message}" ]; then
+      echo
+      echo "OOPS! It looks like the rebase stopped."
+      echo "- Reason: The latest commit is not the \"WIP\" we made."
+      echo "- Resolution: You're gonna have to take it from here!"
+      return
+    fi
+
+    # The original safe-guard from 2021-05-03 only prompted the user.
+    # FIXME/2022-10-13: If the previous safety checks (git-status) work,
+    #                   we can remove this prompt.
+    echo "It looks like the rebase was successful!"
+    echo "- But this code is under test, so please confirm."
+    echo
+    echo "FIXME: Once you're sick of being prompted, remove this check."
+    echo
+
+    echo "Was rebase successful? [y/n]"
     read yorn
     if [ "${yorn#y}" != "${yorn}" ] || [ "${yorn#Y}" != "${yorn}" ]; then
-      # Aka `git pop1`
+      # Aka `git pop1`.
       git reset --mixed @~1
       git --no-pager log -1 --pretty=oneline --abbrev-commit
     fi
   fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_status_porcelain () {
+  git status --porcelain=v1
+}
+
+git_latest_commit_message () {
+  git --no-pager log -1 --pretty=%B
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
