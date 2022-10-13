@@ -1,2 +1,4 @@
 .git/
 
+/bin/completions/git-completion.bash
+
