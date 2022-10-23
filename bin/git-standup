@@ -38,7 +38,7 @@ main () {
 }
 
 # Run the function if being executed. Do nothing if sourced.
-if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|z)?sh$' -); then
+if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
   main "${@}"
 fi
 
