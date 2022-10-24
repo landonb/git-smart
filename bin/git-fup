@@ -29,6 +29,14 @@ git_fixup_and_rebase () {
 
   set -e
 
+  # The `git --no-pager diff --name-only` returns paths relative to
+  # root, which is used by must_not_have_unstaged_hard_link_changes.
+  git_root() {
+    git rev-parse --show-toplevel
+  }
+
+  cd "$(git_root)"
+
   must_not_have_unstaged_hard_link_changes
 
   # Aka `git fu`.
