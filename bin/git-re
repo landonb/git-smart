@@ -21,7 +21,43 @@ reveal_biz_vars () {
 
 # ***
 
-declare -A -x GITSMART_REMOTE_CACHE
+# TOO_BASHY for macOS system Bash:
+#  declare -A -x GITSMART_REMOTE_CACHE__
+
+_gs_set_remote_cache () {
+  local name="$1"
+  local url="$2"
+
+  # >&2 echo eval "GITSMART_REMOTE_CACHE__${name}='${url}'"
+
+  # TOO_BASHY:
+  #  GITSMART_REMOTE_CACHE[${name}]="${url}"
+  eval "GITSMART_REMOTE_CACHE__${name}='${url}'"
+}
+
+_gs_get_remote_cache () {
+  local name="$1"
+
+  # >&2 echo eval echo '$'GITSMART_REMOTE_CACHE__${name} == \
+  #   $(eval echo '$'GITSMART_REMOTE_CACHE__${name})
+
+  # TOO_BASHY:
+  #  echo "${GITSMART_REMOTE_CACHE[${name}]}"
+  eval echo '$'GITSMART_REMOTE_CACHE__${name}
+}
+
+_gs_has_remote_cache () {
+  local name="$1"
+
+  # >&2 echo [ -v "GITSMART_REMOTE_CACHE__${name}" ] == \
+  #   $([ -v "GITSMART_REMOTE_CACHE__${name}" ] && echo true || echo false)
+
+  # TOO_BASHY:
+  #  [ ${GITSMART_REMOTE_CACHE[${name}]+x} ] && true || false
+  eval [ ! -z '$'{GITSMART_REMOTE_CACHE__${name}+x} ] && true || false
+}
+
+# ***
 
 update_first_column_max () {
   local name=$1
@@ -48,7 +84,7 @@ git_remote_assemble_cache () {
       last_op="${op}"
       last_url="${url}"
       update_first_column_max "${name}"
-      GITSMART_REMOTE_CACHE[${name}]="${url}"
+      _gs_set_remote_cache "${name}" "${url}"
     elif [ "${op}" = "(push)" ]; then
       # (lb): It's probably possible to have other ops, or disparate
       # URLs for the same remote, but I've never seen it in my usage,
@@ -136,11 +172,11 @@ remotes_process_and_pretty_print_tidy () {
       | sort \
   ); do
     # Return if no URL recorded for remote.
-    ! [ ${GITSMART_REMOTE_CACHE[${remote}]+x} ] && continue
+    ! _gs_has_remote_cache ${remote} && continue
 
     if [ -z "${git_cmd}" ] || [ "${git_cmd}" = "pwd" ]; then
       # Print the remote name and remote URL.
-      callback_print_remote_info "${remote}" "${GITSMART_REMOTE_CACHE[${remote}]}"
+      callback_print_remote_info "${remote}" "$(_gs_get_remote_cache "${remote}")"
     elif [ "${git_cmd}" = "fetch" ]; then
       # Run git-fetch on each remote.
       callback_process_git_cmd_fetch "${remote}"
