@@ -48,8 +48,9 @@
 
 [interactive]
 
-  # Add a visual break (colorful flower bed)
-  # between interactive patch hunks.
+  # Project: https://github.com/landonb/git-veggie-patch
+  #
+  # Add a visual break (colorful flower bed) between interactive patch hunks.
   diffFilter = diff-filter-garden
 
   # The singleKey option is not in git-smart/.gitconfig proper because
