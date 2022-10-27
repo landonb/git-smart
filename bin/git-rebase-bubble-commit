@@ -118,6 +118,10 @@ must_find_previous_commit () {
   echo "${ci_before}"
 }
 
+# MEH: We could add a `--force` option so user could skip this check...
+# or they could just add a `return 0` atop this function, seems like a
+# real special use case (overwriting history shared with another branch,
+# possibly an upstream release branch).
 ensure_commit_unique_to_this_branch () {
   local ci_target="$1"
   local br_count
@@ -137,7 +141,8 @@ git_rebase_buble_commit_noninteractive () {
   if ! command -v "${seditor}" > /dev/null; then
     seditor="${GITSMART_BIN:-${HOME}/.local/bin}/${seditor}"
     if [ ! -e "${seditor}" ]; then
-      >&2 echo "ERROR: Cannot locate: git-rebase-bubble-oldest"
+      >&2 echo "ERROR: Rebase stream editor missing or not executable: ${seditor}"
+
       exit 1
     fi
   fi
