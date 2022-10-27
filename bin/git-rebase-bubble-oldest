@@ -6,19 +6,44 @@
 
 # USAGE:
 #
-#   GIT_SEQUENCE_EDITOR='/path/to/git-rebase-swampend' git rebase -i ...
+#   GIT_SEQUENCE_EDITOR='/path/to/git-rebase-bubble-oldest' git rebase -i <revision>
 #
-# 2020-01-30 16:06: I meant to call this `git-rebase-swap-ends`.
-#
-# TEELDEER: Swaps the first and last commit of an (interactive) rebase
-#           sequence and completes the rebase (sans interaction).
+# USETO: Rebase so the first commit in the range (the ancestor commit)
+#        becomes the last commit (the new HEAD).
+#        - This is a contactless interactive rebase, so to speak,
+#          no user interaction involved.
 
+# REFER: The `awk -i inplace` specifies an awk extension:
+#   https://www.gnu.org/software/gawk/manual/html_node/Extension-Sample-Inplace.html
+
+# DEV: Uncomment to show rebase-todo before and after:
+#  DX_SHOW_TODO=true
+DX_SHOW_TODO=${DX_SHOW_TODO:-false}
+
+# Git passes the internal path to the rebase-todo file, e.g.,
+#   /path/to/project/.git/rebase-merge/git-rebase-todo
 git_rebase_bubble_oldest () {
+  local rebase_todo_path="$1"
+
+  if ${DX_SHOW_TODO}; then
+    >&2 echo
+    >&2 echo "rebase-todo before:"
+    >&2 cat "${rebase_todo_path}"
+    >&2 echo
+  fi
+
   awk -i inplace "
     BEGIN { state = 0 }
-    state == 0 { hist_line = \$0; state = 1; next };
-    \$0 ~ /^\$/ && state == 1 { print hist_line; state = 2; }
-    1" $1
+    state == 0 { first_commit = \$0; state = 1; next };
+    \$0 ~ /^\$/ && state == 1 { print first_commit; state = 2; }
+    1" ${rebase_todo_path}
+
+  if ${DX_SHOW_TODO}; then
+    >&2 echo
+    >&2 echo "rebase-todo after:"
+    >&2 cat "${rebase_todo_path}"
+    >&2 echo
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
