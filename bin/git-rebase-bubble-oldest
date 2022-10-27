@@ -24,7 +24,7 @@ git_rebase_bubble_oldest () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
-  git_rebase_bubble_oldest
+  git_rebase_bubble_oldest "${@}"
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
