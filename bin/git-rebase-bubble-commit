@@ -7,7 +7,16 @@
 # USAGE: Call with a commit message snippet to bubble the matching commit
 #        to be the latest commit.
 #
-#        Wire to an alias specific to your workflow, e.g.,
+#        Wire to an alias specific to your workflow.
+#
+#        E.g., suppose you commit a changlog with the commit title
+#        "Update History", and you want that commit to be the most
+#        recent commit when you make a release, so you bubble that
+#        commit before tagging (and then possibly `commit --amend`
+#        additional details). You could auto-bubble that commit up
+#        using this command with the following alias. Then when you
+#        want to bring the most recent changlog "Update History"
+#        commit to be the HEAD commit, call `git bubble-history`.
 #
 #           git config --add alias.bubble-history "rebase-bubble-commit 'Update History'"
 
