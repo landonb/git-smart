@@ -55,7 +55,7 @@ git-rebase-bubble-commit () {
   #   local matchstr="$1"
   # - Unless we want to pass-through args to git-rebase, no reason not to gobble all...
   #   unless behavior changes later and then user's git behaves unexpectedly differently.
-  local find_ci_msg="${@}"
+  local find_ci_msg="$@"
 
   must_specify_match_message "${find_ci_msg}"
 
@@ -150,10 +150,10 @@ git_rebase_buble_commit_noninteractive () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
-  git-rebase-bubble-commit "${@}"
+  git-rebase-bubble-commit "$@"
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
-  main "${@}"
+  main "$@"
 fi
 
