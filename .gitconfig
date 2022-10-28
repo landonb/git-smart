@@ -1170,7 +1170,7 @@
 
   wip = ! \
     git add -A && \
-    git ci -m WIP
+    git ci --no-verify -m WIP
 
   # See: bin/git-wipit
   wippit = wipit
