@@ -7,11 +7,13 @@
 
 git_branch_exists () {
   local branch_name="$1"
+
   git show-ref --verify --quiet refs/heads/${branch_name}
 }
 
 git_branch_name () {
   local project_root="$(git rev-parse --show-toplevel)"
+
   # Note that $(git rev-parse HEAD) returns the hash, not the name,
   # so we add the option, --abbrev-ref.
   # - But first! check there's actually a branch, i.e., if `git init`
@@ -22,6 +24,7 @@ git_branch_name () {
 
     return
   fi
+
   # 2020-09-21: (lb): Adding `=loose`:
   # - For whatever reason, I'm seeing this behavior:
   #   - On Linux, `git rev-parse --abbrev-ref` returns simply, e.g., "my_branch".
@@ -43,6 +46,10 @@ git_HEAD_commit_sha () {
   git rev-parse HEAD
 }
 
+git_first_commit_sha () {
+  git rev-list --max-parents=0 HEAD
+}
+
 git_remote_exists () {
   local remote="$1"
 
@@ -53,7 +60,15 @@ git_remote_branch_exists () {
   local remote="$1"
   local branch="$2"
 
-  git show-branch remotes/${remote}/${branch} &> /dev/null
+  local remote_branch
+  if [ -z "${branch}" ]; then
+    # Assume caller passed in remote/branch.
+    remote_branch="${remote}"
+  else
+    remote_branch="${remote}/${branch}"
+  fi
+
+  git show-branch "remotes/${remote_branch}" &> /dev/null
 }
 
 git_tracking_branch () {
@@ -110,6 +125,7 @@ git_insist_pristine () {
 
 git_versions_tagged_for_commit () {
   local hash="$1"
+
   if [ -z "${hash}" ]; then
     hash="$(git_HEAD_commit_sha)"
   fi
