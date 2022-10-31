@@ -97,8 +97,8 @@ git_fixup_and_rebase () {
     echo "FIXME: Once you're sick of being prompted, remove this check."
     echo
 
-    echo "Was rebase successful? [y/n]"
-    read yorn
+    echo "Was rebase successful? [y/N] "
+    read -n 1 yorn
     if [ "${yorn#y}" != "${yorn}" ] || [ "${yorn#Y}" != "${yorn}" ]; then
       # Aka `git pop1`.
       git reset --mixed @~1
