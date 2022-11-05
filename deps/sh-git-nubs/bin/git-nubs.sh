@@ -12,7 +12,9 @@ git_branch_exists () {
 }
 
 git_branch_name () {
-  local project_root="$(git rev-parse --show-toplevel)"
+  local project_root
+  project_root="$(git_project_root)"
+  [ $? -eq 0 ] || return
 
   # Note that $(git rev-parse HEAD) returns the hash, not the name,
   # so we add the option, --abbrev-ref.
@@ -50,6 +52,20 @@ git_first_commit_sha () {
   git rev-list --max-parents=0 HEAD
 }
 
+git_first_commit_message () {
+  git --no-pager log --format=%s --max-parents=0 HEAD
+}
+
+git_latest_commit_message () {
+  git --no-pager log --format=%s -1 HEAD
+}
+
+git_number_of_commits () {
+  local gitref="${1:-HEAD}"
+
+  git rev-list --count "${gitref}"
+}
+
 git_remote_exists () {
   local remote="$1"
 
@@ -82,6 +98,12 @@ git_tracking_branch_safe () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Not that Git essentially calls `realpath` (or `readlink -f`?)
+# on the path, resolving symlinks along the way.
+git_project_root () {
+  git rev-parse --show-toplevel
+}
+
 # Check that the current directory exists in a Git repo.
 git_insist_git_repo () {
   # A naive approach is to check for the .git/ directory.
@@ -113,9 +135,29 @@ git_insist_pristine () {
   local projpath="${1:-$(pwd)}"
 
   >&2 echo
-  >&2 echo "ERROR: Project working directory not tidy! Try:"
+  >&2 echo "ERROR: Working directory not tidy."
+  >&2 echo "- HINT: Try:"
   >&2 echo
-  >&2 echo "   cd ${projpath} && git status"
+  >&2 echo "   cd \"${projpath}\" && git status"
+  >&2 echo
+
+  return 1
+}
+
+git_nothing_staged () {
+  git diff --cached --quiet
+}
+
+git_insist_nothing_staged () {
+  ! git_nothing_staged || return 0
+
+  local projpath="${1:-$(pwd)}"
+
+  >&2 echo
+  >&2 echo "ERROR: Working directory has staged changes."
+  >&2 echo "- HINT: Try:"
+  >&2 echo
+  >&2 echo "   cd \"${projpath}\" && git status"
   >&2 echo
 
   return 1
