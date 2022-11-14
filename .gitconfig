@@ -1163,14 +1163,14 @@
   #   https://icanhazdadjoke.com/api
   # - Bored?
   #   curl -H "Accept: application/json" "https://icanhazdadjoke.com/search?term=bar"
-  dad = !curl "https://icanhazdadjoke.com/" && echo && git add
+  dad = !curl '"https://icanhazdadjoke.com/"' && echo && git add
   rad = !echo '   (⌐■_■)' && git add
 
   # -------
 
   wip = ! \
     git add -A && \
-    git ci --no-verify -m WIP
+    git commit --no-verify -m '"WIP"'
 
   # See: bin/git-wipit
   wippit = wipit
@@ -1188,7 +1188,7 @@
   #          are marked as assume unchanged (see git-update-index(1))."
   #     https://stackoverflow.com/questions/2363197/
   #       can-i-get-a-list-of-files-marked-assume-unchanged
-  ignored = !git ls-files -v | grep "^[[:lower:]]"
+  ignored = !git ls-files -v | grep '"^[[:lower:]]"'
 
   # From Marius Gedminas, a command to see files that are .gitignore'd,
   # but I have git-ignored showing --assume-unchanged files, so I guess
