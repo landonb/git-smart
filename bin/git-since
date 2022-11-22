@@ -62,12 +62,10 @@ git_since () {
   # - E.g., if 'release' branch and 'release' remote,
   #   which one does git-diff, git-log, and tig use?
 
-  must_verify_ref "${upstream_ref}" "Reference" || return $?
+  must_verify_ref "${upstream_ref}" "Upstream" || return $?
   must_verify_ref "${feature_work}" "Feature" || return $?
 
   local common_ancestor=$(git merge-base ${feature_work} ${upstream_ref})
-
-  # >&2 echo "common_ancestor=${common_ancestor}"
 
   eval "${_GS_SINCE_COMMAND:-git diff} ${common_ancestor}..HEAD"
 }
@@ -135,16 +133,6 @@ _git_since_command_parse_ref_arg () {
   fi
 }
 
-must_verify_ref () {
-  local ref_name="$1"
-  local friendly="$2"
-
-  git_is_valid_ref "${ref_name}" && return
-
-  >&2 echo "ERROR: ${friendly} reference not found: ${ref_name}"
-  return 1
-}
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # 2021-02-05: I really don't remember why I was being so strict here...
@@ -155,37 +143,15 @@ must_verify_ref () {
 #       unknown revision or path not in the working tree.
 #   So at least this check lets us tell user which ref is invalid.
 
-# We could check for specific refs by object type, e.g.,
-#
-#   git show-ref --verify --quiet refs/heads/${ref_name} ||
-#     git show-ref --verify --quiet refs/remotes/${ref_name} ||
-#     git show-ref --verify --quiet refs/tags/${ref_name}
-#
-# But we also want to allow SHA1 refs, so...:
-#
-# A few ideas to check for valid SHA1 object.
-#
-#   # Check that reference resolves to a commit.
-#   test "$(git cat-file -t "${ref_name}")" == commit
-#
-#   # Check that reference valid, printing on error only, e.g.,
-#   #   fatal: Not a valid object name {}
-#   git cat-file -e "${ref_name}^{commit}" > /dev/null
-#
-#   # Check valid ref, printing on success only (the resolved SHA1).
-#   [ -z "$(git rev-parse -q --verify "${ref_name}^{commit}")" ]
-#
-# https://stackoverflow.com/questions/18515488/
-#   how-to-check-if-the-commit-exists-in-a-git-repository-by-its-sha-1
-
-git_is_valid_ref () {
+must_verify_ref () {
   local ref_name="$1"
+  local friendly="$2"
 
-  [ -n "$(git rev-parse --verify --quiet "${ref_name}^{commit}")" ]
-}
+  git_is_valid_ref "${ref_name}" && return
 
-git_tracking_branch () {
-  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null
+  >&2 echo "ERROR: ${friendly} reference not found: ${ref_name}"
+
+  return 1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
