@@ -47,6 +47,7 @@ use_conventional_remote_maybe_and_must_exist () {
     for try_remote in ${GITSMART_MYST_REMOTE_HIERARCHY}; do
       if git remote get-url ${try_remote} &> /dev/null; then
         remote="${try_remote}"
+
         break
       fi
     done
@@ -58,6 +59,7 @@ use_conventional_remote_maybe_and_must_exist () {
     else
       >&2 echo 'ERROR: Unable to deduce remote; please specify.'
     fi
+
     return 1
   fi
 

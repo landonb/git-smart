@@ -9,9 +9,11 @@
 # - If no branches are specified, finds the ancestor of the
 #   upstream branch and the current branch.
 #   - The upstream branch is assumed to be named 'release'.
+#
 #     - FIXME/2021-01-30: Ideally, this command would honor the
 #       GITSMART_CORE_BRANCHES list that other commands use to
 #       determine the trunk branch name.
+#
 # - If a single branch is specified, finds the ancestor of 'release'
 #   and the named branch.
 # - If two branches are specified, finds the ancestor of the two
@@ -79,30 +81,37 @@ _git_since_command_parse_args () {
     case $1 in
       -d | --diff)
         _GS_SINCE_COMMAND='git diff'
+
         shift
         ;;
       -l | --log)
         _GS_SINCE_COMMAND='git log'
+
         shift
         ;;
       -t | --tig)
         _GS_SINCE_COMMAND='tig'
+
         shift
         ;;
       -p | --print)
+        
         _GS_SINCE_COMMAND='echo'
         shift
         ;;
       -h | --help)
         echo "USAGE: $0 [-d|--diff | -l|--log | -t|--tig| -p|--print] [<upstream-ref>] [<feature-ref>]"
+
         exit 0
         ;;
       --)
         shift
+
         break
         ;;
       *)
         _git_since_command_parse_ref_arg "$1"
+
         shift
         ;;
     esac
