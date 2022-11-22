@@ -155,16 +155,26 @@ remotes_process_and_pretty_print_tidy () {
   local git_cmd="$1"
 
   for remote in \
+    'entrust' \
+    'isolate' \
+    'qualify' \
     'proving' \
+    'publish' \
     'release' \
+    'genesis' \
     'starter' \
     'myclone' \
     'origin' \
     'upstream' \
     $(git remote \
       | grep -v \
+        -e 'entrust' \
+        -e 'isolate' \
+        -e 'qualify' \
         -e 'proving' \
+        -e 'publish' \
         -e 'release' \
+        -e 'genesis' \
         -e 'starter' \
         -e 'myclone' \
         -e 'origin' \
