@@ -4,6 +4,8 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 reveal_biz_vars () {
   # Left-align with 5 spaces between name and URL:
   #  GITSMART_COLSEP="${GITSMART_COLSEP:-     }"
@@ -19,7 +21,7 @@ reveal_biz_vars () {
   GITSMART_MAX_WIDTH=${GITSMART_MAX_WIDTH:-0}
 }
 
-# ***
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # TOO_BASHY for macOS system Bash:
 #  declare -A -x GITSMART_REMOTE_CACHE__
@@ -117,6 +119,7 @@ callback_print_remote_info () {
 # Runs the git fetch command, being particular about messaging.
 callback_process_git_cmd_fetch () {
   local remote="$1"
+  shift
 
   local cmd_resp
   local err_code
@@ -124,7 +127,7 @@ callback_process_git_cmd_fetch () {
   # Print a "Fetching" message that we'll overwrite later.
   printf "Fetching ${remote}..."
 
-  cmd_resp="$(git fetch "${remote}" 2>&1)"
+  cmd_resp="$(git fetch "${remote}" "$@" 2>&1)"
   err_code=$?
 
   # Remove error lines associated with offline remote, because git
@@ -153,6 +156,7 @@ callback_process_git_cmd_fetch () {
 
 remotes_process_and_pretty_print_tidy () {
   local git_cmd="$1"
+  shift
 
   for remote in \
     'entrust' \
@@ -189,18 +193,20 @@ remotes_process_and_pretty_print_tidy () {
       callback_print_remote_info "${remote}" "$(_gs_get_remote_cache "${remote}")"
     elif [ "${git_cmd}" = "fetch" ]; then
       # Run git-fetch on each remote.
-      callback_process_git_cmd_fetch "${remote}"
+      callback_process_git_cmd_fetch "${remote}" "$@"
     fi
   done
 }
 
 must_recognize_optional_remotes_command () {
   local git_cmd="$1"
+  shift
 
   if [ -n "${git_cmd}" ] &&
       [ "${git_cmd}" != "fetch" ] &&
       [ "${git_cmd}" != "pwd" ] ; then
     >&2 echo "ERROR: Unrecognized git command: “${git_cmd}”"
+
     exit 1
   fi
 }
