@@ -738,6 +738,7 @@
   }; f"
 
   brs-all = !git --no-pager branch -avv
+  bra = !git --no-pager branch -avv
 
   # Delete merged branches except any conventionally-named branch (e.g., the
   # main development branch, what I call "proving" or others might call "main";
