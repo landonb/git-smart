@@ -1564,7 +1564,7 @@
   #       fap = "!f() { git fetch --all --prune 2> /dev/null; }; f"
   #   - Or better yet fetch in same order as git-re prints remotes,
   #     and indicate if success status of each fetch:
-  fap = re fetch
+  fap = re fetch --prune
 
   # Use `git pup` to push a branch and add tracking information (e.g., to
   # be used on a later `git pull`, or for `git status` to tell you things).
