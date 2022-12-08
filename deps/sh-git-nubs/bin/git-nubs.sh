@@ -52,8 +52,14 @@ git_HEAD_commit_sha () {
   git rev-parse HEAD
 }
 
+# BWARE: If the arg. is a valid SHA format, git-rev-parse echoes
+# it without checking if object actually exists.
 git_commit_object_name () {
   git rev-parse "${1:-HEAD}"
+}
+
+git_object_is_commit () {
+  [ "$(git cat-file -t "$1" 2> /dev/null)" = "commit" ]
 }
 
 git_first_commit_sha () {
@@ -93,6 +99,12 @@ git_remote_branch_exists () {
   fi
 
   git show-branch "refs/remotes/${remote_branch}" &> /dev/null
+}
+
+git_remote_default_branch () {
+  local remote="$1"
+
+  git remote show ${remote} | grep 'HEAD branch' | cut -d' ' -f5
 }
 
 # Prints the tracking aka upstream branch.
