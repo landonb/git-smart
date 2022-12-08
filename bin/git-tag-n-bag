@@ -10,28 +10,38 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# The tag-n-bag command uses three conventions when making the tag name:
-# - A common prefix is used to ensure all the tagged commits are grouped
+# USAGE: git tag-n-bag 
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# The tag-n-bag command builds the tag name from three components:
+# - A common prefix is used to ensure the tagged commits are grouped
 #   together, and so they don't mix with tags being used for another
 #   purpose.
-#   - E.g., a project might tag release with just the release number,
-#     e.g., '2.0.0', so you probably don't want the bagged tags to
-#     start with the date, e.g., '2021-01-19', because then the two
-#     types of tagged objects would appear interleaved in a tag list.
-# - The second convetion is to put the date of the latest commit next.
-# - And finally the third convention is simply that the branch name
-#   itself is used as the final part of the tag name.
+#   - E.g., a project might tag each release with the release number,
+#     e.g., '2.0.0'. So we don't use a date or a number to start the
+#     tag name. Otherwise, bagged tags might appear interleaved with
+#     version tags when listed by the user.
+# - After the prefix, we use the date of the HEAD commit, so that
+#   bag-tags are ordered chronologically.
+# - Finally, we append the branch name.
 
-# YOU: Set your own tag prefix externally, or to the empty string to not use.
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# USAGE: Set the TAGNBAG_PREFIX environ to use your own tag prefix.
 
 # Ref: For legal tag name (object name) characters, see:
 #
 #        man git-check-ref-format
 
-# The tag name used on each branch is the three components,
-# a prefix, the latest commit date, and the branch name,
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# The tag name used on each branch is the three components --
+# a prefix, the latest commit date, and the branch name --
 # each separated by a delimiter that defaults to '--'.
 [ -z ${TAGNBAG_SEP+x} ] && TAGNBAG_SEP="--"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # Some ideas for the prefix:
 # - Use the prefix to group all branches that you archive with the t-bag command.
@@ -80,7 +90,7 @@ git_tag_n_bag () {
   # Just a DEV switch for posterity: different code paths, same result.
   local dx_use_for_loop=false
 
-  # Notes if using --branches (esp. if you set dx_use_for_loop=true):
+  # Notes re: --branches (esp. if you set dx_use_for_loop=true):
   # - NOTE: The `rev-parse` pattern is a glob, e.g., `pattern*` will match the
   #         start of the branch name, whereas `*pattern*` will match anywhere.
   #         - See also: `git --no-pager branch --list <pattern>`, but that
