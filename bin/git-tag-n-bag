@@ -70,6 +70,7 @@ git_tag_n_bag () {
 
   if [ -z "${branch_or_pattern}" ]; then
     >&2 echo "USAGE: git tag-n-bag <branch-name-or-pattern> [<tag-prefix>]"
+
     return 1
   fi
 
@@ -141,6 +142,7 @@ git_tag_n_bag_branch () {
 
   if [ -z "${latest_date}" ]; then
     >&2 echo "SKIPPED: No such ref.: ${branch_name}"
+
     return 1
   fi
 
@@ -151,42 +153,55 @@ git_tag_n_bag_branch () {
   if git_tag_exists "${tag_name}"; then
     local tag_branch_sha1="$(git_lookup_tag_branch_sha1 "${tag_name}")"
     local bag_branch_sha1="$(git rev-parse "refs/heads/${branch_name}")"
+
     if [ "${tag_branch_sha1}" != "${bag_branch_sha1}" ]; then
       >&2 echo "SKIPPED: Tag exists but at different commit than branch"
       >&2 echo "- Tag named: ${tag_name}"
       >&2 echo "- on Branch: ${branch_name}"
+
       return 1
     fi
+
     echo "Endured: ${tag_name}"
   else
     git tag "${tag_name}" "refs/heads/${branch_name}"
+
     if [ $? -ne 0 ]; then
       >&2 echo "ERROR: Failed to ‘git tag ${tag_name} refs/heads/${branch_name}’"
+
       return 1
     fi
+
     echo "New Tag: ${tag_name}"
   fi
 
   # Delete the branch.
   #
   local branch_sha1_short="$(git rev-parse --short "refs/tags/${tag_name}")"
+
   # Outputs, e.g.: "Deleted branch foo-bar (was 9c6e0380)."
   git branch -D "${branch_name}" > /dev/null
+
   if [ $? -ne 0 ]; then
     # This would be totally unexpected!
     >&2 echo "ERROR: Failed to ‘git branch -D ${branch_name}’"
+
     return 1
   fi
   #
   echo "Deleted: ${branch_name} (from ${branch_sha1_short})"
 
   # Delete remote, if exists.
+  #
   if git show-ref --verify --quiet "refs/remotes/${remote_name}/${branch_name}"; then
     git push "${remote_name}" ":${branch_name}"
+
     if [ $? -ne 0 ]; then
       >&2 echo "ERROR: Failed to ‘git push ${remote_name} :${branch_name}’"
+
       return 1
     fi
+
     echo "Remove remote: ${remote_name}/${branch_name}"
     echo "Bagged branch: ${branch_name}"
   fi
@@ -204,6 +219,7 @@ git_lookup_tag_branch_sha1 () {
   local tag_name="$1"
   local tag_sha1="$(git rev-parse "refs/tags/${tag_name}")"
   local tag_commit="$(git rev-list -n 1 "${tag_sha1}")"
+
   echo "${tag_commit}"
 }
 
@@ -214,6 +230,7 @@ git_tag_n_bag_report () {
 
   local branches
   [ ${bagged_count} -ne 1 ] && branches="branches" || branches="branch"
+
   echo "-Tagged 'n bagged- (${bagged_count}) ${branches}."
 }
 
