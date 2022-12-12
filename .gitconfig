@@ -892,6 +892,9 @@
       --pretty='format:%C(green)%ad %C(red)%h %C(reset)%D' \
       --date=short
 
+  tags-match = "! f() { \
+    git tag --format=\"%(objectname:short) %(refname:short)\" --list \"$@\"; }; f \"$@\""
+
   # Show just the date of the latest commit.
   d1 = "! f() { git --no-pager log -1 --format=%cd --date=format:%Y-%m-%d; }; f"
 
