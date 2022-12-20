@@ -1676,8 +1676,15 @@
   # These are similar:
   whoami = "! printf '%s <%s>\n' \"$(git config user.name)\" \"$(git config user.email)\""
   # To include the name, from https://github.com/mgedmin/dotfiles/blob/master/gitconfig:
-  # Or even, from https://gist.github.com/pksunkara/988716#file-config-L257:
-  whoami2 = !sh -c 'git --no-pager log -i -1 --author=\"$1\" --pretty=\"format:%an <%ae>%n\"' -
+  #  whoami = var GIT_COMMITTER_IDENT
+  #  whoami = !git var GIT_COMMITTER_IDENT | sed 's/ [0-9]\\+ [-+0-9]\\+$//'
+  # Or even, from https://gist.github.com/pksunkara/988716#file-config-L257
+  # the author of the last commit :
+  #  # whoami2 = !sh -c 'git --no-pager log -i -1 --author=\"$1\" --pretty=\"format:%an <%ae>%n\"' -
+  #  whoami2 = !sh -c 'git --no-pager log -i -1 --pretty=\"format:%an <%ae>%n\"' -
+  whose-commit = "!f() { \
+    git --no-pager log -i -1 --pretty=\"format:%an <%ae>%n\" \"$@\"; \
+  }; f"
 
   # SHA of the very first commit.
   first-commit = rev-list --max-parents=0 HEAD
