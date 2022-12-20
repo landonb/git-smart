@@ -1672,9 +1672,10 @@
 
 [alias]
   # Empirically speaking.
-  whoami = config user.email
+  #  whoami = config user.email
+  # These are similar:
+  whoami = "! printf '%s <%s>\n' \"$(git config user.name)\" \"$(git config user.email)\""
   # To include the name, from https://github.com/mgedmin/dotfiles/blob/master/gitconfig:
-  #   whoami = !git var GIT_COMMITTER_IDENT | sed 's/ [0-9]\\+ [-+0-9]\\+$//'
   # Or even, from https://gist.github.com/pksunkara/988716#file-config-L257:
   whoami2 = !sh -c 'git --no-pager log -i -1 --author=\"$1\" --pretty=\"format:%an <%ae>%n\"' -
 
