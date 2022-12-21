@@ -1644,14 +1644,18 @@
   #   - GIT_EDITOR=true courtesy:
   #       https://stackoverflow.com/questions/43489971/
   #         how-to-suppress-the-editor-for-git-rebase-continue
-  rc = !GIT_EDITOR=true git rebase --continue
+  #
+  #  rc = !GIT_EDITOR=true git rebase --continue
+  #  # Git cherry-pick --continue.
+  #  #     ░      ▒      ▓
+  #  cpc = cherry-pick --continue
+  rc = ! [ -f .git/CHERRY_PICK_HEAD ] && \
+    GIT_EDITOR=true git cherry-pick --continue || \
+    GIT_EDITOR=true git rebase --continue
 
   # MAYBE/2021-05-30: Time to add an --abort shortcut?
   #  rba = rebase --abort
 
-  # Git cherry-pick --continue.
-  #     ░      ▒      ▓
-  cpc = cherry-pick --continue
 
   # Automatic conflict resolution.
   # From: https://gist.github.com/pksunkara/988716#file-config-L263-L264
