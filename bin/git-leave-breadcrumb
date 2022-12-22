@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# FIXME/2020-03-24 19:10: a01/2020-03-24- instead,
+# i.e., encode the number in the prefix...
+# for now, this is just so easy:
+#   git co -b a05/$(TTT)
+
+# USAGE: Creates a new, greater-numbered and dated WIP branch.
+#
+# - For intance, assuming today is 11 Feb 2020
+#   and there are already 2 WIP branches, then:
+#
+#   $ git brs
+#   * feature/XX-123/make-customer-happy
+#     release
+#
+#   $ git --no-pager tag --list feature/XX-123/make-customer-happy/*
+#   feature/XX-123/make-customer-happy/01
+#
+#   $ git leave-breadcrumb
+#   Dropped crumb at 'feature/XX-123/make-customer-happy/02'
+
+# ***
+
+# How wide to make the -XX counter.
+_GS_PRECISION="2"
+
+_GS_TAG_PREFIX="🍞/"
+
+DTRACE=false
+# DEV/YOU: Uncomment to spit trace to stderr.
+#  DTRACE=true
+
+# ***
+
+git-leave-breadcrumb () {
+  local dry=false
+  [ "$1" = "-v" ] && dry=true
+
+  local branch_name=$(git rev-parse --abbrev-ref=loose HEAD)
+
+  local max_crumb_num=$( \
+    git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" \
+    | /usr/bin/env sed -E 's#^.*/0*([0-9]+)/[0-9a-zA-Z_-]+$#\1#' \
+    | sort -n -r \
+    | head -n1 \
+  )
+
+  if [ -z "${max_crumb_num}" ]; then
+    max_crumb_num=0
+  else
+    # FIXME/2022-12-21 20:00: Move to sub fcn.
+    local fmtd_prev_crumb_num
+    fmtd_prev_crumb_num=$(printf "%0${_GS_PRECISION}d" "${max_crumb_num}")
+    ${DTRACE} && >&2 echo "fmtd_prev_crumb_num=${fmtd_prev_crumb_num}"
+
+    local latest_crumb_prefix
+    latest_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/${fmtd_prev_crumb_num}"
+    ${DTRACE} && >&2 echo "latest_crumb_prefix=${latest_crumb_prefix}"
+
+    local latest_crumb_tag="$( \
+      git --no-pager tag --list "${latest_crumb_prefix}/*" \
+    )"
+    ${DTRACE} && >&2 echo "latest_crumb_tag=${latest_crumb_tag}"
+
+    if [ -n "${latest_crumb_tag}" ]; then
+      local latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
+      ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
+
+      local HEAD_id="$(git rev-parse "HEAD")"
+      ${DTRACE} && >&2 echo "HEAD_id=${HEAD_id}"
+
+      if [ "${latest_crumb_id}" = "${HEAD_id}" ]; then
+        echo "already tagged!"
+
+        return
+      fi
+    fi
+  fi
+  ${DTRACE} && >&2 echo "max_crumb_num=${max_crumb_num}"
+
+  local next_crumb_num
+  next_crumb_num=$((${max_crumb_num} + 1))
+  ${DTRACE} && >&2 echo "next_crumb_num=${next_crumb_num}"
+
+  local fmtd_crumb_num
+  fmtd_crumb_num=$(printf "%0${_GS_PRECISION}d" "${next_crumb_num}")
+  ${DTRACE} && >&2 echo "fmtd_crumb_num=${fmtd_crumb_num}"
+
+  local next_crumb_num
+  # next_crumb_num="wip/${fmtd_crumb_num}/$(date +%Y-%m-%d)"
+  next_crumb_num="${_GS_TAG_PREFIX}${branch_name}/${fmtd_crumb_num}/$(date '+%y%m%d_%H%M')"
+
+  if ${dry}; then
+    # echo "git branch --track=inherit ${next_crumb_num}"
+    echo "git tag ${next_crumb_num}"
+
+    return
+  fi
+
+  # git branch --track=inherit "${next_crumb_num}"
+  git tag "${next_crumb_num}"
+
+  echo "${next_crumb_num}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git-leave-breadcrumb "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "$@"
+fi
+
