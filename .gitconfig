@@ -1653,9 +1653,7 @@
     GIT_EDITOR=true git cherry-pick --continue || \
     GIT_EDITOR=true git rebase --continue
 
-  # MAYBE/2021-05-30: Time to add an --abort shortcut?
-  #  rba = rebase --abort
-
+  cancel = ! git abort
 
   # Automatic conflict resolution.
   # From: https://gist.github.com/pksunkara/988716#file-config-L263-L264
