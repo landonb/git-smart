@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+git_abort () {
+  local gitdir
+  gitdir="$(git rev-parse --git-dir)" || exit
+
+  local opfound=""
+  local fcnt=""
+  local plumbing_files=""
+
+  local abortable_ops="cherry-pick merge rebase revert"
+
+  local abortable_op
+  for abortable_op in ${abortable_ops}; do
+    local normalized
+    normalized="$(printf "${abortable_op}" | tr '[:lower:]' '[:upper:]')"
+    normalized="${normalized/-/_}"
+
+    local plumbing_file="${gitdir}/${normalized}_HEAD"
+
+    if [ -f "${plumbing_file}" ]; then
+      fcnt="1${fcnt}"
+      opfound="${abortable_op}"
+      plumbing_files="${plumbing_files} ${plumbing_file}"
+    fi
+  done
+
+  if [ "${fcnt}" != "1" ]; then
+    if [ "${fcnt}" = "" ]; then
+      echo "(You're doing fine) Nothing to abort" >&2
+    else
+      echo "(Something stinks) More than one abortable operation detected:" >&2
+      echo "${plumbing_files}" | xargs ls >&2
+    fi
+
+    exit 1
+  fi
+
+  git ${opfound} --abort
+}
+
+git_abort
+
