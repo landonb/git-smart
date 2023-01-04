@@ -1665,6 +1665,7 @@
 # #######################################################################
 
 [sequence]
+  # Aka `git config --global sequence.editor=interactive-rebase-tool`
   # https://github.com/MitMaro/git-interactive-rebase-tool
   editor = interactive-rebase-tool
 
