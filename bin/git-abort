@@ -25,6 +25,16 @@ git_abort () {
     fi
   done
 
+  # FIXME/2023-01-09 11:31: How better to detect this?:
+  # - If I `git ria! HEAD^` and try a squash, then rebase fails.
+  #   But there's no REBASE_HEAD, just a `.git/rebase-merge` directory.
+  #   - Why is it called `rebase-merge`? I.e., does git-merge use the
+  #     same-named directory?
+  if [ "${fcnt}" = "" ] && [ -d ".git/rebase-merge" ]; then
+    opfound="rebase"
+    fcnt=1
+  fi
+
   if [ "${fcnt}" != "1" ]; then
     if [ "${fcnt}" = "" ]; then
       echo "(You're doing fine) Nothing to abort" >&2
