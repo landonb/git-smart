@@ -1673,6 +1673,18 @@
   # https://github.com/MitMaro/git-interactive-rebase-tool
   editor = interactive-rebase-tool
 
+# https://github.com/MitMaro/git-interactive-rebase-tool/blob/master/readme/customization.md#key-bindings
+[interactive-rebase-tool]
+
+  # Would I like the tool a little better if I removed a little finger from the interaction?
+  # - I trust myself on rebase and to recover from error, so don't need a guard.
+
+  inputAbort = Q
+  inputForceAbort = q
+
+  inputRebase = W
+  inputForceRebase = w
+
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
