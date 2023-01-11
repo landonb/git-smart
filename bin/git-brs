@@ -46,7 +46,31 @@ git-brs () {
   bg_cyan () { printf '46'; }
   bg_white () { printf '47'; }
 
-  printg () { echo "$1" | GREP_COLORS="mt=$2" grep --color=always -P "$3"; }
+  # 2023-01-11: I don't prefer Homebrew grep because it's slow (at was when
+  # I most recently onboarded an M1 Mac), so ensure calling GNU grep.
+  # - Note this script uses Perl regex b/c (?!negative lookahead) [I assume],
+  #   which BSD grep does not support.
+  #   - I also tried perl directly, but probably did it wrong but don't want
+  #     to rabbit-hole, but this did not work for me:
+  #       echo ... | perl -ne 'print ${regex}'
+  grep-or-ggrep () {
+    #   $ grep --version
+    #   grep (BSD grep, GNU compatible) 2.6.0-FreeBSD
+    #   # "GNU compatible" it's not.
+    #   $ ggrep --version
+    #   ggrep (GNU grep) 3.8
+    if grep -q -e "GNU grep" <(grep --version | head -1); then
+      echo "grep"
+    elif command -v ggrep > /dev/null; then
+      echo "ggrep"
+    else
+      >&2 echo "ERROR: GNU \`grep\` not found"
+    fi
+  }
+
+  local GREP="$(grep-or-ggrep)"
+
+  printg () { echo "$1" | GREP_COLORS="mt=$2" ${GREP} --color=always -P "$3"; }
 
   # Use -a/--all to include remote-tracking branches. Add -v includes sha1 and
   # commit subject line, and relationship to upstream branch. Make double -vv
@@ -61,7 +85,7 @@ git-brs () {
 
   local all_annotate="$(git --no-pager branch -avv)"
   local filter_remotes="$(git_brs_filter_remotes)"
-  local important_brs="$(echo "${all_annotate}" | grep -P "${filter_remotes}")"
+  local important_brs="$(echo "${all_annotate}" | ${GREP} -P "${filter_remotes}")"
 
   local high="${important_brs}"
   # Start by matching everything.
