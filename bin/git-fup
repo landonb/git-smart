@@ -40,7 +40,7 @@ git_fixup_and_rebase () {
   must_not_have_unstaged_hard_link_changes
 
   # Aka `git fu`.
-  git commit --no-verify --fixup ${commit}
+  git commit -q --no-verify --fixup ${commit}
 
   local pop_after=false
   if [ -n "$(git_status_porcelain)" ]; then
@@ -48,7 +48,7 @@ git_fixup_and_rebase () {
     pop_after=true
     # Aka `git wip`
     git add -A
-    git commit --no-verify -m "${wip_commit_message}"
+    git commit -q --no-verify -m "${wip_commit_message}"
   fi
 
   # Have the interactive rebase sequence editor complete automatically
