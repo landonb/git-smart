@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# USAGE: git reword {commit}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# COPYD: See git_reword_revision command in tig-newtons
+#   https://github.com/depoxy/tig-newtons#🍎
+# Using DepoXy, at ~/.kit/git/tig-newtons/tig/config
+git_reword_revision () {
+  local commit="$1"
+
+  set -e
+
+  local wipped=false
+
+  git add -A \
+    && git commit --no-verify -m 'PRIVATE: WIP [git-reword]' \
+    && wipped=true
+
+  GIT_SEQUENCE_EDITOR='f () { \
+    local rebase_todo_path="$1"
+    sed -i "1 s/^pick/reword/" "${rebase_todo_path}"
+  }; f "$1"' git rebase -i "${commit}"^
+
+  ${wipped} && git reset --mixed @~1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  git_reword_revision "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
