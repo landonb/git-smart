@@ -22,12 +22,16 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE="PRIVATE: WIP [git-fup]"
+
 git_fixup_and_rebase () {
   local commit="$1"
 
-  local wip_commit_message="WIP"
+  if [ -z "${commit}" ]; then
+    >&2 echo "ERROR: Please specify a commit"
 
-  set -e
+    exit 1
+  fi
 
   # The `git --no-pager diff --name-only` returns paths relative to
   # root, which is used by must_not_have_unstaged_hard_link_changes.
@@ -43,13 +47,7 @@ git_fixup_and_rebase () {
   git commit -q --no-verify --fixup ${commit}
 
   local pop_after=false
-  if [ -n "$(git_status_porcelain)" ]; then
-    # Untracked, Unstaged, or Staged changes not committed.
-    pop_after=true
-    # Aka `git wip`
-    git add -A
-    git commit -q --no-verify -m "${wip_commit_message}"
-  fi
+  ! maybe_commit_uncommitted || pop_after=true
 
   # Have the interactive rebase sequence editor complete automatically
   # by specifying the Bash `:` no-op.
@@ -57,54 +55,110 @@ git_fixup_and_rebase () {
   #   https://stackoverflow.com/questions/29094595/
   #     git-interactive-rebase-without-opening-the-editor
 
-  # Aka `git ria ${commit}^`
-  GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^
+  local rebase_failed=false
 
-  # Here we pop the temporary "WIP" commit that we made before the rebase.
-  # - But beware a failed rebase -- we don't want to pop the latest commit
+  # Aka `git ria ${commit}^`
+  #  echo "GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^"
+  if ! GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^; then
+    # MEH: We could wait for user to resolve conflicts (like git-put-wise
+    # does (see: must_await_user_resolve_conflicts)). But all user has to
+    # do to clean up is pop the WIP commit. So unless that's too annoying,
+    # we'll just remind user about the WIP commit; otherwise we can take
+    # the time to add code to prompt-loop until .git/REBASE_HEAD gone.
+    print_error_rebase_failed_shared
+    if ${pop_after}; then
+      print_error_rebase_failed_wipped
+    fi
+
+    rebase_failed=true
+  fi
+
+  # Before we pop the temporary "WIP" commit that we made before the rebase:
+  # - Beware a failed rebase -- we don't want to pop the latest commit
   #   if the rebase stopped to ask the user to intervene, because that's
   #   nor our temporary commit.
-  # - Most likely, we only need to check that the repo is tidy. If it's
-  #   not tidy, the rebase failed.
-  # - But we'll also do an extra paranoid check (or is it due diligence?)
-  #   and verify that the latest commit has a "WIP" message (which isn't
-  #   foolproof, and if we check after checking git-status, the fail-branch
-  #   will likely never run, but at least we can say we tried).
-  if ${pop_after}; then
-    if [ -n "$(git_status_porcelain)" ]; then
-      echo
-      echo "OOPS! It looks like the rebase stopped."
-      echo "- Reason: Git status reports the project is not tidy."
-      echo "- Resolution: You're gonna have to take it from here!"
-      return
-    fi
-    echo
+  # - AFAIK, .git/REBASE_HEAD exists until the rebase is complete.
+  # - We can also to check if the repo is tidy. If it's not tidy,
+  #   we can assume the rebase failed.
+  # - While we're at it -- or just being unnecessarily paranoid --
+  #   verify that the latest commit has the "WIP" message we used.
+  if ${pop_after} && ! ${rebase_failed}; then
+    double_triple_quadruple_check_rebase_complete \
+      || exit 1
 
-    if [ "$(git_latest_commit_message)" != "${wip_commit_message}" ]; then
-      echo
-      echo "OOPS! It looks like the rebase stopped."
-      echo "- Reason: The latest commit is not the \"WIP\" we made."
-      echo "- Resolution: You're gonna have to take it from here!"
-      return
-    fi
-
-    # The original safe-guard from 2021-05-03 only prompted the user.
-    # FIXME/2022-10-13: If the previous safety checks (git-status) work,
-    #                   we can remove this prompt.
-    echo "It looks like the rebase was successful!"
-    echo "- But this code is under test, so please confirm."
-    echo
-    echo "FIXME: Once you're sick of being prompted, remove this check."
-    echo
-
-    echo "Was rebase successful? [y/N] "
-    read -n 1 yorn
-    if [ "${yorn#y}" != "${yorn}" ] || [ "${yorn#Y}" != "${yorn}" ]; then
-      # Aka `git pop1`.
-      git reset --mixed @~1
-      git --no-pager log -1 --pretty=oneline --abbrev-commit
-    fi
+    # Aka `git pop1 --quiet`.
+    git reset -q --mixed @~1
   fi
+}
+
+# ***
+
+maybe_commit_uncommitted () {
+  local pop_after=false
+
+  if [ -n "$(git_status_porcelain)" ]; then
+    # Untracked, Unstaged, or Staged changes not committed.
+    pop_after=true
+
+    # Aka `git wip`
+    git add -A
+    git commit -q --no-verify -m "${GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE}"
+  fi
+
+  ${pop_after}
+}
+
+# ***
+
+print_error_rebase_failed_shared () {
+  >&2 echo
+  >&2 echo "ERROR: The rebase failed."
+}
+
+print_error_rebase_failed_wipped () {
+  >&2 echo "- You'll find the WIP commit we made after you finish rebasing."
+  >&2 echo "  You can easily remove this commit:"
+  >&2 echo "    git-pop1 { git reset --mixed @~1; }"
+}
+
+# ***
+
+double_triple_quadruple_check_rebase_complete () {
+  local rebase_complete=true
+
+  # MAYBE/2023-01-15: Take page from git-put-wise playbook and
+  # wait for user to resolve rebase conflicts, so we can pop the
+  # wip commit. / But that's only reason to offer to run to
+  # completion, so really a big deal if we don't add such a
+  # mechanism.
+  if [ -f ".git/REBASE_HEAD" ]; then
+    echo
+    echo "ERROR: .git/REBASE_HEAD still exists"
+    echo "- This is likely a DEV error, so please take it from here."
+
+    rebase_complete=false
+  fi
+
+  if [ -n "$(git_status_porcelain)" ]; then
+    echo
+    echo "ERROR: There was an unexpected error:"
+    echo "- Git status reports the project is not tidy,"
+    echo "  but we didn't detect a .git/REBASE_HEAD file."
+    echo "- This is likely a DEV error, so please take it from here."
+
+    rebase_complete=false
+  fi
+
+  if [ "$(git_latest_commit_message)" != "${GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE}" ]; then
+    echo
+    echo "ERROR: There was an unexpected error:"
+    echo "- The latest commit is not the \"WIP\" we made."
+    echo "- This is likely a DEV error, so please take it from here."
+
+    rebase_complete=false
+  fi
+
+  ${rebase_complete}
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -152,6 +206,8 @@ must_not_have_unstaged_hard_link_changes () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
+  set -e
+
   git_fixup_and_rebase "$@"
 }
 
