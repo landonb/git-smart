@@ -132,8 +132,24 @@ double_triple_quadruple_check_rebase_complete () {
   # completion, so really a big deal if we don't add such a
   # mechanism.
   if [ -f ".git/REBASE_HEAD" ]; then
+    # 2023-01-16: I squashed @^ in @^^ via my new tig <C-r> command,
+    # and tig command said failed because .git/REBASE_HEAD exists,
+    # but rebase clearly-obviously completed, so looks like (via the
+    # empherical evidence) that Git won't always cleanup .git/REBASE_HEAD.
     echo
-    echo "ERROR: .git/REBASE_HEAD still exists"
+    # LATER/2023-01-16: Revisit and remove this if-block (confirm that
+    # you start seeing this error sometimes).
+    echo "ERROR?: .git/REBASE_HEAD still exists [but does it matter?]"
+    #echo "- This is likely a DEV error, so please take it from here."
+
+    # rebase_complete=false
+  fi
+
+  if [ -f ".git/rebase-merge/git-rebase-todo" ]; then
+    # 2023-01-16: This is the file the definitely should not exist if
+    # the rebase was sucessful.
+    echo
+    echo "ERROR: .git/rebase-merge/git-rebase-todo still exists"
     echo "- This is likely a DEV error, so please take it from here."
 
     rebase_complete=false
