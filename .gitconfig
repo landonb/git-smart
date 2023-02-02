@@ -1728,17 +1728,17 @@
   # https://github.com/MitMaro/git-interactive-rebase-tool
   editor = interactive-rebase-tool
 
-# https://github.com/MitMaro/git-interactive-rebase-tool/blob/master/readme/customization.md#key-bindings
-[interactive-rebase-tool]
-
-  # Would I like the tool a little better if I removed a little finger from the interaction?
-  # - I trust myself on rebase and to recover from error, so don't need a guard.
-
-  inputAbort = Q
-  inputForceAbort = q
-
-  inputRebase = W
-  inputForceRebase = w
+  # You can customize git-interactive-rebase-tool bindings in Git config,
+  # which I do from a separate project, to avoid being opinionated here
+  # and changing default bindings that might confuse or infuriate users.
+  # - CXREF: DepoXy development environment orchestrator:
+  #     https://github.com/depoxy/depoxy#🍯
+  #   If you've installed DepoXy, the config is likely at
+  #     ~/.depoxy/ambers/home/.gitconfig.local
+  #   and definitely symlinked at ~/.gitconfig.local,
+  #   which gets included at the bottom of this file.
+  # - CXREF: git-interactive-rebase-tool customization doc:
+  #     https://github.com/MitMaro/git-interactive-rebase-tool/blob/master/readme/customization.md#key-bindings
 
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
