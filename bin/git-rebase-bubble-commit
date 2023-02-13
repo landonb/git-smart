@@ -147,7 +147,7 @@ git_rebase_buble_commit_noninteractive () {
     fi
   fi
 
-  ${DTRACE} && >&2 echo "Pivot: git rebase -i ${ci_before}"
+  ${DTRACE} && >&2 echo "git rebase -i ${ci_before}"
   GIT_SEQUENCE_EDITOR="${seditor}" \
     git rebase -i ${ci_before}
 }
