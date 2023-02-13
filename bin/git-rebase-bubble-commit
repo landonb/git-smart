@@ -49,7 +49,7 @@ DTRACE=false
 
 # ***
 
-git-rebase-bubble-commit () {
+git_rebase_bubble_commit () {
   # See note at start of script: Ensure you've quoted the string properly!
   # FIXME/2020-01-30: Any reason to `shift 1` and send `${@}` to git-rebase?
   #   local matchstr="$1"
@@ -155,10 +155,12 @@ git_rebase_buble_commit_noninteractive () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
-  git-rebase-bubble-commit "$@"
+  git_rebase_bubble_commit "$@"
 }
 
-if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+# Note that dash complains "Bad substitution" on ${BASH_SOURCE[0]},
+# so we test set first.
+if [ -n "${BASH_SOURCE}" ] && [ "$0" = "${BASH_SOURCE[0]}" ]; then
   main "$@"
 fi
 
