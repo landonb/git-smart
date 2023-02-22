@@ -25,12 +25,7 @@ DX_SHOW_TODO=${DX_SHOW_TODO:-false}
 git_rebase_bubble_oldest () {
   local rebase_todo_path="$1"
 
-  if ${DX_SHOW_TODO}; then
-    >&2 echo
-    >&2 echo "rebase-todo before:"
-    >&2 cat "${rebase_todo_path}"
-    >&2 echo
-  fi
+  print_todo_maybe "${rebase_todo_path}" "before"
 
   awk -i inplace "
     BEGIN { state = 0 }
@@ -38,12 +33,19 @@ git_rebase_bubble_oldest () {
     \$0 ~ /^\$/ && state == 1 { print first_commit; state = 2; }
     1" ${rebase_todo_path}
 
-  if ${DX_SHOW_TODO}; then
-    >&2 echo
-    >&2 echo "rebase-todo after:"
-    >&2 cat "${rebase_todo_path}"
-    >&2 echo
-  fi
+  print_todo_maybe "${rebase_todo_path}" "after"
+}
+
+print_todo_maybe () {
+  local rebase_todo_path="$1"
+  local context="$2"
+
+  ${DX_SHOW_TODO} || return 0
+
+  >&2 echo
+  >&2 echo "rebase-todo ${context}:"
+  >&2 echo "$(cat "${rebase_todo_path}" | grep -v "^#")"
+  >&2 echo
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
