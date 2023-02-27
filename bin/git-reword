@@ -9,7 +9,7 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # COPYD: See git_reword_revision command in tig-newtons
-#   https://github.com/depoxy/tig-newtons#🍎
+#   https://github.com/DepoXy/tig-newtons#🍎
 # Using DepoXy, at ~/.kit/git/tig-newtons/tig/config
 git_reword_revision () {
   local commit="$1"

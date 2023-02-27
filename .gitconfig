@@ -1732,7 +1732,7 @@
   # which I do from a separate project, to avoid being opinionated here
   # and changing default bindings that might confuse or infuriate users.
   # - CXREF: DepoXy development environment orchestrator:
-  #     https://github.com/depoxy/depoxy#🍯
+  #     https://github.com/DepoXy/depoxy#🍯
   #   If you've installed DepoXy, the config is likely at
   #     ~/.depoxy/ambers/home/.gitconfig.local
   #   and definitely symlinked at ~/.gitconfig.local,
