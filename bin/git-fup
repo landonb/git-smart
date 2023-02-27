@@ -43,7 +43,6 @@ git_fixup_and_rebase () {
 
   must_not_have_unstaged_hard_link_changes
 
-  # Aka `git fu`.
   git commit -q --no-verify --fixup ${commit}
 
   local pop_after=false
