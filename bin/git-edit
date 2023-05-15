@@ -10,7 +10,32 @@
 
 # COPYD: See git_edit_revision command in tig-newtons
 #   https://github.com/DepoXy/tig-newtons#🍎
-# Using DepoXy, at ~/.kit/git/tig-newtons/tig/config
+# If using DepoXy, it's at ~/.kit/git/tig-newtons/tig/config
+#   meld ~/.kit/git/git-smart/bin/git-edit ~/.kit/git/tig-newtons/tig/bind-rebase &
+#
+# Note the `exec` appended to the .git/git-rebase-todo, which
+# pops the stashed WIP commit after the user finishes rebase.
+# - We `&` background the operation so that git-rebase does
+#   not see uncommitted changes, otherwise it'll think the
+#   rebase failed:
+#
+#     $ git rc
+#     Executing: true && git reset --mixed @~1
+#     Unstaged changes after reset:
+#     M	some/file
+#     M	another/f
+#     error: cannot rebase: You have unstaged changes.
+#     warning: execution succeeded: true && git reset --mixed @~1
+#     but left changes to the index and/or the working tree
+#     Commit or stash your changes, and then run
+#
+#       git rebase --continue
+#
+#   - Note also the short sleep, though it works without in practice,
+#     but there's a race condition with Git checking for a tidy work tree:
+#
+#       https://github.com/git/git/blob/5bc069e383539824fd3a0d897100d44bbe1f8a24/sequencer.c#L3620
+#
 git_edit_revision () {
   local commit="$1"
 
@@ -24,6 +49,8 @@ git_edit_revision () {
   GIT_SEQUENCE_EDITOR='f () { \
     local rebase_todo_path="$1"
     sed -i "1 s/^pick/edit/" "${rebase_todo_path}"
+    echo "exec '${wipped}' && sleep 0.1 && git reset --mixed @~1 > /dev/null &" \
+      >> "${rebase_todo_path}"
   }; f "$1"' git rebase -i "${commit}"^
 }
 
