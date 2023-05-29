@@ -4,12 +4,22 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-# Prints latest version tag.
+# Prints *largest* version tag.
+# - We assume the largest tag is the latest tag.
+# - Perhaps this command should be renamed, e.g.,
+#     git-largest-version
+#  but people tend to think of "latest" version
+#  as the largest version, and it might be
+#  confusing to return a smaller version than
+#  the largest if the user happened to apply
+#  version tags "out of order". So we'll assume
+#  the user really wants the largest version tag
+#  that's even been used.
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 source_deps () {
-  # Load git_latest_version_tag.
+  # Load git_largest_version_tag.
   . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
 }
 
@@ -18,7 +28,7 @@ source_deps () {
 main () {
   source_deps
 
-  git_latest_version_tag
+  git_largest_version_tag
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
