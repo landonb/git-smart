@@ -210,9 +210,12 @@ must_not_have_unstaged_hard_link_changes () {
   if [ -n "$( \
     git --no-pager diff --name-only | xargs -I {} find {} -links +1 \
   )" ]; then
-    echo "ERROR: Cannot process: There are hard links with unstaged changes."
-    echo "       This command clobbers such hard links. You don't want that."
-    echo "       HINT: Commit hard linked changes first, then retry git-fup."
+    >&2 echo "ERROR: Cannot process: There are hard links with unstaged changes."
+    >&2 echo "       This command clobbers such hard links. You don't want that."
+    >&2 echo "       HINT: Commit hard linked changes first, then retry git-fup."
+    >&2 echo
+    >&2 echo "The culprit is one of more of:"
+    >&2 echo "$( git --no-pager diff --name-only 2>&1 | xargs -I {} find {} -links +1 )"
 
     return 1
   fi
