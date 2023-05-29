@@ -32,7 +32,7 @@
 #       git rebase --continue
 #
 #   - Note also the short sleep, though it works without in practice,
-#     but there's a race condition with Git checking for a tidy work tree:
+#     but there's a race condition with the Git tidy work tree check:
 #
 #       https://github.com/git/git/blob/5bc069e383539824fd3a0d897100d44bbe1f8a24/sequencer.c#L3620
 #
