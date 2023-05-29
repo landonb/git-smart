@@ -39,9 +39,24 @@ DTRACE=false
 
 git-leave-breadcrumb () {
   local dry=false
-  [ "$1" = "-v" ] && dry=true
+  if [ "$1" = "-v" ]; then
+    dry=true
 
-  local branch_name=$(git rev-parse --abbrev-ref=loose HEAD)
+    shift
+  fi
+
+  local commit="${1:-HEAD}"
+
+  # If user doesn't specify commit, we'll tag HEAD and use branch name
+  # in tag name. If user specifies commit, we'll tag HEAD and still
+  # use current branch name in tag, though it's likely meaningless
+  # (though the author does this when they forgot to leave a bread-
+  # crumb earlier, so generally the branch name would still be acc-
+  # urate).
+  local branch_name=$(git rev-parse --abbrev-ref=loose "${commit}")
+  if [ -z "${branch_name}" ]; then
+    branch_name=$(git rev-parse --abbrev-ref=loose "HEAD")
+  fi
 
   local max_crumb_num=$( \
     git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" \
@@ -71,10 +86,10 @@ git-leave-breadcrumb () {
       local latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
       ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
 
-      local HEAD_id="$(git rev-parse "HEAD")"
-      ${DTRACE} && >&2 echo "HEAD_id=${HEAD_id}"
+      local target_id="$(git rev-parse "${commit}")"
+      ${DTRACE} && >&2 echo "target_id=${target_id}"
 
-      if [ "${latest_crumb_id}" = "${HEAD_id}" ]; then
+      if [ "${latest_crumb_id}" = "${target_id}" ]; then
         echo "already tagged!"
 
         return
@@ -97,13 +112,13 @@ git-leave-breadcrumb () {
 
   if ${dry}; then
     # echo "git branch --track=inherit ${next_crumb_num}"
-    echo "git tag ${next_crumb_num}"
+    echo "git tag \"${next_crumb_num}\" \"${commit}\""
 
     return
   fi
 
   # git branch --track=inherit "${next_crumb_num}"
-  git tag "${next_crumb_num}"
+  git tag "${next_crumb_num}" "${commit}"
 
   echo "${next_crumb_num}"
 }
