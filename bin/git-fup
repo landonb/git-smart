@@ -22,7 +22,7 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE="PRIVATE: WIP [git-fup]"
+GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-fup]"
 
 git_fixup_and_rebase () {
   local commit="$1"
