@@ -25,6 +25,14 @@ git_abort () {
     fi
   done
 
+  git_abort_try "${opfound}" "${fcnt}" "${plumbing_files}"
+}
+
+git_abort_try () {
+  local opfound="$1"
+  local fcnt="$2"
+  local plumbing_files="$3"
+
   # FIXME/2023-01-09 11:31: How better to detect this?:
   # - If I `git ria! HEAD^` and try a squash, then rebase fails.
   #   But there's no REBASE_HEAD, just a `.git/rebase-merge` directory.
