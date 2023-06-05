@@ -72,16 +72,8 @@ git_fixup_and_rebase () {
     rebase_failed=true
   fi
 
-  # Before we pop the temporary "WIP" commit that we made before the rebase:
-  # - Beware a failed rebase -- we don't want to pop the latest commit
-  #   if the rebase stopped to ask the user to intervene, because that's
-  #   nor our temporary commit.
-  # - AFAIK, .git/REBASE_HEAD exists until the rebase is complete.
-  # - We can also to check if the repo is tidy. If it's not tidy,
-  #   we can assume the rebase failed.
-  # - While we're at it -- or just being unnecessarily paranoid --
-  #   verify that the latest commit has the "WIP" message we used.
   if ${pop_after} && ! ${rebase_failed}; then
+    # Unnecessary and unnecessarily complex state check.
     double_triple_quadruple_check_rebase_complete \
       || exit 1
 
@@ -122,6 +114,11 @@ print_error_rebase_failed_wipped () {
 
 # ***
 
+# - AFAIK, .git/REBASE_HEAD exists until the rebase is complete.
+# - We can also to check if the repo is tidy. If it's not tidy,
+#   we can assume the rebase failed.
+# - While we're at it -- or just being unnecessarily paranoid --
+#   verify that the latest commit has the "WIP" message we used.
 double_triple_quadruple_check_rebase_complete () {
   local rebase_complete=true
 
