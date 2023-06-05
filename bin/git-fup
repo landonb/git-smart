@@ -82,7 +82,7 @@ git_fixup_and_rebase () {
     # This feels a little... backhanded. Or maybe just sneaky.
     #
     # Append rebase-todo with 'exec' cleanup commands:
-    # - Pop the WIP, if we used one (with `git reset --mixed @~1`).
+    # - Pop the WIP, if we used one (with `git reset -q --mixed @~1`).
     # - Restage the fixup! (with `git reset --soft @~1`, aka `git undo`).
     #   - This restages the intermediate commit the `--fixup` created,
     #     titled like "fixup! <target commit message>". So the user
@@ -100,7 +100,7 @@ git_fixup_and_rebase () {
     local todo_exec="sleep 0.1"
 
     if ${pop_after}; then
-      todo_exec="${todo_exec} && git reset --mixed @~1 > /dev/null"
+      todo_exec="${todo_exec} && git reset -q --mixed @~1"
     fi
 
     todo_exec="${todo_exec} && git reset --soft @~1"

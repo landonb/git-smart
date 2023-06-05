@@ -49,7 +49,7 @@ git_edit_revision () {
   GIT_SEQUENCE_EDITOR='f () { \
     local rebase_todo_path="$1"
     sed -i "1 s/^pick/edit/" "${rebase_todo_path}"
-    echo "exec '${wipped}' && sleep 0.1 && git reset --mixed @~1 > /dev/null &" \
+    echo "exec '${wipped}' && sleep 0.1 && git reset -q --mixed @~1 &" \
       >> "${rebase_todo_path}"
   }; f "$1"' git rebase -i "${commit}"^
 }
