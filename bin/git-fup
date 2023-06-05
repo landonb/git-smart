@@ -24,6 +24,15 @@
 
 GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-fup]"
 
+# This is the known Git rebase todo path.
+# - SPIKE: Can we get this from `git` so it's not hardcoded?
+GIT_REBASE_TODO_PATH=".git/rebase-merge/git-rebase-todo"
+
+# This is the special tag at the end of the 'exec' line that
+# you must use if you git-abort to run that 'exec'.
+# - USYNC: This environ is used in git-smart and tig-newtons:
+GITSMART_POST_REBASE_EXECS_TAG=" #git-abort"
+
 git_fixup_and_rebase () {
   local commit="$1"
 
@@ -65,15 +74,41 @@ git_fixup_and_rebase () {
     # we'll just remind user about the WIP commit; otherwise we can take
     # the time to add code to prompt-loop until .git/REBASE_HEAD gone.
     print_error_rebase_failed_shared
-    if ${pop_after}; then
-      print_error_rebase_failed_wipped
-    fi
 
     rebase_failed=true
   fi
 
-  if ${pop_after} && ! ${rebase_failed}; then
-    # Unnecessary and unnecessarily complex state check.
+  if ${rebase_failed}; then
+    # This feels a little... backhanded. Or maybe just sneaky.
+    #
+    # Append rebase-todo with 'exec' cleanup commands:
+    # - Pop the WIP, if we used one (with `git reset --mixed @~1`).
+    # - Restage the fixup! (with `git reset --soft @~1`, aka `git undo`).
+    #   - This restages the intermediate commit the `--fixup` created,
+    #     titled like "fixup! <target commit message>". So the user
+    #     can now endlessly loop git-fup, git-abort, git-fup, etc.
+    # - Also sleep first and background `&` the 'exec', so that
+    #   git-rebase does not see uncommitted changes (otherwise it
+    #   thinks the rebase failed).
+    # - Finally, the #git-abort tag tells git-abort to run the execs
+    #   if the user aborts the rebase instead of finishing it.
+    # (At this point, it feels like we should just use a sequence editor
+    #  and write the initial todo ourselves. But there's also nothing that
+    #  says we shouldn't do it this way, and it works. Just hopping on the
+    #  party train a little late.)
+
+    local git_pop_wip=""
+    if ${pop_after}; then
+      git_pop_wip="git reset --mixed @~1 > /dev/null &&"
+    fi
+
+    echo "exec sleep 0.1 &&" \
+      "${git_pop_wip}git reset --soft @~1 & ${GITSMART_POST_REBASE_EXECS_TAG}" \
+        >> "${GIT_REBASE_TODO_PATH}"
+  elif ${pop_after}; then
+    # Rebase succeeded without user intervention. We are clear to
+    # pop the WIP commit... but we'll slide in an unnecessary and
+    # unnecessarily complex state check first just to be paranoid.
     double_triple_quadruple_check_rebase_complete \
       || exit 1
 
@@ -103,13 +138,12 @@ maybe_commit_uncommitted () {
 
 print_error_rebase_failed_shared () {
   >&2 echo
-  >&2 echo "ERROR: The rebase failed."
-}
-
-print_error_rebase_failed_wipped () {
-  >&2 echo "- You'll find the WIP commit we made after you finish rebasing."
-  >&2 echo "  You can easily remove this commit:"
-  >&2 echo "    git-pop1 { git reset --mixed @~1; }"
+  >&2 echo "ERROR: The git-fup rebase failed."
+  >&2 echo "- Hint: Resolve conflicts and run \`git rc\`" \
+    "(or \`git rebase --continue\`)"
+  >&2 echo "        Or, give up using \`git abort\`" \
+    "(a fancy \`git rebase --abort\`"
+  >&2 echo "        that restages your changes)"
 }
 
 # ***
