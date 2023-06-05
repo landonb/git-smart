@@ -27,7 +27,14 @@ git_reword_revision () {
     sed -i "1 s/^pick/reword/" "${rebase_todo_path}"
   }; f "$1"' git rebase -i "${commit}"^
 
+  # We assume the rebase won't fail, because user is only rewording a message.
+
   ${wipped} && git reset -q --mixed @~1
+
+  # Run any post-rebase user hooks.
+  if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
+    eval ${GIT_POST_REBASE_EXEC}
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
