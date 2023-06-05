@@ -44,7 +44,7 @@ git_edit_revision () {
   local wipped=false
 
   git add -A \
-    && git commit --no-verify -m 'PRIVATE: WIP [git-edit]'
+    && git commit --no-verify -m 'PRIVATE: WIP [git-edit]' > /dev/null
 
   GIT_SEQUENCE_EDITOR='f () { \
     local rebase_todo_path="$1"

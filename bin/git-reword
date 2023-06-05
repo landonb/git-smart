@@ -19,7 +19,7 @@ git_reword_revision () {
   local wipped=false
 
   git add -A \
-    && git commit --no-verify -m 'PRIVATE: WIP [git-reword]' \
+    && git commit --no-verify -m 'PRIVATE: WIP [git-reword]' > /dev/null \
     && wipped=true
 
   GIT_SEQUENCE_EDITOR='f () { \
@@ -27,7 +27,7 @@ git_reword_revision () {
     sed -i "1 s/^pick/reword/" "${rebase_todo_path}"
   }; f "$1"' git rebase -i "${commit}"^
 
-  ${wipped} && git reset --mixed @~1
+  ${wipped} && git reset -q --mixed @~1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
