@@ -42,15 +42,15 @@ git_fixup_and_rebase () {
     exit 1
   fi
 
-  # The `git --no-pager diff --name-only` returns paths relative to
-  # root, which is used by must_not_have_unstaged_hard_link_changes.
-  git_root() {
+  # We can run the `git` commands we need from anywhere within the project,
+  # but change to the root directory just to be safe (this is from a
+  # reverted "feature" that called `git --no-pager diff --name-only`,
+  # which returns paths relative to root, so best run from root).
+  git_root () {
     git rev-parse --show-toplevel
   }
 
   cd "$(git_root)"
-
-  must_not_have_unstaged_hard_link_changes
 
   git commit -q --no-verify --fixup ${commit}
 
@@ -97,14 +97,20 @@ git_fixup_and_rebase () {
     #  says we shouldn't do it this way, and it works. Just hopping on the
     #  party train a little late.)
 
-    local git_pop_wip=""
+    local todo_exec="sleep 0.1"
+
     if ${pop_after}; then
-      git_pop_wip="git reset --mixed @~1 > /dev/null &&"
+      todo_exec="${todo_exec} && git reset --mixed @~1 > /dev/null"
     fi
 
-    echo "exec sleep 0.1 &&" \
-      "${git_pop_wip}git reset --soft @~1 & ${GITSMART_POST_REBASE_EXECS_TAG}" \
-        >> "${GIT_REBASE_TODO_PATH}"
+    todo_exec="${todo_exec} && git reset --soft @~1"
+
+    if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
+      todo_exec="${todo_exec} && ${GIT_POST_REBASE_EXEC}"
+    fi
+
+    echo "exec ${todo_exec} & ${GITSMART_POST_REBASE_EXECS_TAG}" \
+      >> "${GIT_REBASE_TODO_PATH}"
   elif ${pop_after}; then
     # Rebase succeeded without user intervention. We are clear to
     # pop the WIP commit... but we'll slide in an unnecessary and
@@ -114,6 +120,11 @@ git_fixup_and_rebase () {
 
     # Aka `git pop1 --quiet`.
     git reset -q --mixed @~1
+
+    # Run any post-rebase user hooks.
+    if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
+      eval ${GIT_POST_REBASE_EXEC}
+    fi
   fi
 }
 
@@ -215,41 +226,6 @@ git_status_porcelain () {
 
 git_latest_commit_message () {
   git --no-pager log -1 --pretty=%B
-}
-
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
-
-# BEWARE: git-reset is not nice to hard links -- if we were to WIP-commit
-# uncommitted changes from a hard link, a git-reset breaks the hard link.
-#
-# - So examine changed files, and check if any have +1 links:
-#     find . ! -name . -prune -links +1  # report files in current directory
-#     find . ! -name . -prune ! -type d -links +1  # exclude directories
-#     find . ! -name . ! -type d -links +1  # descend into directories
-#   Check a single file instead...
-#     find ${file} -prune ! -type d -links +1
-#   List staged files (which we don't care about; these get fup'ed):
-#     git --no-pager diff --name-only --cached
-#     git --no-pager diff --name-only --staged  # Newer Git alias option
-#   List modified, unstaged files (what we want to check for links):
-#     git ls-files -m  # aka `git ls-files --modified`
-#     git --no-pager diff --name-only
-#   Altogether now:
-#     git --no-pager diff --name-only | xargs -I {} find {} -links +1 | wc -l
-
-must_not_have_unstaged_hard_link_changes () {
-  if [ -n "$( \
-    git --no-pager diff --name-only | xargs -I {} find {} -links +1 \
-  )" ]; then
-    >&2 echo "ERROR: Cannot process: There are hard links with unstaged changes."
-    >&2 echo "       This command clobbers such hard links. You don't want that."
-    >&2 echo "       HINT: Commit hard linked changes first, then retry git-fup."
-    >&2 echo
-    >&2 echo "The culprit is one of more of:"
-    >&2 echo "$( git --no-pager diff --name-only 2>&1 | xargs -I {} find {} -links +1 )"
-
-    return 1
-  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
