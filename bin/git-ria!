@@ -74,6 +74,10 @@ git_ria! () {
     \
     sed -i -e \"/^#/d\" -e \"/^$/d\" \"\${rebase_todo_path}\"; \
     \
+    if [ -n \"${GIT_POST_REBASE_EXEC}\" ]; then \
+      echo \"exec ${GIT_POST_REBASE_EXEC}\" >> \"\${rebase_todo_path}\"; \
+    fi; \
+    \
     echo \"# [pick|reword|edit|squash|fixup[-C|-c]|drop <commit>]|[exec <cmd>]|[break]\" \
       >> \"\${rebase_todo_path}\"; \
     \
