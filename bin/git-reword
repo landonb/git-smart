@@ -29,12 +29,12 @@ git_reword_revision () {
 
   # We assume the rebase won't fail, because user is only rewording a message.
 
-  ${wipped} && git reset -q --mixed @~1
-
   # Run any post-rebase user hooks.
   if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
     eval ${GIT_POST_REBASE_EXEC}
   fi
+
+  ${wipped} && git reset -q --mixed @~1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

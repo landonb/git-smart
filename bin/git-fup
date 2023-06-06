@@ -97,17 +97,20 @@ git_fixup_and_rebase () {
     #  says we shouldn't do it this way, and it works. Just hopping on the
     #  party train a little late.)
 
+    if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
+      echo "exec ${GIT_POST_REBASE_EXEC} ${GITSMART_POST_REBASE_EXECS_TAG}" \
+        >> "${GIT_REBASE_TODO_PATH}"
+    fi
+
     local todo_exec="sleep 0.1"
 
     if ${pop_after}; then
+      # Pop the WIP commit.
       todo_exec="${todo_exec} && git reset -q --mixed @~1"
     fi
 
+    # Restage the "fixup!" commit.
     todo_exec="${todo_exec} && git reset --soft @~1"
-
-    if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
-      todo_exec="${todo_exec} && ${GIT_POST_REBASE_EXEC}"
-    fi
 
     echo "exec ${todo_exec} & ${GITSMART_POST_REBASE_EXECS_TAG}" \
       >> "${GIT_REBASE_TODO_PATH}"
@@ -118,13 +121,13 @@ git_fixup_and_rebase () {
     double_triple_quadruple_check_rebase_complete \
       || exit 1
 
-    # Aka `git pop1 --quiet`.
-    git reset -q --mixed @~1
-
     # Run any post-rebase user hooks.
     if [ -n "${GIT_POST_REBASE_EXEC}" ]; then
       eval ${GIT_POST_REBASE_EXEC}
     fi
+
+    # Aka `git pop1 --quiet`.
+    git reset -q --mixed @~1
   fi
 }
 
