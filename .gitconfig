@@ -1626,6 +1626,12 @@
   # - If you want the `append_todo_help` reminders back, use this.
   ria-helpful = -c sequence.editor="${EDITOR}" rebase -i --autosquash
 
+  # - From man git-rebase:
+  #
+  #     --no-verify
+  #         This option bypasses the pre-rebase hook. See also githooks(5).
+  ria-no-verify = rebase -i --autosquash --no-verify
+
   # - Use case: Works well with `git ci --fixup=<>`, e.g.,
   #
   #     git ci --fixup=abcd1234 && git ria abcd1234^
