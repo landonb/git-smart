@@ -1620,7 +1620,10 @@
   #       ~/.depoxy/ambers/home/.gitconfig.local
   ria = rebase -i --autosquash
 
-  # If you want the `append_todo_help` reminders back, use this.
+  # The git-ria! command shows a much less noisy todo (with comments removed).
+  # And DepoXy's git-ria calls interactive-rebase-tool (shadows previous alias).
+  # So this command exists for DepoXy users who want to see unadultered todo.
+  # - If you want the `append_todo_help` reminders back, use this.
   ria-helpful = -c sequence.editor="${EDITOR}" rebase -i --autosquash
 
   # - Use case: Works well with `git ci --fixup=<>`, e.g.,
