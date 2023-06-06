@@ -69,11 +69,17 @@
 #   that's where my muscle memory's at).
 
 git_ria! () {
-  GIT_SEQUENCE_EDITOR='f () { \
-    sed -i -e "/^#/d" -e "/^$/d" "$1"; \
-    echo "# [pick|reword|edit|squash|fixup[-C|-c]|drop <commit>]|[exec <cmd>]|[break]" >> "$1"; \
-    editor-vim-0-0-insert "$1"; \
-  }; f "$1"' git rebase -i --autosquash "$@"
+  GIT_SEQUENCE_EDITOR="f () { \
+    local rebase_todo_path=\"\$1\"; \
+    \
+    sed -i -e \"/^#/d\" -e \"/^$/d\" \"\${rebase_todo_path}\"; \
+    \
+    echo \"# [pick|reword|edit|squash|fixup[-C|-c]|drop <commit>]|[exec <cmd>]|[break]\" \
+      >> \"\${rebase_todo_path}\"; \
+    \
+    editor-vim-0-0-insert \"\${rebase_todo_path}\"; \
+    \
+  }; f \"\$1\"" git rebase -i --autosquash "$@"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
