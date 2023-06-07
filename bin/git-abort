@@ -160,7 +160,13 @@ git_abort_post_rebase_execs_run_maybe () {
   done < <(cat "${GITSMART_POST_REBASE_EXECS_PATH}")
 }
 
-# ***
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-git_abort
+main () {
+  git_abort "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "$@"
+fi
 
