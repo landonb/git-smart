@@ -156,7 +156,7 @@ git_abort_post_rebase_execs_run_maybe () {
     echo "Executing: ${post_rebase_exec}"
 
     # So trustworthy.
-    eval ${post_rebase_exec}
+    GIT_ABORT=true eval ${post_rebase_exec}
   done < <(cat "${GITSMART_POST_REBASE_EXECS_PATH}")
 }
 
