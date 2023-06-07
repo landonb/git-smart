@@ -189,11 +189,11 @@ double_triple_quadruple_check_rebase_complete () {
     # rebase_complete=false
   fi
 
-  if [ -f ".git/rebase-merge/git-rebase-todo" ]; then
+  if [ -f "${GIT_REBASE_TODO_PATH}" ]; then
     # 2023-01-16: This is the file the definitely should not exist if
     # the rebase was sucessful.
     echo
-    echo "ERROR: .git/rebase-merge/git-rebase-todo still exists"
+    echo "ERROR: ${GIT_REBASE_TODO_PATH} still exists"
     echo "- This is likely a DEV error, so please take it from here."
 
     rebase_complete=false
