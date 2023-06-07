@@ -1670,6 +1670,7 @@
   #  # Git cherry-pick --continue.
   #  #     ░      ▒      ▓
   #  cpc = cherry-pick --continue
+  # HA: Remember this ! is for Git and not a shell symbol.
   rc = ! [ -f .git/CHERRY_PICK_HEAD ] && \
     GIT_EDITOR=true git cherry-pick --continue || \
     GIT_EDITOR=true git rebase --continue
