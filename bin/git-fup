@@ -147,12 +147,9 @@ maybe_commit_uncommitted () {
 
 print_error_rebase_failed () {
   >&2 echo
-  >&2 echo "ERROR: The git-fup rebase failed."
-  >&2 echo "- Hint: Resolve conflicts and run \`git rc\`" \
-    "(or \`git rebase --continue\`)"
-  >&2 echo "        Or, give up using \`git abort\`" \
-    "(a fancy \`git rebase --abort\`"
-  >&2 echo "        that restages your changes)"
+  >&2 echo "ALERT: git-fup stopped on unresolved merge conflict."
+  >&2 echo "  Resolve conflicts and call \`git rebase --continue\`"
+  >&2 echo "   — or \`git abort\` to cancel and restage changes."
 }
 
 # ***
