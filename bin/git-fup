@@ -109,7 +109,7 @@ git_fixup_and_rebase () {
 
     echo "exec ${todo_exec} & ${GITSMART_POST_REBASE_EXECS_TAG}" \
       >> "${GIT_REBASE_TODO_PATH}"
-  elif ${pop_after}; then
+  else
     # Rebase succeeded without user intervention. We are clear to
     # pop the WIP commit... but we'll slide in an unnecessary and
     # unnecessarily complex state check first just to be paranoid.
@@ -121,8 +121,10 @@ git_fixup_and_rebase () {
       eval ${GIT_POST_REBASE_EXEC}
     fi
 
-    # Aka `git pop1 --quiet`.
-    git reset -q --mixed @~1
+    if ${pop_after}; then
+      # Aka `git pop1 --quiet`.
+      git reset -q --mixed @~1
+    fi
   fi
 }
 
