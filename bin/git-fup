@@ -70,7 +70,7 @@ git_fixup_and_rebase () {
   GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^ \
     || retcode=$?
 
-  if [ ${retcode} -ne 0 ]; then
+  if [ ${retcode} -ne 0 ] && [ -f "${GIT_REBASE_TODO_PATH}" ]; then
     print_error_rebase_failed
 
     # This feels a little... backhanded. Or maybe just sneaky.
