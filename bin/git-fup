@@ -68,12 +68,7 @@ git_fixup_and_rebase () {
   # Aka `git ria ${commit}^`
   #  echo "GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^"
   if ! GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^; then
-    # MEH: We could wait for user to resolve conflicts (like git-put-wise
-    # does (see: must_await_user_resolve_conflicts)). But all user has to
-    # do to clean up is pop the WIP commit. So unless that's too annoying,
-    # we'll just remind user about the WIP commit; otherwise we can take
-    # the time to add code to prompt-loop until .git/REBASE_HEAD gone.
-    print_error_rebase_failed_shared
+    print_error_rebase_failed
 
     rebase_failed=true
   fi
@@ -150,7 +145,7 @@ maybe_commit_uncommitted () {
 
 # ***
 
-print_error_rebase_failed_shared () {
+print_error_rebase_failed () {
   >&2 echo
   >&2 echo "ERROR: The git-fup rebase failed."
   >&2 echo "- Hint: Resolve conflicts and run \`git rc\`" \
