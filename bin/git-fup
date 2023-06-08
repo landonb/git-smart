@@ -63,17 +63,16 @@ git_fixup_and_rebase () {
   #   https://stackoverflow.com/questions/29094595/
   #     git-interactive-rebase-without-opening-the-editor
 
-  local rebase_failed=false
+  local retcode=0
 
   # Aka `git ria ${commit}^`
   #  echo "GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^"
-  if ! GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^; then
+  GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash ${commit}^ \
+    || retcode=$?
+
+  if [ ${retcode} -ne 0 ]; then
     print_error_rebase_failed
 
-    rebase_failed=true
-  fi
-
-  if ${rebase_failed}; then
     # This feels a little... backhanded. Or maybe just sneaky.
     #
     # Append rebase-todo with 'exec' cleanup commands:
@@ -126,6 +125,8 @@ git_fixup_and_rebase () {
       git reset -q --mixed @~1
     fi
   fi
+
+  return ${retcode}
 }
 
 # ***
