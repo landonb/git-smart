@@ -112,7 +112,7 @@ git_fixup_and_rebase () {
     # Rebase succeeded without user intervention. We are clear to
     # pop the WIP commit... but we'll slide in an unnecessary and
     # unnecessarily complex state check first just to be paranoid.
-    double_triple_quadruple_check_rebase_complete \
+    double_triple_quadruple_check_rebase_complete ${pop_after} \
       || exit 1
 
     # Run any post-rebase user hooks.
@@ -163,6 +163,8 @@ print_error_rebase_failed () {
 # - While we're at it -- or just being unnecessarily paranoid --
 #   verify that the latest commit has the "WIP" message we used.
 double_triple_quadruple_check_rebase_complete () {
+  local pop_after=$1
+
   local rebase_complete=true
 
   # MAYBE/2023-01-15: Take page from git-put-wise playbook and
@@ -204,7 +206,9 @@ double_triple_quadruple_check_rebase_complete () {
     rebase_complete=false
   fi
 
-  if [ "$(git_latest_commit_message)" != "${GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE}" ]; then
+  if ${pop_after} && \
+    [ "$(git_latest_commit_message)" != "${GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE}" ] \
+  ; then
     echo
     echo "ERROR: There was an unexpected error:"
     echo "- The latest commit is not the \"WIP\" we made."
