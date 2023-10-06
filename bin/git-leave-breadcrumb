@@ -144,13 +144,11 @@ git_leave_breadcrumb () {
   next_crumb_num="${_GS_TAG_PREFIX}${branch_name}/${fmtd_crumb_num}/$(date '+%y%m%d_%H%M')${crumb_slug}"
 
   if ${dry}; then
-    # echo "git branch --track=inherit ${next_crumb_num}"
     echo "git tag \"${next_crumb_num}\" \"${tag_commit}\""
 
     return
   fi
 
-  # git branch --track=inherit "${next_crumb_num}"
   git tag "${next_crumb_num}" "${tag_commit}"
 
   echo "${next_crumb_num}"
