@@ -91,15 +91,42 @@ git_leave_breadcrumb () {
 
   # ***
 
-  # If user doesn't specify commit, we'll tag HEAD and use branch name
-  # in tag name. If user specifies commit, we'll tag HEAD and still
-  # use current branch name in tag, though it's likely meaningless
-  # (though the author does this when they forgot to leave a bread-
-  # crumb earlier, so generally the branch name would still be acc-
-  # urate).
-  local branch_name=$(git rev-parse --abbrev-ref=loose "${tag_commit}")
+  # Group breadcrumbs by branch name, which we determine based
+  # on the target commit, not on the current branch. I.e., don't
+  # just use `git_branch_name`, or its equivalent,
+  #   git rev-parse --abbrev-ref=loose HEAD
+  # Instead, use `git branch --contains` to determine which
+  # branches contain the specified commit, then pick one of
+  # those branch names.
+  # - Note that the current branch is starred, if it also
+  #   contains the commit, e.g.,
+  #
+  #     $ git branch --contains abcd123
+  #       a/branch
+  #     * current/branch
+  #       yet/another/one
+  # - We'll prefer the current branch name if it contains the
+  #   target commit, otherwise will pick the first branch in
+  #   the list (which git-branch sorts alphabetically).
+
+  local branch_names
+  branch_names="$(git branch --contains "${tag_commit}")"
+
+  local branch_name
+
+  # Prefer current branch branch name, if current branch contains commit.
+  branch_name="$(echo "${branch_names}" | grep -E "^\* " | sed 's/^\* //')"
+
+  # Otherwise, use first of any other branch name that contains commit.
   if [ -z "${branch_name}" ]; then
-    branch_name=$(git rev-parse --abbrev-ref=loose "HEAD")
+    branch_name="$(echo "${branch_names}" | grep -E "^  " | sed 's/  //' | head -1)"
+  fi
+
+  if [ -z "${branch_name}" ]; then
+    >&2 echo "BWARE: Tagging an orphan (branchless) commit"
+    # MEH: Add arg. or environ so user can set?
+    #      - This use case seems very unlikely.
+    branch_name="__derelict__"
   fi
 
   # ***
