@@ -60,7 +60,36 @@ git_leave_breadcrumb () {
     shift
   fi
 
-  local commit="${1:-HEAD}"
+  local tag_commit="${1:-HEAD}"
+  local crumb_slug="$2"
+
+  if [ -n "${tag_commit}" ] && [ -z "${crumb_slug}" ]; then
+    # Only one arg specified. Check if commit object.
+    if ! git_is_commit "${tag_commit}"; then
+      # Not a valid commit, so assume it's the slug.
+      crumb_slug="${tag_commit}"
+      tag_commit="HEAD"
+    fi
+  elif [ -n "${tag_commit}" ]; then
+    # Both args specified.
+    if ! git_is_commit "${tag_commit}"; then
+      >&2 echo "ERROR: Not a valid commit ref: ${tag_commit}"
+
+      exit 1
+    fi
+  fi
+
+  if [ -n "${crumb_slug}" ]; then
+    if ! git_tag_name_check_format "${crumb_slug}"; then
+      >&2 echo "ERROR: Improperly formed name: ${crumb_slug}"
+
+      exit 1
+    fi
+
+    crumb_slug="/${crumb_slug}"
+  fi
+
+  # ***
 
   # If user doesn't specify commit, we'll tag HEAD and use branch name
   # in tag name. If user specifies commit, we'll tag HEAD and still
@@ -68,14 +97,21 @@ git_leave_breadcrumb () {
   # (though the author does this when they forgot to leave a bread-
   # crumb earlier, so generally the branch name would still be acc-
   # urate).
-  local branch_name=$(git rev-parse --abbrev-ref=loose "${commit}")
+  local branch_name=$(git rev-parse --abbrev-ref=loose "${tag_commit}")
   if [ -z "${branch_name}" ]; then
     branch_name=$(git rev-parse --abbrev-ref=loose "HEAD")
   fi
 
+  # ***
+
+  # Look for branch-specific numbered breadcrumbs, e.g.,
+  #   $ git --no-pager tag --list "🍞/private/*"
+  #   🍞/private/01/230226_1406
+  #   🍞/private/02/230420_1113/some-slug
+  # And then increment by 1 for the new breadcrumb.
   local max_crumb_num=$( \
     git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" \
-    | /usr/bin/env sed -E 's#^.*/0*([0-9]+)/[0-9a-zA-Z_-]+$#\1#' \
+    | /usr/bin/env sed -E 's#^.*/0*([0-9]+)/[0-9_]+(/.+)?$#\1#' \
     | sort -n -r \
     | head -n1 \
   )
@@ -101,7 +137,7 @@ git_leave_breadcrumb () {
       local latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
       ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
 
-      local target_id="$(git rev-parse "${commit}")"
+      local target_id="$(git rev-parse "${tag_commit}")"
       ${DTRACE} && >&2 echo "target_id=${target_id}"
 
       if [ "${latest_crumb_id}" = "${target_id}" ]; then
@@ -121,19 +157,21 @@ git_leave_breadcrumb () {
   fmtd_crumb_num=$(printf "%0${_GS_PRECISION}d" "${next_crumb_num}")
   ${DTRACE} && >&2 echo "fmtd_crumb_num=${fmtd_crumb_num}"
 
+  # Prepare the crumb, formatted:
+  #
+  #  🍞/<branch>/<crumb-num>/<YYMMDD_HHMM>/<crumb-slug>
   local next_crumb_num
-  # next_crumb_num="wip/${fmtd_crumb_num}/$(date +%Y-%m-%d)"
-  next_crumb_num="${_GS_TAG_PREFIX}${branch_name}/${fmtd_crumb_num}/$(date '+%y%m%d_%H%M')"
+  next_crumb_num="${_GS_TAG_PREFIX}${branch_name}/${fmtd_crumb_num}/$(date '+%y%m%d_%H%M')${crumb_slug}"
 
   if ${dry}; then
     # echo "git branch --track=inherit ${next_crumb_num}"
-    echo "git tag \"${next_crumb_num}\" \"${commit}\""
+    echo "git tag \"${next_crumb_num}\" \"${tag_commit}\""
 
     return
   fi
 
   # git branch --track=inherit "${next_crumb_num}"
-  git tag "${next_crumb_num}" "${commit}"
+  git tag "${next_crumb_num}" "${tag_commit}"
 
   echo "${next_crumb_num}"
 }
