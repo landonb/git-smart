@@ -115,39 +115,19 @@ git_leave_breadcrumb () {
     | sort -n -r \
     | head -n1 \
   )
+  ${DTRACE} && >&2 echo "max_crumb_num=${max_crumb_num}"
 
   if [ -z "${max_crumb_num}" ]; then
     max_crumb_num=0
   else
-    # FIXME/2022-12-21 20:00: Move to sub fcn.
-    local fmtd_prev_crumb_num
-    fmtd_prev_crumb_num=$(printf "%0${_GS_PRECISION}d" "${max_crumb_num}")
-    ${DTRACE} && >&2 echo "fmtd_prev_crumb_num=${fmtd_prev_crumb_num}"
+    if is_already_tagged "${branch_name}" "${max_crumb_num}" "${tag_commit}"; then
+      echo "already tagged!"
 
-    local latest_crumb_prefix
-    latest_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/${fmtd_prev_crumb_num}"
-    ${DTRACE} && >&2 echo "latest_crumb_prefix=${latest_crumb_prefix}"
-
-    local latest_crumb_tag="$( \
-      git --no-pager tag --list "${latest_crumb_prefix}/*" \
-    )"
-    ${DTRACE} && >&2 echo "latest_crumb_tag=${latest_crumb_tag}"
-
-    if [ -n "${latest_crumb_tag}" ]; then
-      local latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
-      ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
-
-      local target_id="$(git rev-parse "${tag_commit}")"
-      ${DTRACE} && >&2 echo "target_id=${target_id}"
-
-      if [ "${latest_crumb_id}" = "${target_id}" ]; then
-        echo "already tagged!"
-
-        return
-      fi
+      return
     fi
   fi
-  ${DTRACE} && >&2 echo "max_crumb_num=${max_crumb_num}"
+
+  # ***
 
   local next_crumb_num
   next_crumb_num=$((${max_crumb_num} + 1))
@@ -174,6 +154,43 @@ git_leave_breadcrumb () {
   git tag "${next_crumb_num}" "${tag_commit}"
 
   echo "${next_crumb_num}"
+}
+
+# ***
+
+is_already_tagged () {
+  local branch_name="$1"
+  local max_crumb_num="$2"
+  local tag_commit="$3"
+  
+  local fmtd_prev_crumb_num
+  fmtd_prev_crumb_num=$(printf "%0${_GS_PRECISION}d" "${max_crumb_num}")
+  ${DTRACE} && >&2 echo "fmtd_prev_crumb_num=${fmtd_prev_crumb_num}"
+
+  local latest_crumb_prefix
+  latest_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/${fmtd_prev_crumb_num}"
+  ${DTRACE} && >&2 echo "latest_crumb_prefix=${latest_crumb_prefix}"
+
+  local latest_crumb_tag="$( \
+    git --no-pager tag --list "${latest_crumb_prefix}/*" \
+  )"
+  ${DTRACE} && >&2 echo "latest_crumb_tag=${latest_crumb_tag}"
+
+  if [ -n "${latest_crumb_tag}" ]; then
+    local latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
+    ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
+
+    local target_id="$(git rev-parse "${tag_commit}")"
+    ${DTRACE} && >&2 echo "target_id=${target_id}"
+
+    if [ "${latest_crumb_id}" = "${target_id}" ]; then
+      # Already tagged.
+
+      return 0
+    fi
+  fi
+
+  return 1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
