@@ -140,18 +140,18 @@ git_leave_breadcrumb () {
   # Prepare the crumb, formatted:
   #
   #  🍞/<branch>/<crumb-num>/<YYMMDD_HHMM>/<crumb-slug>
-  local next_crumb_num
-  next_crumb_num="${_GS_TAG_PREFIX}${branch_name}/${fmtd_crumb_num}/$(date '+%y%m%d_%H%M')${crumb_slug}"
+  local new_crumb
+  new_crumb="${_GS_TAG_PREFIX}${branch_name}/${fmtd_crumb_num}/$(date '+%y%m%d_%H%M')${crumb_slug}"
 
   if ${dry}; then
-    echo "git tag \"${next_crumb_num}\" \"${tag_commit}\""
+    echo "git tag \"${new_crumb}\" \"${tag_commit}\""
 
     return
   fi
 
-  git tag "${next_crumb_num}" "${tag_commit}"
+  git tag "${new_crumb}" "${tag_commit}"
 
-  echo "${next_crumb_num}"
+  echo "${new_crumb}"
 }
 
 # ***
