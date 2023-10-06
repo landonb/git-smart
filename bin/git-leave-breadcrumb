@@ -4,33 +4,41 @@
 # Project: https://github.com/landonb/git-smart#💡
 # License: MIT. Please find more in the LICENSE file.
 
-# FIXME/2020-03-24 19:10: a01/2020-03-24- instead,
-# i.e., encode the number in the prefix...
-# for now, this is just so easy:
-#   git co -b a05/$(TTT)
-
-# USAGE: Creates a new, greater-numbered and dated WIP branch.
+# USAGE: Creates dated, orderly tag "breadcrumbs" so you never lose a line of work
 #
-# - For intance, assuming today is 11 Feb 2020
-#   and there are already 2 WIP branches, then:
+# - Use case: You want to delete a WIP branch, but you don't want the
+#   commits to ever disappear (be garbage collected). Drop a breadcrumb.
+#
+# - Use case: Or you're popping some commits to re-commit your work, or
+#   you're rebasing, and you want an easy reference to your work from
+#   the before times. Drop a breadcrumb.
+#
+# - For example, assume today is 2020 Feb 11, 06:40 am, and you're
+#   working on a feature branch, you might crumb it like so:
 #
 #   $ git brs
 #   * feature/XX-123/make-customer-happy
 #     release
 #
-#   $ git --no-pager tag --list feature/XX-123/make-customer-happy/*
-#   feature/XX-123/make-customer-happy/01
+#   $ git --no-pager tag --list 🍞/feature/XX-123/*
+#   🍞/feature/XX-123/make-customer-happy/01/191005_1750
 #
 #   $ git leave-breadcrumb
-#   Dropped crumb at 'feature/XX-123/make-customer-happy/02'
+#   🍞/feature/XX-123/make-customer-happy/02/200211_0640
+#
+#   $ git --no-pager tag --list 🍞/feature/XX-123/*
+#   🍞/feature/XX-123/make-customer-happy/01/191005_1750
+#   🍞/feature/XX-123/make-customer-happy/02/200211_0640
 
 # ***
 
 # How wide to make the -XX counter.
 _GS_PRECISION="2"
 
+# Common tag prefix.
 _GS_TAG_PREFIX="🍞/"
 
+# Trace message switch.
 DTRACE=false
 # DEV/YOU: Uncomment to spit trace to stderr.
 #  DTRACE=true
