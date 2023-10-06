@@ -147,9 +147,9 @@ must_verify_ref () {
   local ref_name="$1"
   local friendly="$2"
 
-  git_is_valid_ref "${ref_name}" && return
+  git_is_commit "${ref_name}" && return
 
-  >&2 echo "ERROR: ${friendly} reference not found: ${ref_name}"
+  >&2 echo "ERROR: ${friendly} reference is not a commit: ${ref_name}"
 
   return 1
 }
