@@ -45,7 +45,14 @@ DTRACE=false
 
 # ***
 
-git-leave-breadcrumb () {
+source_deps () {
+  # Load: git_is_commit, git_tag_name_check_format.
+  . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+}
+
+# ***
+
+git_leave_breadcrumb () {
   local dry=false
   if [ "$1" = "-v" ]; then
     dry=true
@@ -134,7 +141,9 @@ git-leave-breadcrumb () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
-  git-leave-breadcrumb "$@"
+  source_deps
+
+  git_leave_breadcrumb "$@"
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
