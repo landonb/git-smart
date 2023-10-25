@@ -948,7 +948,7 @@
 
   # -------
 
-  # Use `git lg1` to see the best representation I could make of the `tig`  log view.
+  # Use `git lg1` to see the best representation I could make of the `tig` log view.
   #
   # STYLE: Prefer `%C(foo)` to `%Cfoo` for readability.
   # INFO.: `less -R` required here, but not if you paste this command to your terminal.
@@ -999,7 +999,7 @@
 
   # -------
 
-  # Use `git log1` to show exclusive history for the currently branch.
+  # Use `git log1` to show exclusive history for the current branch.
   #
   # - Shows one log entry per line, formatted like:
   #
