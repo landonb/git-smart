@@ -100,11 +100,14 @@ git_fixup_and_rebase () {
 
     if ${pop_after}; then
       # Pop the WIP commit.
+      # - Runs on success or abort.
       todo_exec="${todo_exec} && git reset -q --mixed @~1"
     fi
 
     # Restage the "fixup!" commit.
-    todo_exec="${todo_exec} && git reset --soft @~1"
+    # - Runs on abort only, so check git-abort signal,
+    #   otherwise don't soft-pop (git-undo) on success.
+    todo_exec="\${GIT_ABORT:-false} && ${todo_exec} && git reset --soft @~1"
 
     echo "exec ${todo_exec} & ${GITSMART_POST_REBASE_EXECS_TAG}" \
       >> "${GIT_REBASE_TODO_PATH}"
