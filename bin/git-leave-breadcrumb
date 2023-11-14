@@ -60,23 +60,30 @@ git_leave_breadcrumb () {
     shift
   fi
 
-  local tag_commit="${1:-HEAD}"
+  local tag_commit_or_slug="$1"
   local crumb_slug="$2"
 
-  if [ -n "${tag_commit}" ] && [ -z "${crumb_slug}" ]; then
+  local tag_commit=""
+
+  if [ -n "${tag_commit_or_slug}" ] && [ -z "${crumb_slug}" ]; then
     # Only one arg specified. Check if commit object.
-    if ! git_is_commit "${tag_commit}"; then
+    if ! git_is_commit "${tag_commit_or_slug}"; then
       # Not a valid commit, so assume it's the slug.
-      crumb_slug="${tag_commit}"
+      crumb_slug="${tag_commit_or_slug}"
       tag_commit="HEAD"
+    else
+      tag_commit="${tag_commit_or_slug}"
     fi
-  elif [ -n "${tag_commit}" ]; then
+  elif [ -n "${tag_commit_or_slug}" ]; then
     # Both args specified.
-    if ! git_is_commit "${tag_commit}"; then
-      >&2 echo "ERROR: Not a valid commit ref: ${tag_commit}"
+    if ! git_is_commit "${tag_commit_or_slug}"; then
+      >&2 echo "ERROR: Not a valid commit ref: ${tag_commit_or_slug}"
 
       exit 1
     fi
+    tag_commit="${tag_commit_or_slug}"
+  else
+    tag_commit="HEAD"
   fi
 
   if [ -n "${crumb_slug}" ]; then
