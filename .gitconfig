@@ -895,6 +895,28 @@
   tags-match = "! f() { \
     git tag --format=\"%(objectname:short) %(refname:short)\" --list \"$@\"; }; f \"$@\""
 
+  # USAGE: Without params, defaults to upstream remote,
+  # and leads with the remote name, e.g.,:
+  #     $ git tags-remote
+  #     From git@github.com:thegittinsgood/easy-as-pypi.git
+  #     555e9969250d391e88d189ca17f60723376fcb17	refs/tags/1.0.1
+  #     ...
+  # - If the upstream branch is local, prints local tags, e.g.,
+  #     $ git tags-remote
+  #     From .
+  #     555e9969250d391e88d189ca17f60723376fcb17	refs/tags/1.0.1
+  # USAGE: With single param, prints tags for that remote,
+  # and leads without the remote name (leads with nothing), e.g.,
+  #     $ git tags-remote publish
+  #     555e9969250d391e88d189ca17f60723376fcb17	refs/tags/1.0.1
+  # - Note that multiple params always outputs nothing (and exits 0)
+  #   unless maybe *I'm doing it wrong*. I thought maybe Git would
+  #   output shared tags (union) from multiple remotes, but that's
+  #   not it. So guessing it's just nothing, for real's.
+  tags-remote = "ls-remote --tags"
+
+  # -------
+
   # Show just the date of the latest commit.
   d1 = "! f() { git --no-pager log -1 --format=%cd --date=format:%Y-%m-%d; }; f"
 
