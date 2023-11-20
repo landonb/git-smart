@@ -1706,55 +1706,8 @@
 
   # ***
 
-  # I've always wondered by 'cherry-pick' and not just 'pick', or both,
-  # considering users use 'pick' in the sequence editor todo. Also, if
-  # I'm not mistaked, 'cherry-pick' is only command that uses a dash
-  # (which either makes it more awkward to type, or makes it seem like
-  #  a different type or special type of command, or both).
-  # - When you type `git pick`, Git likes to retort, "The most similar
-  #   command is `pickaxe`", and you're like You're better than this,
-  #   Git.
-  #   - SPIKE: Why can't I find the `pickaxe` source?
-  #     - It looks like an internal alias to `blame`:
-  #
-  #         $ git help pickaxe
-  #         No manual entry for git-pickaxe
-  #
-  #         $ type git-pickaxe
-  #         bash: type: git-pickaxe: not found
-  #
-  #         $ git help blame
-  #         # ...
-  #         $ type git-blame
-  #         bash: type: git-blame: not found
-  #
-  #         $ git pickaxe |& head -1
-  #         usage: git blame [<options>] [<rev-opts>] [<rev>] [--] <file>
-  #
-  #         $ git blame |& head -1
-  #         usage: git blame [<options>] [<rev-opts>] [<rev>] [--] <file>
-  #
-  #     - Ha, you're not wrong:
-  #
-  #         From git/git.c:
-  #
-  #         static struct cmd_struct commands[] = {
-  #         	{ "blame", cmd_blame, RUN_SETUP },
-  #         	{ "pickaxe", cmd_blame, RUN_SETUP },
-  #
-  #     - Huh... now I think the "The most similar command is `pickaxe`"
-  #       message is even worse UX than before! Because I was like, WTF
-  #       is pickaxe? Then wasted time tracking it down, and it's an
-  #       internal, unadvertised 'blame' alias??? WTF! If you're not
-  #       going to document it or even mention it in the general help,
-  #       why suggest it in a command-not-found hint?? (Futhermore,
-  #       searching 'pickaxe' surfaces a ton of noise, because,
-  #       colloquially the "Git pickaxe" is the -S option in git log,
-  #       e.g., `git log -p -S --debug [<path>]`, which helps you
-  #       track down which revision introduced a particular change.
-  #
-  #       But I digress... (this Git config more a blathering of
-  #       notes than it is a collection of aliases and commands)
+  # I've always wondered why `cherry-pick` and not just `pick`, or both,
+  # considering users use `pick` in the sequence editor todo.
   pick = cherry-pick
 
   # ***
