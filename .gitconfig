@@ -1782,6 +1782,15 @@
   # SHA of the very first commit.
   first-commit = rev-list --max-parents=0 HEAD
 
+  # Where `git nth-commit 1` is same as `git first-commit`.
+  # And where `git nth-commit <number-bigger-than---count>`
+  # prints latest commit (HEAD) sha.
+  nth-commit = "!f () { \
+    local dist_from_head=$(git rev-list HEAD --count); \
+    dist_from_head=$((dist_from_head - ${1:-1})); \
+    git log --skip=${dist_from_head} --max-count=1 --pretty=format:%H | cat; \
+  }; f"
+
   # https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L243-L244
   # *show current commit SHA; try also*:
   #   git sha --short
