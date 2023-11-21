@@ -1712,6 +1712,30 @@
 
   # ***
 
+  # SAVVY: ``4b825dc...`` is the hash of the empty tree::
+  #
+  #   $ git hash-object -wt tree --stdin < /dev/null
+  #   4b825dc642cb6eb9a060e54bf8d69288fbee4904
+  #
+  #   $ git hash-object -t tree /dev/null
+  #   4b825dc642cb6eb9a060e54bf8d69288fbee4904
+  #
+  #   $ git mktree </dev/null
+  #   4b825dc642cb6eb9a060e54bf8d69288fbee4904
+  #
+  # - REFER: https://stackoverflow.com/questions/9765453/
+  #   is-gits-semi-secret-empty-tree-object-reliable-and-why-is-there-not-a-symbolic
+
+  # USAGE: `git insert-empty-first-commit <commit-message>`
+  # REFER: https://stackoverflow.com/questions/645450/insert-a-commit-before-the-root-commit-in-git
+  insert-empty-first-commit = "!f() { \
+    local tree=$(git hash-object -wt tree --stdin < /dev/null); \
+    local commit=$(git commit-tree -m \"${1:-welcome to the machine\"} ${tree}); \
+    git rebase --root --onto ${commit}; \
+  }; f"
+
+  # ***
+
 # #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
