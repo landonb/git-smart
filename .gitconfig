@@ -1143,10 +1143,11 @@
   #     commit --amend --reuse-message=HEAD
 
   # Here's a clever way to change the last commit's author, courtesy:
-  #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig
+  #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig [MIT]
   # (although I added argument verification).
-  # (https://github.com/jessfraz/dotfiles has a license file! It's MIT.)
   # *Credit an author on the latest commit*
+  # - SAVVY/2023-11-20: To make yourself the author of the last commit:
+  #     git commit --amend --no-edit --author="$(git whoami)"
   credit = "! f() { \
     true \
     && [ -n \"$1\" ] \
