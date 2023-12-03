@@ -705,6 +705,10 @@
   # before the current branch, or `  ` before other branches, try:
   #   br = !git --no-pager branch --format='%(refname:short)'
 
+  # Years later: There's no `git b`, so why not print branch list,
+  # at least until a better `git b` emerges.
+  b = br
+
   # - Use `git brs` to show all branches, including remote branches.
   # - git-brs is inherently aliased because found on PATH.
   #    brs = !${GITSMART_BIN:-${HOME}/.local/bin}/git-brs \"$@\"
