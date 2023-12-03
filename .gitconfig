@@ -1382,27 +1382,34 @@
   #   short of an alias. Using 'pop' and a number is
   #   still pretty short, at least typing 'pop' is very
   #   quick.
-  #
-  pop1 = ! \
-    git reset --mixed @~1 && \
-    git quip
 
   # 2020-10-27: Let's keep the paradigm rolling, adding pop* 2-9.
   popn = "! f() { \
-    echo 'git reflog'; \
-    echo '——————————'; \
-    git quip -g; \
+    pad2 () { sed 's/^/  /'; }; \
+    \
+    if [ $1 -gt 1 ]; then \
+      echo; \
+      echo '  git reflog'; \
+      echo '  ——————————'; \
+      git quip -g | pad2; \
+    else \
+      echo; \
+      echo '  pop commit'; \
+      echo '  ——————————'; \
+      git --no-pager log -1 --decorate --color=always | pad2; \
+    fi; \
     \
     echo; \
-    echo git reset --mixed @~${1}; \
-    echo '—————————————————————'; \
-    git reset --mixed @~${1}; \
+    echo '  git reset --mixed @~'$1; \
+    echo '  —————————————————————'; \
+    git reset --mixed @~${1} | pad2; \
     \
     echo; \
-    echo 'git log'; \
-    echo '———————'; \
-    git quip; \
+    echo '  new HEAD'; \
+    echo '  ————————'; \
+    git quip | pad2; \
   }; f"
+  pop1 = "! git popn 1"
   pop2 = "! git popn 2"
   pop3 = "! git popn 3"
   pop4 = "! git popn 4"
@@ -1412,7 +1419,11 @@
   pop8 = "! git popn 8"
   pop9 = "! git popn 9"
 
-  quip = ! git --no-pager log -1 --pretty=oneline --abbrev-commit
+  # Note that, used in a pipe (output not going to terminal), Git doesn't
+  # "decorate" ref names (e.g., it would print "commit abcd1234", instead
+  # of "commit abcd1234 (HEAD -> main)". So always --decorate.
+  # - REFER: log.decorate in `man git-log`.
+  quip = ! git --no-pager log -1 --pretty=oneline --abbrev-commit --decorate --color=always
 
   # -------
 
