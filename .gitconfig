@@ -1432,9 +1432,9 @@
   # - The undo command is in its own file on PATH, so
   #   that it runs, not git-extras' /usr/bin/git-undo.
   #
-  #   See:
+  #   See:                CXREF: For DepoXy devs:
   #
-  #     bin/git-undo
+  #     bin/git-undo        ~/.kit/git/git-smart/bin/git-undo
   #
   # - This is useful if you want to rewrite the commit message,
   #   or if you want to incorporate changes without having to
