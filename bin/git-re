@@ -27,8 +27,10 @@ reveal_biz_vars () {
 #  declare -A -x GITSMART_REMOTE_CACHE__
 
 _gs_set_remote_cache () {
-  local name="$1"
+  local name_raw="$1"
   local url="$2"
+
+  local name="$(_gs_normalize_cache_name "${name_raw}")"
 
   # >&2 echo eval "GITSMART_REMOTE_CACHE__${name}='${url}'"
 
@@ -38,7 +40,9 @@ _gs_set_remote_cache () {
 }
 
 _gs_get_remote_cache () {
-  local name="$1"
+  local name_raw="$1"
+
+  local name="$(_gs_normalize_cache_name "${name_raw}")"
 
   # >&2 echo eval echo '$'GITSMART_REMOTE_CACHE__${name} == \
   #   $(eval echo '$'GITSMART_REMOTE_CACHE__${name})
@@ -49,7 +53,9 @@ _gs_get_remote_cache () {
 }
 
 _gs_has_remote_cache () {
-  local name="$1"
+  local name_raw="$1"
+
+  local name="$(_gs_normalize_cache_name "${name_raw}")"
 
   # >&2 echo [ -v "GITSMART_REMOTE_CACHE__${name}" ] == \
   #   $([ -v "GITSMART_REMOTE_CACHE__${name}" ] && echo true || echo false)
@@ -57,6 +63,12 @@ _gs_has_remote_cache () {
   # TOO_BASHY:
   #  [ ${GITSMART_REMOTE_CACHE[${name}]+x} ] && true || false
   eval [ ! -z '$'{GITSMART_REMOTE_CACHE__${name}+x} ] && true || false
+}
+
+_gs_normalize_cache_name () {
+  local name_raw="$1"
+
+  echo "${name_raw}" | tr "-" "_"
 }
 
 # ***
