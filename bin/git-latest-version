@@ -29,7 +29,17 @@ source_deps () {
 main () {
   source_deps
 
-  git_largest_version_tag
+  local latest_version
+
+  latest_version="$(git_largest_version_tag)"
+
+  echo "${latest_version}"
+
+  if [ -z "$(
+    git branch --list --contains "refs/tags/${latest_version}" "$(git_branch_name)"
+  )" ]; then
+    >&2 echo "* BWARE: The latest version tag is outside this branch"
+  fi
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
