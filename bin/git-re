@@ -184,17 +184,17 @@ remotes_process_and_pretty_print_tidy () {
     'upstream' \
     $(git remote \
       | grep -v \
-        -e 'entrust' \
-        -e 'isolate' \
-        -e 'qualify' \
-        -e 'proving' \
-        -e 'publish' \
-        -e 'release' \
-        -e 'genesis' \
-        -e 'starter' \
-        -e 'myclone' \
-        -e 'origin' \
-        -e 'upstream' \
+        -e '^entrust$' \
+        -e '^isolate$' \
+        -e '^qualify$' \
+        -e '^proving$' \
+        -e '^publish$' \
+        -e '^release$' \
+        -e '^genesis$' \
+        -e '^starter$' \
+        -e '^myclone$' \
+        -e '^origin$' \
+        -e '^upstream$' \
       | sort \
   ); do
     # Skip if no URL recorded for remote.
