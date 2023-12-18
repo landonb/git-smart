@@ -197,7 +197,7 @@ remotes_process_and_pretty_print_tidy () {
         -e 'upstream' \
       | sort \
   ); do
-    # Return if no URL recorded for remote.
+    # Skip if no URL recorded for remote.
     ! _gs_has_remote_cache ${remote} && continue
 
     if [ -z "${git_cmd}" ] || [ "${git_cmd}" = "pwd" ]; then
