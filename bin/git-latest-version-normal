@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Prints *largest* version tag.
+# - We assume the largest tag is the latest tag.
+# - Perhaps this command should be renamed, e.g.,
+#     git-largest-version
+#  but people tend to think of "latest" version
+#  as the largest version, and it might be
+#  confusing to return a smaller version than
+#  the largest if the user happened to apply
+#  version tags "out of order". So we'll assume
+#  the user really wants the largest version tag
+#  that's even been used.
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+source_deps () {
+  # Load git_largest_version_tag.
+  # - CXREF: ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
+  . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+}
+
+# ***
+
+main () {
+  source_deps
+
+  local latest_version
+
+  latest_version="$(git_largest_version_tag_normal)"
+
+  echo "${latest_version}"
+
+  if [ -z "$(
+    git branch --list --contains "refs/tags/${latest_version}" "$(git_branch_name)"
+  )" ]; then
+    >&2 echo "* BWARE: The latest version tag is outside this branch"
+  fi
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "${@}"
+fi
+
