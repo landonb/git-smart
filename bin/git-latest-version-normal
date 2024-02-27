@@ -33,6 +33,12 @@ main () {
 
   latest_version="$(git_largest_version_tag_normal)"
 
+  if [ -z "${latest_version}" ]; then
+    >&2 echo "ERROR: No version tag found (via \`git_largest_version_tag_normal\`)"
+
+    exit 1
+  fi
+
   echo "${latest_version}"
 
   if [ -z "$(
