@@ -49,7 +49,7 @@ great aliases and commands, try something like this::
     mkdir "${HOME}/.config/git/template"
     cd "${HOME}/.config/git/template"
     # Edit HEAD to set a different default branch name, then copy it.
-    /bin/cp "${git_smart_dir}/.config/git/template/HEAD" .
+    command cp "${git_smart_dir}/.config/git/template/HEAD" .
 
     # Reality check.
     git whoami
