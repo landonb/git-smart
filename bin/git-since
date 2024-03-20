@@ -157,11 +157,11 @@ must_verify_ref () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 source_dep () {
-  local dep_path="$(dirname "$(realpath "$0")")/../$1"
+  local dep_path="$(dirname -- "$(realpath -- "$0")")/../$1"
 
   ! . "${dep_path}" 2> /dev/null || return 0
 
-  >&2 echo "ERROR: ‘$(basename $0)’ failed to find or source: ${dep_path}"
+  >&2 echo "ERROR: ‘$(basename -- "$0")’ failed to find or source: ${dep_path}"
 
   exit 1
 }

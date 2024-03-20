@@ -142,7 +142,7 @@ git_begin_review_init_particulars () {
   # ***
 
   if [ -z "${REVIEW_PR_NUM}" ] && [ -z "${REVIEW_BRANCH}" ]; then
-    >&2 echo "USAGE: $(basename "$0") [{branch|PR-number}] [{remote}]"
+    >&2 echo "USAGE: $(basename -- "$0") [{branch|PR-number}] [{remote}]"
     return 1
   fi
 

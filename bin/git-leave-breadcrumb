@@ -47,7 +47,7 @@ DTRACE=false
 
 source_deps () {
   # Load: git_is_commit, git_tag_name_check_format.
-  . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+  . "$(dirname -- "$(realpath -- "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
 }
 
 # ***

@@ -21,7 +21,7 @@
 source_deps () {
   # Load git_largest_version_tag.
   # - CXREF: ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
-  . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+  . "$(dirname -- "$(realpath -- "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
 }
 
 # ***

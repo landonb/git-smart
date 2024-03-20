@@ -28,7 +28,7 @@ git_gc_all_ferocious () {
       echo "Missing dependency: \`realpath\`" && return 1
     )
 
-    . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+    . "$(dirname -- "$(realpath -- "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
 
     git_insist_git_repo
   }
