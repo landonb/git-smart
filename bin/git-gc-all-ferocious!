@@ -53,7 +53,7 @@ git_gc_all_ferocious () {
     #          https://github.com/jbq/Dotfiles/blob/master/bin/git-gc-all-ferocious
     (
       cd .git
-      /bin/rm -rf refs/remotes/ refs/original/ *_HEAD logs/
+      command rm -rf -- refs/remotes/ refs/original/ *_HEAD logs/
     )
   }
 

@@ -17,7 +17,7 @@ meld_hexdumps () {
   hexdump -v -C $1 > $file1
   hexdump -v -C $2 > $file2
   meld $file1 $file2
-  /bin/rm $file1 $file2
+  command rm -- "$file1" "$file2"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
