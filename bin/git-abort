@@ -120,6 +120,13 @@ git_abort_try () {
     git_abort_post_rebase_execs_run_maybe
   fi
 
+  # Remove the out-of-band `exec` file regardless of abort success.
+  # - Unless there's a use case for only running cleanup if the
+  #   --abort succeeds, we'll avoid running the execs if --abort
+  #   failed, because, without said use case, we don't know why
+  #   it fails. So let's not run our `execs` if the user tries
+  #   again and it succeeds, because maybe they changed the repo
+  #   state otherwise to get --abort to succeed.
   git_abort_post_rebase_execs_cleanup
 
   return ${retcode}
