@@ -74,12 +74,26 @@ git_abort_try () {
   local optally="$2"
   local plumbing_files="$3"
 
-  # FIXME/2023-01-09 11:31: How better to detect this?:
-  # - If I `git ria! HEAD^` and try a squash, then rebase fails.
-  #   But there's no REBASE_HEAD, just a `.git/rebase-merge` directory.
-  #   - Why is it called `rebase-merge`? I.e., does git-merge use the
-  #     same-named directory?
-  if [ "${fcnt}" = "" ] && [ -d ".git/rebase-merge" ]; then
+  # Run `rebase --abort` whenever the .git/rebase-merge directory exists.
+  #
+  # - There are instances where there's either no REBASE_HEAD,
+  #   or there's also a MERGE_HEAD:
+  #
+  #   - Run `git ria! HEAD^` and try to squash, then rebase fails.
+  #     But there's no REBASE_HEAD, just `.git/rebase-merge`.
+  #
+  #   - Run a "merge" command rebase (via git-rebase-todo), then
+  #     .git/rebase-merge exists, as well as .git/MERGE_HEAD (but
+  #     surprisingly no REBASE_HEAD).
+  #
+  #     (And if you then run `git merge --abort`, it clears MERGE_HEAD,
+  #      but not .git/rebase-merge. You can `git rebase --abort` to
+  #      finish the abort, or you could just `git rebase --abort` in
+  #      the first place).
+  #
+  #   - Run `git rebase --rebase-merges` and you'll see both HEAD
+  #     files: MERGE_HEAD and REBASE_HEAD.
+  if [ -d ".git/rebase-merge" ]; then
     opfound="rebase"
     optally=1
   fi
