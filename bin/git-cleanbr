@@ -13,7 +13,7 @@
 
 # ***
 
-# MEH/2020-07-01 18:44: Add sh-git-nubs/bin/git-nubs.sh as a dependency, and source.
+# MEH/2020-07-01 18:44: Add sh-git-nubs/lib/git-nubs.sh as a dependency, and source.
 # - For now, DRY warning: The following are duplicated from the aforementioned project.
 
 git_branch_exists () {

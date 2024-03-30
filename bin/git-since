@@ -168,7 +168,7 @@ source_dep () {
 
 main () {
   set -e
-  source_dep "../deps/sh-git-nubs/bin/git-nubs.sh"
+  source_dep "../deps/sh-git-nubs/lib/git-nubs.sh"
 
   git_since "$@"
 }
