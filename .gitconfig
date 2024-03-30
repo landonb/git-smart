@@ -1711,20 +1711,34 @@
 
   # If the rebase pauses and you need to resolve a conflict,
   # here's a shortcut to continue the rebase quickly.
+  #
   # - Noice! I almost never care about editing message during rebase, as
   #   I'm usually just resolving conflicts, or I already ran --amend.
+  #
   #   - GIT_EDITOR=true courtesy:
+  #
   #       https://stackoverflow.com/questions/43489971/
   #         how-to-suppress-the-editor-for-git-rebase-continue
   #
+  # Previous iterations of this/these commands:
+  #
   #  rc = !GIT_EDITOR=true git rebase --continue
+  #
   #  # Git cherry-pick --continue.
   #  #     ░      ▒      ▓
   #  cpc = cherry-pick --continue
-  # HA: Remember this ! is for Git and not a shell symbol.
-  rc = ! [ -f .git/CHERRY_PICK_HEAD ] && \
-    GIT_EDITOR=true git cherry-pick --continue || \
-    GIT_EDITOR=true git rebase --continue
+  #
+  # Note that rebase uses both git-rebase-todo and MERGE_HEAD, so
+  # check the former first, to distinguish from merge.
+  rc = "!f() { \
+    if [ -f .git/rebase-merge/git-rebase-todo ]; then \
+      GIT_EDITOR=true git rebase --continue; \
+    elif [ -f .git/CHERRY_PICK_HEAD ]; then \
+      GIT_EDITOR=true git cherry-pick --continue; \
+    elif [ -f .git/MERGE_HEAD ]; then \
+      GIT_EDITOR=true git merge --continue; \
+    fi; \
+  }; f"
 
   cancel = ! git abort
 
