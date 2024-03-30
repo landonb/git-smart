@@ -822,6 +822,19 @@
   # Upstream branch name. From:
   #   https://gist.github.com/pksunkara/988716#file-config-L86
   # (pksunkara/988716 is technically not licensed: No license info.)
+  #
+  # SAVVY/2024-03-28: The git-rev-parse error message varies.
+  # - If there's no upstream configured, it'll print:
+  #     fatal: no upstream configured for branch 'liminal'
+  # - But if the upstream is no longer valid, e.g., deleted branch, prints:
+  #     @{u}
+  #     fatal: ambiguous argument '@{u}': unknown revision or path not in the working tree.
+  #     Use '--' to separate paths from revisions, like this:
+  #     'git <command> [<revision>...] -- [<file>...]'
+  #   In which case set a new upstream or run `git branch --unset-upstream`.
+  #   - If you really need to know the value, look in the config:
+  #       git config branch.<name>.merge
+  #       git config branch.<name>.remote
   upstream = !git rev-parse --abbrev-ref --symbolic-full-name "@{u}"
   # Number of commits ahead or behind upstream branch. From:
   #   https://gist.github.com/pksunkara/988716#file-config-L260-L261
