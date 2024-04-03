@@ -96,7 +96,7 @@ LCONFL="${MERGED}.REMOTE.$$.tmp"
 RCONFL="${MERGED}.LOCAL.$$.tmp"
 
 # Always delete our temp files; Git will handle it's own temp files
-trap 'rm -f "'"${LCONFL}"'" "'"${RCONFL}"'"' SIGINT SIGTERM EXIT
+trap -- 'rm -f "'"${LCONFL}"'" "'"${RCONFL}"'"' SIGINT SIGTERM EXIT
 
 # Remove the conflict markers for each 'side' and put each into a temp file
 /usr/bin/env sed -E -e '/^<<<<<<< /,/^=======\r?$/d' -e '/^>>>>>>> /d' "${MERGED}" > "${LCONFL}"
