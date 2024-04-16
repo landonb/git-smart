@@ -8,10 +8,11 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# COPYD: See git_edit_revision command in tig-newtons
+# COPYD: See rebase_edit__________selected_rev_________ command
+# in tig-newtons:
 #   https://github.com/DepoXy/tig-newtons#🍎
-# If using DepoXy, it's at ~/.kit/git/tig-newtons/tig/config
-#   meld ~/.kit/git/git-smart/bin/git-edit ~/.kit/git/tig-newtons/tig/bind-rebase &
+# CXREF: If using DepoXy, it's at:
+#   ~/.kit/git/tig-newtons/tig/bind-rebase
 #
 # Note the `exec` appended to the .git/git-rebase-todo, which
 # pops the stashed WIP commit after the user finishes rebase.

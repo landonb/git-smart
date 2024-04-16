@@ -8,9 +8,11 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# COPYD: See git_reword_revision command in tig-newtons
+# COPYD: See rebase_reword________selected_rev_________ command
+# in tig-newtons:
 #   https://github.com/DepoXy/tig-newtons#🍎
-# Using DepoXy, at ~/.kit/git/tig-newtons/tig/config
+# CXREF: If using DepoXy, it's at:
+#   ~/.kit/git/tig-newtons/tig/bind-rebase
 git_reword_revision () {
   local commit="$1"
 
