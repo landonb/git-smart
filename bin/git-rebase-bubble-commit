@@ -154,13 +154,18 @@ git_rebase_buble_commit_noninteractive () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+PROG_NAME="git-rebase-bubble-commit"
+
 main () {
   git_rebase_bubble_commit "$@"
 }
 
-# Note that dash complains "Bad substitution" on ${BASH_SOURCE[0]},
-# so we test set first.
-if [ -n "${BASH_SOURCE}" ] && [ "$0" = "${BASH_SOURCE[0]}" ]; then
+# Complain if sourced (from any shell), or not run via Bash.
+if [ -z "${BASH_SOURCE}" ] || [ "$0" != "${BASH_SOURCE[0]}" ]; then
+  >&2 echo "ERROR: Run this script with Bash [${PROG_NAME}]"
+
+  false
+else
   main "$@"
 fi
 
