@@ -1410,6 +1410,9 @@
       echo '  pop commit'; \
       echo '  ——————————'; \
       git --no-pager log -1 --decorate --color=always | pad2; \
+      echo; \
+      echo \"  If you want a do-over:\"; \
+      echo \"    git ci -m \\\"$(git --no-pager log -1 --format=%s)\\\"\"; \
     fi; \
     \
     echo; \
