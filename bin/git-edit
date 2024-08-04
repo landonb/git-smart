@@ -42,6 +42,12 @@ git_edit_revision () {
 
   set -e
 
+  if ! git diff --cached --quiet; then
+    >&2 echo "ERROR: git-edit disabled while staging"
+
+    return 1
+  fi
+
   local wipped=false
 
   git add -A \

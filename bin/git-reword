@@ -19,6 +19,12 @@ git_reword_revision () {
 
   set -e
 
+  if ! git diff --cached --quiet; then
+    >&2 echo "ERROR: git-reword disabled while staging"
+
+    return 1
+  fi
+
   local wipped=false
 
   git add -A \
