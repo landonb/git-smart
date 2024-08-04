@@ -54,10 +54,14 @@ git_edit_revision () {
     && git commit --no-verify -m 'PRIVATE: WIP [git-edit]' > /dev/null
     && wipped=true
 
+  # ALTLY: " $(echo '16i 23 P' | dc)git-abort"
+  GITSMART_POST_REBASE_EXECS_TAG=" #git-abort"
+
   GIT_SEQUENCE_EDITOR='f () { \
     local rebase_todo_path="$1"
     sed -i "1 s/^pick/edit/" "${rebase_todo_path}"
     echo "exec '${wipped}' && sleep 0.1 && git reset -q --mixed @~1 &" \
+      '"'${GITSMART_POST_REBASE_EXECS_TAG}'"' \
       >> "${rebase_todo_path}"
   }; f "$1"' git rebase -i "${commit}"^
 }
