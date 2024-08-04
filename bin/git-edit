@@ -52,6 +52,7 @@ git_edit_revision () {
 
   git add -A \
     && git commit --no-verify -m 'PRIVATE: WIP [git-edit]' > /dev/null
+    && wipped=true
 
   GIT_SEQUENCE_EDITOR='f () { \
     local rebase_todo_path="$1"
