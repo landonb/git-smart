@@ -23,6 +23,7 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-fup]"
+GITSMART_GIT_FUP_WIP_COMMIT_GREP="${PRIVATE_PREFIX:-PRIVATE: }WIP \\[git-fup\\]"
 
 # This is the known Git rebase todo path.
 # - SPIKE: Can we get this from `git` so it's not hardcoded?
@@ -55,7 +56,7 @@ git_fixup_and_rebase () {
   git commit -q --no-verify --fixup ${commit}
 
   local pop_after=false
-  ! maybe_commit_uncommitted || pop_after=true
+  ! stash_untracked_changes || pop_after=true
 
   # Have the interactive rebase sequence editor complete automatically
   # by specifying the Bash `:` no-op.
@@ -101,7 +102,10 @@ git_fixup_and_rebase () {
     if ${pop_after}; then
       # Pop the WIP commit.
       # - Runs on success or abort.
-      todo_exec="${todo_exec} && git reset -q --mixed @~1"
+      todo_exec="${todo_exec} \
+        && git log -1 --format=%s \
+          | grep -q -e \"^${GITSMART_GIT_FUP_WIP_COMMIT_GREP}\" \
+        && git reset -q --mixed @~1"
     fi
 
     # Restage the "fixup!" commit.
@@ -123,10 +127,7 @@ git_fixup_and_rebase () {
       eval ${GIT_POST_REBASE_EXEC}
     fi
 
-    if ${pop_after}; then
-      # Aka `git pop1 --quiet`.
-      git reset -q --mixed @~1
-    fi
+    maybe_unstash_changes ${pop_after}
   fi
 
   return ${retcode}
@@ -134,7 +135,7 @@ git_fixup_and_rebase () {
 
 # ***
 
-maybe_commit_uncommitted () {
+stash_untracked_changes () {
   local pop_after=false
 
   if [ -n "$(git_status_porcelain)" ]; then
@@ -147,6 +148,18 @@ maybe_commit_uncommitted () {
   fi
 
   ${pop_after}
+}
+
+maybe_unstash_changes () {
+  local pop_after=$1
+
+  if ${pop_after:-false} \
+    && git log -1 --format=%s \
+      | grep -q -e "^${GITSMART_GIT_FUP_WIP_COMMIT_GREP}" \
+  ; then
+    # Aka `git pop1 --quiet`.
+    git reset -q --mixed @~1
+  fi
 }
 
 # ***

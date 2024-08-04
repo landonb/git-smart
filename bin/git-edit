@@ -51,20 +51,36 @@ git_edit_revision () {
   local wipped=false
 
   git add -A \
-    && git commit --no-verify -m 'PRIVATE: WIP [git-edit]' > /dev/null
+    && git commit --no-verify -m "${GITSMART_GIT_EDIT_WIP_COMMIT_MESSAGE}" > /dev/null \
     && wipped=true
 
   # ALTLY: " $(echo '16i 23 P' | dc)git-abort"
   GITSMART_POST_REBASE_EXECS_TAG=" #git-abort"
 
-  GIT_SEQUENCE_EDITOR='f () { \
-    local rebase_todo_path="$1"
-    sed -i "1 s/^pick/edit/" "${rebase_todo_path}"
-    echo "exec '${wipped}' && sleep 0.1 && git reset -q --mixed @~1 &" \
-      '"'${GITSMART_POST_REBASE_EXECS_TAG}'"' \
-      >> "${rebase_todo_path}"
-  }; f "$1"' git rebase -i "${commit}"^
+  GIT_SEQUENCE_EDITOR="f () { \
+    local rebase_todo_path=\"\$1\"
+
+    sed -i '1 s/^pick/edit/' \"\${rebase_todo_path}\"
+
+    if [ -n \"${GIT_POST_REBASE_EXEC}\" ]; then
+      echo \"exec ${GIT_POST_REBASE_EXEC} > /dev/null 2>&1\" \
+        '${GITSMART_POST_REBASE_EXECS_TAG}' \
+          >> \"\${rebase_todo_path}\"
+    fi
+
+    if ${wipped}; then \
+      echo 'exec sleep 0.1 \
+        && git log -1 --format=%s \
+          | grep -q -e \"^${GITSMART_GIT_EDIT_WIP_COMMIT_GREP}\" \
+        && git reset -q --mixed @~1 &' \
+        '${GITSMART_POST_REBASE_EXECS_TAG}' \
+          >> \"\${rebase_todo_path}\"
+    fi
+  }; f \"\$1\"" git rebase -i "${commit}"^
 }
+
+GITSMART_GIT_EDIT_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-edit]"
+GITSMART_GIT_EDIT_WIP_COMMIT_GREP="${PRIVATE_PREFIX:-PRIVATE: }WIP \\[git-edit\\]"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
