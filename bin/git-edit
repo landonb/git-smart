@@ -8,12 +8,12 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# COPYD: See rebase_edit__________selected_rev_________ command
-# in tig-newtons:
-#   https://github.com/DepoXy/tig-newtons#🍎
+# USYNC: See tig-newtons command:
+#   rebase_edit__________selected_rev_________
+# https://github.com/DepoXy/tig-newtons#🍎
 # CXREF: If using DepoXy, it's at:
 #   ~/.kit/git/tig-newtons/tig/bind-rebase
-#
+
 # Note the `exec` appended to the .git/git-rebase-todo, which
 # pops the stashed WIP commit after the user finishes rebase.
 # - We `&` background the operation so that git-rebase does
@@ -35,8 +35,8 @@
 #   - Note also the short sleep, though it works without in practice,
 #     but there's a race condition with the Git tidy work tree check:
 #
-#       https://github.com/git/git/blob/5bc069e383539824fd3a0d897100d44bbe1f8a24/sequencer.c#L3620
-#
+#       https://github.com/git/git/blob/5bc069e38353/sequencer.c#L3620
+
 git_edit_revision () {
   local commit="$1"
 
