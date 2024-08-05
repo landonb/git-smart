@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT
+
+# Copyright (c) © 2020-2021, 2024 Landon Bouma. All Rights Reserved.
+
+# USAGE: Creates an encrypted archive of the current repo,
+# including the .git/ directory and all repo files.
+#
+# - SAVVY: If you don't care about the project history but want to
+#   keep the archive smaller, copy the repo and `git flatten` it,
+#   e.g.,
+#
+#     git_first_commit_sha () {
+#       git rev-list --max-parents=0 --first-parent HEAD
+#     }
+#     git_latest_commit_message () {
+#       git --no-pager log --format=%s -1 "${1:-HEAD}";
+#     }
+#     git squash "$(git_first_commit_sha)" "$(git_latest_commit_message)"
+#
+#   - ALTLY: Omit .git/ directory from the archive using -G/--exclude-git
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_package_encrypted_repo_archive () {
+  ! git_is_a_repo && >&2 echo "not a repo!" && return 1
+
+  [ ! -d ".git" ] && >&2 echo "no .git/ !?" && return 1
+
+  local omit_git_db=false
+  parse_args
+
+  local archive_f=$(mktemp)
+  local encrypt_f=$(mktemp)
+
+  # Use printf, '-z', and -0 to use null terminators, to handle
+  # whitespace in filenames.
+  # https://stackoverflow.com/questions/2766600/
+  #   git-archive-of-repository-with-uncommitted-changes
+  ( ${omit_git_db} || printf '%s\0' '.git'; git ls-files -z) \
+    | xargs -0 tar -czvf "${archive_f}"
+
+  gpg -o "${encrypt_f}" --cipher-algo AES256 -c "${archive_f}"
+
+  command rm -- "${archive_f}"
+
+  echo "The encrypted repo archive is ready at:"
+  echo "  ${encrypt_f}"
+}
+
+# ***
+
+parse_args () {
+  while [ "$1" != '' ]; do
+    case $1 in
+      -g | --include-git)
+        omit_git_db=false
+
+        shift
+        ;;
+      -G | --exclude-git)
+        omit_git_db=true
+
+        shift
+        ;;
+      *)
+        >&2 echo "ERROR: Unrecognized argument: “$1”"
+
+        exit 1
+        ;;
+    esac
+  done
+}
+
+# ***
+
+git_is_a_repo () {
+  git rev-parse --git-dir > /dev/null 2>&1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  set -e
+
+  git_package_encrypted_repo_archive
+}
+
+main "$@"
+
