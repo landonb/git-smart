@@ -70,8 +70,7 @@ git_edit_revision () {
 
     if ${wipped}; then \
       echo 'exec sleep 0.1 \
-        && git log -1 --format=%s \
-          | grep -q -e \"^${GITSMART_GIT_EDIT_WIP_COMMIT_GREP}\" \
+        && test \"\$(git log -1 --format=%s)\" = \"${GITSMART_GIT_EDIT_WIP_COMMIT_MESSAGE}\" \
         && git reset -q --mixed @~1 &' \
         '${GITSMART_POST_REBASE_EXECS_TAG}' \
           >> \"\${rebase_todo_path}\"
@@ -80,7 +79,6 @@ git_edit_revision () {
 }
 
 GITSMART_GIT_EDIT_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-edit]"
-GITSMART_GIT_EDIT_WIP_COMMIT_GREP="${PRIVATE_PREFIX:-PRIVATE: }WIP \\[git-edit\\]"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 

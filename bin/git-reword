@@ -33,8 +33,7 @@ git_reword_revision () {
 
   maybe_unstash_changes () {
     if ${wipped} \
-      && git log -1 --format=%s \
-        | grep -q -e \"^${GITSMART_GIT_REWORD_WIP_COMMIT_GREP}\" \
+      && test "$(git log -1 --format=%s)" = "${GITSMART_GIT_REWORD_WIP_COMMIT_MESSAGE}" \
     ; then
       git reset --quiet --mixed @~1
     fi
@@ -57,7 +56,6 @@ git_reword_revision () {
 }
 
 GITSMART_GIT_REWORD_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-reword]"
-GITSMART_GIT_REWORD_WIP_COMMIT_GREP="${PRIVATE_PREFIX:-PRIVATE: }WIP \\[git-reword\\]"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 

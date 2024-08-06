@@ -23,7 +23,6 @@
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE="${PRIVATE_PREFIX:-PRIVATE: }WIP [git-fup]"
-GITSMART_GIT_FUP_WIP_COMMIT_GREP="${PRIVATE_PREFIX:-PRIVATE: }WIP \\[git-fup\\]"
 
 # This is the known Git rebase todo path.
 # - SPIKE: Can we get this from `git` so it's not hardcoded?
@@ -103,8 +102,7 @@ git_fixup_and_rebase () {
       # Pop the WIP commit.
       # - Runs on success or abort.
       todo_exec="${todo_exec} \
-        && git log -1 --format=%s \
-          | grep -q -e \"^${GITSMART_GIT_FUP_WIP_COMMIT_GREP}\" \
+        && test \"\$(git log -1 --format=%s)\" = \"${GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE}\" \
         && git reset -q --mixed @~1"
     fi
 
@@ -154,8 +152,7 @@ maybe_unstash_changes () {
   local pop_after=$1
 
   if ${pop_after:-false} \
-    && git log -1 --format=%s \
-      | grep -q -e "^${GITSMART_GIT_FUP_WIP_COMMIT_GREP}" \
+    && test "$(git log -1 --format=%s)" = "${GITSMART_GIT_FUP_WIP_COMMIT_MESSAGE}" \
   ; then
     # Aka `git pop1 --quiet`.
     git reset -q --mixed @~1
