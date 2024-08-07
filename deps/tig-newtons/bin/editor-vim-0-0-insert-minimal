@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=sh
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/DepoXy/tig-newtons#🍎
+# License: MIT. Please find more in the LICENSE file.
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# USAGE: I use this as my EDITOR for much quicker `git commit -v`
+#        and git-rebase EDITOR startup, and to inject some useful
+#        commands.
+#
+#        For the most part, I can stick to normal Vim commands to
+#        craft my commit messages, but I've also crafted a minimal
+#        Vimrc to wire a few things:
+#
+#        - Digraphs are remaped from Ctrl-k to Ctrl-l, to match
+#          Dub Vim's built-in (so if you use Dubs Vim, or at least
+#          https://github.com/landonb/vim-buffer-ring then you won't
+#          have to struggle with an existing brain mapping).
+#
+#        - You can save and quit Vim from any mode using Ctrl-s.
+#          Idea is that Vim will start in Insert mode so you can
+#          immediately type you message, and you can just as easily
+#          exit Vim, without needing to Escape to Normal mode first.
+
+# REFER: :h initialization
+
+# Here's a basic --noplugin option that starts in insert mode at
+# the top of the file:
+#
+#  vim --noplugin -c "startinsert" -c "norm! gg" "$@"
+#
+# But we'll also include a minimal Vimrc that adds a few more commands
+# to help edit commit messages quicker.
+
+editor_vim_0_0_insert_minimal () {
+  local git_commit_v_vimrc="$(dirname -- "$0")/editor-vim-0-0-insert-minimal.vimrc"
+
+  vim -u "${git_commit_v_vimrc}" --noplugin -c "startinsert" -c "norm! gg" "$@"
+}
+
+# ***
+
+main () {
+  editor_vim_0_0_insert_minimal "$@"
+}
+
+main "$@"
+
