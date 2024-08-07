@@ -1134,6 +1134,9 @@
   #
   #   (lb): Used 40% of the time (type message at prompt).
   cv = -c core.editor=editor-vim-0-0-insert-minimal commit --verbose
+  #
+  # For parity with `git cim` and `git civ`.
+  civ = -c core.editor=editor-vim-0-0-insert-minimal commit --verbose
 
   # ***
 
