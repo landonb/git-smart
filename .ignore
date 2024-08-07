@@ -2,3 +2,8 @@
 
 /bin/completions/git-completion.bash
 
+# -> ../deps/tig-newtons/bin/editor-vim-0-0-insert-minimal
+/bin/editor-vim-0-0-insert-minimal
+# -> ../deps/tig-newtons/bin/editor-vim-0-0-insert-minimal.vimrc
+/bin/editor-vim-0-0-insert-minimal.vimrc
+
