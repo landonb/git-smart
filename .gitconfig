@@ -1165,6 +1165,21 @@
   # Commit staged using same commit message as latest commit.
   ciagain = ! git commit --message \"$(git log -1 --format=%B)\"
 
+  # Use signed, empty first commit.
+  # - Use case: If you only sign commits before pushing (because you
+  #   rebase often before publishing, and signing is slow), ensure
+  #   the first commit is signed. (If you don't sign the first commit
+  #   now, you can always sign it later, but not as easily as signing
+  #   it now.)
+  # - Use case: In addition to -S[igning], we'll also --allow-empty,
+  #   for those who like to use a meaningful message but no content
+  #   for the first commit (which also makes it easy to fixup changes
+  #   before your first push, without having to fiddle with the --root
+  #   commit).
+  # - SAVVY: Call `git cinit -m` or `git cinit -v`
+  cinit = ciinit
+  ciinit = commit --allow-empty -S
+
   # Here's a clever way to change the last commit's author, courtesy:
   #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig [MIT]
   # (although I added argument verification).
