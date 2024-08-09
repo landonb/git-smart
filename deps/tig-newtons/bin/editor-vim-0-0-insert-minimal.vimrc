@@ -54,7 +54,9 @@ endif
 " won't work (they'll insert As, Bs, Cs, and Ds); Ctrl-s doesn't work;
 " and also whatever else is wrong that I didn't notice b/c those three.
 if filereadable($VIMRUNTIME . "/defaults.vim")
-  " E.g., ~/.local/share/vim/vim90/defaults.vim
+  " CXREF: ~/.local/share/vim/vim90/defaults.vim
+  "   /Applications/MacVim.app/Contents/Resources/vim/runtime/defaults.vim
+  "   /usr/share/vim/vim90/defaults.vim
   source $VIMRUNTIME/defaults.vim
 endif
 
