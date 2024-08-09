@@ -1116,7 +1116,7 @@
   # Simple git-commit shortcut.
   ci = -c core.editor=editor-vim-0-0-insert-minimal commit
 
-  # (lb): Used 60% of the time (type message at prompt).
+  # Type message at prompt.
   cm = -c core.editor=editor-vim-0-0-insert-minimal commit --message
 
   # - Some other commit alias ruminations:
