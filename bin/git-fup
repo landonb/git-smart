@@ -116,7 +116,10 @@ git_fixup_and_rebase () {
       ( \${GIT_ABORT:-false} && git reset --soft @~1 || true ) \
     "
 
+    # Collapse multiple spaces, so looks prettier when printed
+    # by git-rebase.
     echo "exec ${todo_exec} & ${GITSMART_POST_REBASE_EXECS_TAG}" \
+      | sed 's/ \+/ /g' \
       >> "${GIT_REBASE_TODO_PATH}"
   else
     # Rebase succeeded without user intervention. We are clear to
