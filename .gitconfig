@@ -1158,12 +1158,16 @@
   cim-only = -c core.editor=editor-vim-0-0-insert-minimal commit --amend --only -v
 
   # Amend the staged changes to the latest commit.
-  cin = commit --amend --no-edit
+  cin = ! ! git diff --cached --quiet \
+    && git commit --amend --no-edit \
+    || >&2 echo "Nothing staged"
   # - Note this other way to do the same:
   #     commit --amend --reuse-message=HEAD
 
   # Commit staged using same commit message as latest commit.
-  ciagain = ! git commit --message \"$(git log -1 --format=%B)\"
+  ciagain = ! ! git diff --cached --quiet \
+    && git commit --message \"$(git log -1 --format=%B)\" \
+    || >&2 echo "Nothing staged"
 
   # Use signed, empty first commit.
   # - Use case: If you only sign commits before pushing (because you
