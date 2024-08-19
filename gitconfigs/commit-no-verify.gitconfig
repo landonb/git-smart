@@ -86,24 +86,23 @@
   # Is `git ci` common/conventional? What about `git co`?
   # - I'm a git-co-is-for-Check-Out person, which I guess
   #   means git-ci is for Comm-It.
-  ci = commit --no-verify
+  ci = -c core.editor=editor-vim-0-0-insert-minimal commit --no-verify
 
   # *** Commit with message
 
   # Commit with message from the prompt. ci + message → cm.
   # - 6 of 1: `git cm` ↔ `git ci -m` ↔ `git commit --message`.
-  cm = commit --no-verify --message
+  cm = -c core.editor=editor-vim-0-0-insert-minimal commit --message --no-verify
 
   # Commit with message from the EDITOR.
   # - Note that -v/--verbose seems like a misleading option name.
   #   It means the commit template is verbose, and shows a diff
   #   of what's being committed (which you can see with git-smart
   #   `dcc` alias).
-  cv = commit --verbose --no-verify
-  # 2020-11-24: I almost wonder if `ce` makes more sense... commit + editor.
-  # - This author has `git ci -v` fairly well seared into their noggin, but
-  #   for some reason `cv` never clicked. Perhaps `git ce` will be a hit.
-  ce = commit --verbose --no-verify
+  cv = -c core.editor=editor-vim-0-0-insert-minimal commit --verbose --no-verify
+  #
+  # For parity with `git cim` and `git civ`.
+  civ = -c core.editor=editor-vim-0-0-insert-minimal commit --verbose --no-verify
 
   # *** Amend commit
 
@@ -114,10 +113,12 @@
   #
   #   But a better pneumonic might be: Commit Into last commit and update Message
   #                                    c      i                           m
-  cim = commit --amend --no-verify
+  cim = -c core.editor=editor-vim-0-0-insert-minimal commit --amend --no-verify
 
   # Amend commit. Period. Think, "Commit INto" previous commit, perhaps.
-  cin = commit --amend --no-verify --no-edit
+  cin = ! ! git diff --cached --quiet \
+    && git commit --amend --no-edit --no-verify \
+    || >&2 echo "Nothing staged"
 
 [alias]
 
