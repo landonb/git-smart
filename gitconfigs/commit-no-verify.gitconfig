@@ -117,9 +117,11 @@
 
   # Amend commit. Period. Think, "Commit INto" previous commit, perhaps.
   cin = "! f() { \
-    [ -n \"$(git diff --cached)\" ] \
-    && git commit --amend --no-edit --no-verify \"$@\" \
-    || >&2 echo \"Nothing staged\"; \
+    if [ -n \"$(git diff --cached)\" ]; then \
+      git commit --amend --no-edit --no-verify \"$@\"; \
+    else \
+      >&2 echo \"Nothing staged\"; \
+    fi; \
   }; f"
 
 [alias]

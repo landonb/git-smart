@@ -1167,18 +1167,22 @@
   #     Nothing staged --allow-empty
   #   But using fcn wrapper, doesn't echo.
   cin = "! f() { \
-    [ -n \"$(git diff --cached)\" ] \
-    && git commit --amend --no-edit \"$@\" \
-    || >&2 echo \"Nothing staged\"; \
+    if [ -n \"$(git diff --cached)\" ]; then \
+      git commit --amend --no-edit \"$@\"; \
+    else \
+      >&2 echo \"Nothing staged\"; \
+    fi; \
   }; f"
   # - Note this other way to do the same:
   #     commit --amend --reuse-message=HEAD
 
   # Commit staged using same commit message as latest commit.
   ciagain = "! f() { \
-    [ -n \"$(git diff --cached)\" ] \
-    && git commit --message \"$(git log -1 --format=%B)\" \"$@\" \
-    || >&2 echo \"Nothing staged\"; \
+    if [ -n \"$(git diff --cached)\" ]; then \
+      git commit --message \"$(git log -1 --format=%B)\" \"$@\"; \
+    else \
+      >&2 echo \"Nothing staged\"; \
+    fi; \
   }; f"
 
   # Use signed, empty first commit.
