@@ -1160,14 +1160,14 @@
   # Amend the staged changes to the latest commit.
   cin = ! ! git diff --cached --quiet \
     && git commit --amend --no-edit \
-    || >&2 echo "Nothing staged"
+    || >&2 echo \"Nothing staged\"
   # - Note this other way to do the same:
   #     commit --amend --reuse-message=HEAD
 
   # Commit staged using same commit message as latest commit.
   ciagain = ! ! git diff --cached --quiet \
     && git commit --message \"$(git log -1 --format=%B)\" \
-    || >&2 echo "Nothing staged"
+    || >&2 echo \"Nothing staged\"
 
   # Use signed, empty first commit.
   # - Use case: If you only sign commits before pushing (because you

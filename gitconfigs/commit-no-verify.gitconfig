@@ -118,7 +118,7 @@
   # Amend commit. Period. Think, "Commit INto" previous commit, perhaps.
   cin = ! ! git diff --cached --quiet \
     && git commit --amend --no-edit --no-verify \
-    || >&2 echo "Nothing staged"
+    || >&2 echo \"Nothing staged\"
 
 [alias]
 
