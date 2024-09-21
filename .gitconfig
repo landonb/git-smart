@@ -1158,14 +1158,18 @@
   cim-only = -c core.editor=editor-vim-0-0-insert-minimal commit --amend --only -v
 
   # Amend the staged changes to the latest commit.
-  cin = ! ! git diff --cached --quiet \
+  # - BWARE: If you only `git mv foo bar`, then `git diff --cached --quiet`
+  #   returns true (i.e., nothing staged?!). But `git diff --cached` still
+  #   prints the files being renamed.
+  #   - SAVVY: So don't use --quiet, but test output instead.
+  cin = ! [ -n \"$(git diff --cached)\" ] \
     && git commit --amend --no-edit \
     || >&2 echo \"Nothing staged\"
   # - Note this other way to do the same:
   #     commit --amend --reuse-message=HEAD
 
   # Commit staged using same commit message as latest commit.
-  ciagain = ! ! git diff --cached --quiet \
+  ciagain = ! [ -n \"$(git diff --cached)\" ] \
     && git commit --message \"$(git log -1 --format=%B)\" \
     || >&2 echo \"Nothing staged\"
 
