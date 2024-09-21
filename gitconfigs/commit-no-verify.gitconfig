@@ -116,9 +116,11 @@
   cim = -c core.editor=editor-vim-0-0-insert-minimal commit --amend --no-verify
 
   # Amend commit. Period. Think, "Commit INto" previous commit, perhaps.
-  cin = ! [ -n \"$(git diff --cached)\" ] \
-    && git commit --amend --no-edit --no-verify \
-    || >&2 echo \"Nothing staged\"
+  cin = "! f() { \
+    [ -n \"$(git diff --cached)\" ] \
+    && git commit --amend --no-edit --no-verify \"$@\" \
+    || >&2 echo \"Nothing staged\"; \
+  }; f"
 
 [alias]
 

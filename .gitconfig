@@ -1162,16 +1162,24 @@
   #   returns true (i.e., nothing staged?!). But `git diff --cached` still
   #   prints the files being renamed.
   #   - SAVVY: So don't use --quiet, but test output instead.
-  cin = ! [ -n \"$(git diff --cached)\" ] \
-    && git commit --amend --no-edit \
-    || >&2 echo \"Nothing staged\"
+  # - Note with f() wrapper, additional args echoed, e.g.,
+  #     $ git cin --allow-empty
+  #     Nothing staged --allow-empty
+  #   But using fcn wrapper, doesn't echo.
+  cin = "! f() { \
+    [ -n \"$(git diff --cached)\" ] \
+    && git commit --amend --no-edit \"$@\" \
+    || >&2 echo \"Nothing staged\"; \
+  }; f"
   # - Note this other way to do the same:
   #     commit --amend --reuse-message=HEAD
 
   # Commit staged using same commit message as latest commit.
-  ciagain = ! [ -n \"$(git diff --cached)\" ] \
-    && git commit --message \"$(git log -1 --format=%B)\" \
-    || >&2 echo \"Nothing staged\"
+  ciagain = "! f() { \
+    [ -n \"$(git diff --cached)\" ] \
+    && git commit --message \"$(git log -1 --format=%B)\" \"$@\" \
+    || >&2 echo \"Nothing staged\"; \
+  }; f"
 
   # Use signed, empty first commit.
   # - Use case: If you only sign commits before pushing (because you
