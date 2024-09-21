@@ -31,6 +31,15 @@ git_gc_all_ferocious () {
     . "$(dirname -- "$(realpath -- "$0")")/../deps/sh-git-nubs/lib/git-nubs.sh"
 
     git_insist_git_repo
+
+    # Because destructive, insist user runs from repo root,
+    # to prevent them from making a mistake, perhaps.
+    if ! git_is_git_repo_root; then
+      >&2 echo "ERROR: Please run from the repo root"
+      >&2 echo "- E.g.: $(git rev-parse --show-toplevel)"
+
+      return 1
+    fi
   }
 
   confirm_command () {
