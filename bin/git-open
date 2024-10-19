@@ -19,11 +19,12 @@
 
 git_open () {
   local remote_or_pr_number="$1"
+  local pr_number_or_naught="$2"
 
   local pr_number="$(echo_number_or_empty_string "${remote_or_pr_number}")"
   local remote
   remote="$(remote_from_arg_or_deduce "${remote_or_pr_number}" "${pr_number}")" || exit $?
-  [ -z "${pr_number}" ] && pr_number="$2"
+  [ -z "${pr_number}" ] && pr_number="${pr_number_or_naught}"
   [ -z "${pr_number}" ] && pr_number="$(git pr-number-from-branch-name)"
 
   local gh_url="$(prepare_github_url "${remote}" "${pr_number}")"
