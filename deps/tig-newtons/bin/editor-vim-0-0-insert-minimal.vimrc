@@ -226,7 +226,7 @@ inoremap <C-l> <C-k>
 
 " Vim defaults textwidth=72 and wraps once you type past that boundary.
 
-autocmd FileType gitcommit setlocal textwidth=0 shiftwidth=2 tabstop=2
+autocmd FileType gitcommit setlocal textwidth=0 shiftwidth=2 tabstop=2 expandtab
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
