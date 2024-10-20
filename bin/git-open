@@ -31,7 +31,7 @@ git_open () {
   fi
 
   if [ -z "${remote}" ]; then
-    # Unreachable path (git-lookup-remote will have returned nonzero).
+    # Unreachable path (b/c git-remote-picker/git-lookup-remote return nonzero).
     >&2 echo "GAFFE: No remotes are openable (there are no https:// URLs)"
 
     exit 1
@@ -86,10 +86,26 @@ remote_from_arg_or_deduce () {
     remote="${remote_or_pr_number}"
   fi
 
-  # No arguments specified; try to deduce the remote.
-  remote="$(git lookup-remote "${remote}")" || return $?
+  local retcode=0
 
-  echo "${remote}"
+  # If no arguments specified, try to deduce the remote.
+  if [ -n "${remote}" ]; then
+    echo "${remote}"
+  elif command -v fzf > /dev/null; then
+    if remote="$(git remote-picker)"; then
+      echo "${remote}"
+    else
+
+      return $?
+    fi
+  else
+    if remote="$(git lookup-remote)"; then
+      echo "${remote}"
+    else
+
+      return $?
+    fi
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

@@ -1,0 +1,296 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=bash
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# Copyright © 2024 Landon Bouma. All Rights Reserved.
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# USAGE: Declare your own GITSMART_GIT_OPEN_REMOTE_HIERARCHY to
+# set the order that remotes appear in the fzf menu.
+#
+# - You could set the environ from you shell startup scripts,
+#   such as ~/.bashrc, e.g.,
+#
+#     export GITSMART_GIT_OPEN_REMOTE_HIERARCHY="upstream github origin"
+#
+# You can also use GITSMART_GIT_OPEN_REMOTE_BLOCKLIST to exclude remotes.
+
+GITSMART_GIT_OPEN_REMOTE_HIERARCHY="${GITSMART_GIT_OPEN_REMOTE_HIERARCHY}"
+
+GITSMART_GIT_OPEN_REMOTE_BLOCKLIST="${GITSMART_GIT_OPEN_REMOTE_BLOCKLIST}"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+check_deps () {
+  check_dep_fzf || return 1
+}
+
+check_dep_fzf () {
+  check_dep_with_hint "fzf"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# SYNC_ME: NOT_DRY: Common git-smart functions, in lieu of assuming
+# they're defined in the current environment or wiring dependencies.
+
+check_dep_with_hint () {
+  cmd="$1"
+
+  if command -v "${cmd}" > /dev/null; then
+
+    return 0
+  fi
+
+  hint_install_deb () {
+    >&2 echo "    sudo apt-get install ${cmd}"
+  }
+
+  hint_install_brew () {
+    >&2 echo "    brew install ${cmd}"
+  }
+
+  >&2 echo "ERROR: Requires ‘${cmd}’"
+  >&2 echo "- Hint: Install ‘${cmd}’, e.g.:"
+  os_is_macos && hint_install_brew || hint_install_deb
+
+  return 1
+}
+
+os_is_macos () {
+  [ "$(uname)" = 'Darwin' ]
+}
+
+# ***
+
+git_is_a_repo () {
+  git rev-parse --git-dir > /dev/null 2>&1
+}
+
+git_tracking_branch_remote () {
+  git rev-parse --abbrev-ref --symbolic-full-name @{u} 2> /dev/null \
+    | /usr/bin/env sed -e 's#/.*$##'
+}
+
+# ***
+
+_gs_has_remote_cache () {
+  local name_raw="$1"
+
+  local name="$(_gs_normalize_cache_name "${name_raw}")"
+
+  eval [ ! -z '$'{GITSMART_REMOTE_CACHE__${name}+x} ] && true || false
+}
+
+_gs_normalize_cache_name () {
+  local name_raw="$1"
+
+  echo "${name_raw}" | tr "-" "_"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# COPYD: See similar fcn: remotes_process_and_pretty_print_tidy
+#   ~/.kit/git/git-smart/bin/git-re
+
+print_remotes_ordered_hierarchically () {
+  local exclude_cmd="grep -v"
+
+  if [ -z "${GITSMART_GIT_OPEN_REMOTE_HIERARCHY}" ]; then
+    exclude_cmd="cat"
+  fi
+
+  local remote
+  for remote in ${GITSMART_GIT_OPEN_REMOTE_HIERARCHY}; do
+    exclude_cmd="${exclude_cmd} -e '^${remote}$'"
+  done
+
+  # Prioritize conventional remotes, which might not be defined
+  # for this project, followed by all other project remotes.
+  for remote in \
+    ${GITSMART_GIT_OPEN_REMOTE_HIERARCHY} \
+    $(git remote | eval "${exclude_cmd}" | sort) \
+  ; do
+    # Ignore blocklisted remotes.
+    if echo "${GITSMART_GIT_OPEN_REMOTE_BLOCKLIST}" | grep -q -e "\b${remote}\b"; then
+
+      continue
+    fi
+
+    local remote_url
+    remote_url="$(git remote get-url "${remote}" 2> /dev/null)"
+
+    # Ignore conventional remotes this project hasn't defined.
+    if [ -z "${remote_url}" ]; then
+
+      continue
+    fi
+
+    echo "${remote}"
+  done
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# fzf options:
+#   --no-sort         — Do not sort the result [It doesn't seem to anyway with piped input]
+#   --select-1        — If only one option, pick it and return immediately (skip menu)
+#   --reverse         — Display from the top of the screen (not bottom),
+#                       aka --layout=reverse
+#   --height          — Display fzf window below cursor instead of using full screen
+#   --highlight-line  — Highlight the whole current line
+#   --no-info         — Do not display finder info (options count), aka --info=hidden
+#   --no-separator    — No horizontal separator on the info line, aka --separator=''
+
+fzf_remote_chooser () {
+  local non_ssh_remotes="$1"
+
+  local num_remotes
+  num_remotes="$(echo "${non_ssh_remotes}" | wc -l)"
+
+  # Height is number of choices + 1 for prompt line + 1 for header.
+  local fzf_height
+  fzf_height=$((${num_remotes} + 2))
+
+  if [ ${fzf_height} -gt ${GITSMART_FZF_MAX_HEIGHT:-12} ]; then
+    fzf_height=${GITSMART_FZF_MAX_HEIGHT:-12}
+  fi
+
+  local fzf_cmd="\
+    fzf \
+      --no-sort \
+      --select-1 \
+      --reverse \
+      --height ${fzf_height} \
+      --highlight-line \
+      --no-info \
+      --no-separator \
+    "
+
+  # The author generally wants to `git open release` or `git open starter`,
+  # which will usually be the first (default) choice (per the HIERARCHY),
+  # so don't show the menu very long.
+  # - I tried 0.5 secs, but it disappears *too* quickly, looks strange.
+  local timeout_secs=${GITSMART_FZF_TIMEOUT:-1}
+
+  # The 'focus' event runs on 'start' and also when the user interacts
+  # with the menu. So we use an intermediate file to ignore the first
+  # 'focus' event, and to determine other state.
+  # - Use the file as a (sorta) semaphore:
+  #   - Start with a particular value (we'll use "2"), and then change
+  #     it to another value when the first 'focus' runs (we'll use "1").
+  #   - If the user interacts with the menu (which generates another
+  #     'focus' event, or a 'change' event if they type a query), change
+  #     the value again (we'll use "0").
+  #   - When the timeout fires, check the value:
+  #     - If it's still "1", the user has not interacted with the menu,
+  #       so execute the timeout — cancel fzf, and remove the file.
+  #     - It it's "0", don't do anything, as the user is interacting
+  #       with the menu.
+  #   - Finally, after fzf runs, if the file still exists, it means the
+  #     timeout did not run. So check the fzf return value: If nonzero,
+  #     it means the user canceled fzf themselves (<Esc> or <Ctrl-C>),
+  #     so we should cancel the pick job (and maybe git-open, if it
+  #     called us). Or, if fzf exits 0, then the user picked something.
+  local tempfile="$(mktemp -t git-remote-picker--XXXXXX)"
+
+  local kill_on_timeout="\
+    echo '2' > '${tempfile}' &&
+    sleep ${timeout_secs} &&
+    test -f '${tempfile}' &&
+    test \$(cat '${tempfile}') = '1' &&
+    command rm -- '${tempfile}' &&
+    kill \${PPID} 2>/dev/null &"
+
+  local header_prompt="${GSM_FZF_REMOTE_PROMPT:-Please pick a remote}"
+
+  local update_header="\
+    test \$(cat '${tempfile}') = '2' &&
+    echo '1' > '${tempfile}' &&
+    echo '[Default in ${timeout_secs} sec(s)...] ${header_prompt}' ||
+    ( echo '0' > '${tempfile}' && echo '${header_prompt}' )"
+
+  local retcode=0
+  local chosen_remote
+  chosen_remote=$(\
+    echo "${non_ssh_remotes}" | 
+    ${fzf_cmd} \
+      --bind "start:execute(${kill_on_timeout}),focus:transform-header(${update_header}),change:transform-header(${update_header})"
+  )
+  retcode=$?
+
+  # Note that `fzf` exits 130 on interrupt/<Ctrl-C> or <Esc>, but it also
+  # exits 130 when killed.
+  # - So if it exits nonzero and the tempfile still exists, it means the
+  #   user canceled the prompt, and we should do nothing.
+
+  if [ -f "${tempfile}" ]; then
+    command rm -- "${tempfile}"
+
+    if [ ${retcode} -ne 0 ]; then
+
+      return 1
+    fi
+  fi
+
+  echo "${chosen_remote}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_prompt_remote () {
+  local preferred="$1"
+
+  local non_ssh_remotes
+  non_ssh_remotes="$(print_remotes_ordered_hierarchically)"
+
+  if [ -z "${non_ssh_remotes}" ]; then
+    >&2 echo "ERROR: This project does not have any pickable remotes"
+
+    return 1
+  fi
+
+  if [ -z "${preferred}" ]; then
+    preferred="$(git_tracking_branch_remote)"
+
+    if [ -n "${preferred}" ] && ! git remote get-url "${preferred}" >/dev/null 2>&1; then
+      >&2 echo "ALERT: The tracking branch remote is invalid: ‘${preferred}’"
+
+      preferred=""
+    fi
+  fi
+
+  if [ -z "${preferred}" ]; then
+    preferred="$(echo "${non_ssh_remotes}" | head -1)"
+  fi
+
+  local chosen_remote
+  if ! chosen_remote="$(fzf_remote_chooser "${non_ssh_remotes}")"; then
+    # Means the user canceled the prompt.
+
+    return 1
+  fi
+
+  if [ -z "${chosen_remote}" ]; then
+    # Means the prompt timed out without user selecting anything.
+    chosen_remote="${preferred}"
+  fi
+
+  echo "${chosen_remote}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  check_deps
+
+  git_prompt_remote "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "$@"
+fi
+
