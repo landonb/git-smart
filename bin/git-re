@@ -170,6 +170,7 @@ remotes_process_and_pretty_print_tidy () {
   local git_cmd="$1"
   shift
 
+  local remote
   for remote in \
     'entrust' \
     'isolate' \
