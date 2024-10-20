@@ -110,8 +110,11 @@ prepare_github_url () {
     return 1
   fi
 
+  # Translate user@host to the hostname, e.g., "github.com".
+  remote_url="$(replace_user_at_host_with_hostname "${remote_url}")"
+
   # Replace `-e` rules:
-  # - For ~/.ssh/config SSH aliases, e.g.,
+  # - For ~/.ssh/config SSH aliases (if not found via `ssh -G`), e.g.,
   #   git@github_username:username/project.git  → https://github.com/username/project
   # - For default SSH alias:
   #   ssh://git@github.com:username/project.git → https://github.com/username/project
@@ -138,6 +141,67 @@ prepare_github_url () {
   fi
 
   echo "${https_url}"
+}
+
+# ***
+
+replace_user_at_host_with_hostname () {
+  local remote_url="$1"
+
+  # Look for user@host identifier, e.g., "git@github_user:..."
+  local user_at_host
+  user_at_host="$(extract_user_and_host "${remote_url}")"
+
+  if [ -z "${user_at_host}" ]; then
+    echo "${remote_url}"
+
+    return
+  fi
+
+  local hostname
+  hostname="$(extract_hostname_from_ssh_config "${user_at_host}")"
+
+  if [ -z "${hostname}" ]; then
+    echo "${remote_url}"
+
+    return
+  fi
+
+  echo ${remote_url} | sed -e "s#^${user_at_host}#https://${hostname}#"
+}
+
+# ***
+
+extract_user_and_host () {
+  local remote_url="$1"
+
+  local user_at_host
+
+  # Break apart at the colon, e.g.,
+  #   git@github_user:foo/bar → git@github_user
+  user_at_host="$(\
+    echo "${remote_url}" | tr ':' ' ' | awk '{ print $1 }'
+  )"
+
+  # Verify it's not just a scheme and hostname,
+  # e.g., ssh://host
+  if ! echo "${user_at_host}" | grep -q -e "@"; then
+
+    return
+  fi
+
+  echo "${user_at_host}"
+}
+
+# ***
+
+# THANX: `ssh -G` tip via:
+# https://stackoverflow.com/questions/59305574/given-the-alias-get-the-hostname-from-ssh-config
+
+extract_hostname_from_ssh_config () {
+  local user_at_host="$1"
+
+  ssh -G "${user_at_host}" | awk '$1 == "hostname" { print $2 }'
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
