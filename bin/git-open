@@ -112,7 +112,7 @@ prepare_github_url () {
   #          but requires GITHUB_TOKEN=XXXX be set.
   [ -n "${pr_number}" ] && remote_url="${remote_url}/pull/${pr_number}"
 
-  echo  "${remote_url}"
+  echo "${remote_url}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
