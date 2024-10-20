@@ -82,18 +82,20 @@ remote_from_arg_or_deduce () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Normalize URL to https:// URL
+
 prepare_github_url () {
   local remote="$1"
   local pr_number="$2"
 
   # Replace `-e` rules:
   # - For ~/.ssh/config SSH aliases, e.g.,
-  #   git@github_username:username/project.git → https://username/project
+  #   git@github_username:username/project.git  → https://github.com/username/project
   # - For default SSH alias:
-  #   ssh://git@github.com:username/project.git → https://username/project
-  #   git@github.com:username/project.git → https://username/project
-  #   git://github.com:username/project.git → https://username/project
-  #   ssh://github.com:username/project.git → https://username/project
+  #   ssh://git@github.com:username/project.git → https://github.com/username/project
+  #   git@github.com:username/project.git       → https://github.com/username/project
+  #   git://github.com:username/project.git     → https://github.com/username/project
+  #   ssh://github.com:username/project.git     → https://github.com/username/project
   local remote_url=$( \
     git remote get-url ${remote} \
     | sed -E \
@@ -104,9 +106,10 @@ prepare_github_url () {
     | head -n1 2> /dev/null \
   )
 
-  # NOTE: GitHub redirects pull/ to issues/ if not such pr_number.
-  # See also: `hub pr show 1234` will open browser, too,
-  #            but requires GITHUB_TOKEN=XXXX be set.
+  # BWARE: If ${pr_number}, assumes GitHub URL.
+  # SAVVY: GitHub redirects pull/ to issues/ if no such pr_number.
+  # CALSE: `hub pr show 1234` will open browser, too,
+  #          but requires GITHUB_TOKEN=XXXX be set.
   [ -n "${pr_number}" ] && remote_url="${remote_url}/pull/${pr_number}"
 
   echo  "${remote_url}"
