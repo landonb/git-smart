@@ -55,9 +55,9 @@ use_conventional_remote_maybe_and_must_exist () {
 
   if [ -z "${remote}" ] || ! git remote get-url ${remote} &> /dev/null; then
     if ! git_is_a_repo; then
-      >&2 echo 'ERROR: Unable to deduce remote. (HINT: You‘re not in a Git repo.)'
+      >&2 echo "ERROR: This is not a Git repo"
     else
-      >&2 echo 'ERROR: Unable to deduce remote; please specify.'
+      >&2 echo "ERROR: Unable to deduce remote — please be specific"
     fi
 
     return 1
