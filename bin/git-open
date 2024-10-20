@@ -30,6 +30,13 @@ git_open () {
     exit $?
   fi
 
+  if [ -z "${remote}" ]; then
+    # Unreachable path (git-lookup-remote will have returned nonzero).
+    >&2 echo "GAFFE: No remotes are openable (there are no https:// URLs)"
+
+    exit 1
+  fi
+
   if [ -z "${pr_number}" ]; then
     pr_number="${pr_number_or_naught}"
   fi
