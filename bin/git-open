@@ -39,9 +39,14 @@ git_open () {
   fi
 
   local gh_url
-  gh_url="$(prepare_github_url "${remote}" "${pr_number}")"
+  if ! gh_url="$(prepare_github_url "${remote}" "${pr_number}")"; then
 
-  sensible_browser "${gh_url}"
+    exit $?
+  fi
+
+  if [ -n "${gh_url}" ]; then
+    sensible_browser "${gh_url}"
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -88,6 +93,16 @@ prepare_github_url () {
   local remote="$1"
   local pr_number="$2"
 
+  local remote_url
+  remote_url="$(git remote get-url "${remote}")"
+
+  if [ -z "${remote_url}" ]; then
+    # `git remote get-url` will have printed, e.g.,
+    #   error: No such remote 'foo'
+
+    return 1
+  fi
+
   # Replace `-e` rules:
   # - For ~/.ssh/config SSH aliases, e.g.,
   #   git@github_username:username/project.git  → https://github.com/username/project
@@ -96,8 +111,9 @@ prepare_github_url () {
   #   git@github.com:username/project.git       → https://github.com/username/project
   #   git://github.com:username/project.git     → https://github.com/username/project
   #   ssh://github.com:username/project.git     → https://github.com/username/project
-  local remote_url=$( \
-    git remote get-url ${remote} \
+  local https_url
+  https_url=$( \
+    echo "${remote_url}" \
     | sed -E \
       -e 's#git@github_[^:]+:#git@github.com:#' \
       -e 's#(ssh://git@|git@|git://|ssh://)#https://#' \
@@ -110,9 +126,9 @@ prepare_github_url () {
   # SAVVY: GitHub redirects pull/ to issues/ if no such pr_number.
   # CALSE: `hub pr show 1234` will open browser, too,
   #          but requires GITHUB_TOKEN=XXXX be set.
-  [ -n "${pr_number}" ] && remote_url="${remote_url}/pull/${pr_number}"
+  [ -n "${pr_number}" ] && https_url="${https_url}/pull/${pr_number}"
 
-  echo "${remote_url}"
+  echo "${https_url}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
