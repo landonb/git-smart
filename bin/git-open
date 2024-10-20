@@ -133,7 +133,9 @@ prepare_github_url () {
   # SAVVY: GitHub redirects pull/ to issues/ if no such pr_number.
   # CALSE: `hub pr show 1234` will open browser, too,
   #          but requires GITHUB_TOKEN=XXXX be set.
-  [ -n "${pr_number}" ] && https_url="${https_url}/pull/${pr_number}"
+  if [ -n "${pr_number}" ]; then
+    https_url="${https_url}/pull/${pr_number}"
+  fi
 
   echo "${https_url}"
 }
