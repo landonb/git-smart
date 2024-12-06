@@ -1092,7 +1092,7 @@
   child-of = "! f() { \
     git --no-pager log --reverse --ancestry-path --format='%H' ${1}..HEAD \
       | head -1; \
-   }; f \"$@\""
+   }; f"
 
   # -------
 
