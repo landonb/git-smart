@@ -35,6 +35,7 @@
 # to help edit commit messages quicker.
 
 editor_vim_0_0_insert_minimal () {
+  # CXREF: ~/.kit/git/tig-newtons/bin/editor-vim-0-0-insert-minimal.vimrc
   local git_commit_v_vimrc="$(dirname -- "$0")/editor-vim-0-0-insert-minimal.vimrc"
 
   vim -u "${git_commit_v_vimrc}" --noplugin -c "startinsert" -c "norm! gg" "$@"

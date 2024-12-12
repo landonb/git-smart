@@ -179,8 +179,8 @@ let &t_EI = "\<Esc>[2 q"
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" CXREF: ~/.vim/pack/landonb/start/dubs_web_hatch/plugin/dubs_web_hatch.vim
-"   https://github.com/landonb/dubs_web_hatch
+" CXREF: ~/.vim/pack/embrace-vim/start/vim-web-hatch/plugin/vim-web-hatch.vim
+"   https://github.com/embrace-vim/vim-web-hatch#🐣
 
 " Load optional web opener plugin, and define commands:
 " - <Leader>D — define selected word ('define:<term>') in new browser window
