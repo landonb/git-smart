@@ -221,6 +221,19 @@ inoremap <C-l> <C-k>
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+" CXREF: Most for parity, so I'm not suprised if this doesn't work.
+" - But generally I <C-s> to save and quit a Git commit message
+"   EDITOR session.
+" - This is not exactly COPYD, but a much simpler impl. of Dubs Vim's
+"   it's same as <C-s> save-and-quit-command.vim sourced above.
+" ~/.depoxy/ambers/home/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
+
+noremap <Leader>dq :wq<CR>
+inoremap <Leader>dq <C-o>:wq<CR>
+
+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 " COPYD: ~/.vim/pack/landonb/start/dubs_ftype_mess/plugin/dubs_ftype_mess.vim
 "   https://github.com/landonb/dubs_ftype_mess
 
@@ -251,6 +264,43 @@ let g:vim_web_hatch_maps =
   \ }
 
 call embrace#vim_web_hatch#create_maps()
+
+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+" OHMEH: I don't really <Esc> when writing a Git commit message. I normally
+" scribble it out and <C-s> to save and quit.
+" - Nonetheless this doesn't seem to affect startup time or performance.
+"   So, whatever, adding it.
+
+" CXREF/2024-12-14:
+" ~/.vim/pack/embrace-vim/start/vim-async-map/autoload/embrace/async_map.vim
+"
+" COPYD/2024-12-14:
+" ~/.vim/pack/landonb/start/vim-ovm-easyescape-kj-jk/plugin/vim_ovm_easyescape_kj_jk.vim
+
+function! s:setup_bindings_all_modes_kj_jk() abort
+  try
+    " SAVVY: Timeout defaults 100 msec.
+    call g:embrace#async_map#register_insert_mode_map("kj", "\<ESC>")
+    call g:embrace#async_map#register_insert_mode_map("jk", "\<ESC>")
+
+    " SAVVY: These don't work at all or as intended when the line above
+    " and/or below is missing... oh, well, don't really care that much.
+    " - For Git commit message template where there's no line above
+    "   but there are below, `kj` start insert mode but on line below;
+    "   but `jk` works correctly.
+    call g:embrace#async_map#register_normal_mode_map("kj", "ji")
+    call g:embrace#async_map#register_normal_mode_map("jk", "ki")
+	catch /^Vim\%((\a\+)\)\=:E117:/
+    " E.g., E117: Unknown function: foo#bar#baz
+
+    echom "ALERT: Please install embrace-vim/vim-async-map to enable "
+      \ .. "`kj`/`jk` insert and normal mode maps"
+  endtry
+endfunction
+
+call s:setup_bindings_all_modes_kj_jk()
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
