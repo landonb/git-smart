@@ -197,7 +197,7 @@ inoremap <CR> <CR><C-g>u
 "   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/save-and-quit-command.vim
 let $VIM_EDIT_JUICE_EXIT_ON_SAVE = 1
 
-function! s:load_dubs_after_juice_commands() abort
+function! s:LoadDubsAfterJuiceCommands() abort
   for l:sourcep in [
     \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim",
     \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/hide-highlights.vim",
@@ -210,12 +210,12 @@ function! s:load_dubs_after_juice_commands() abort
   endfor
 endfunction
 
-call s:load_dubs_after_juice_commands()
+call s:LoadDubsAfterJuiceCommands()
 
 " Access digraphs at <Ctrl-l>, just like in Dubs Vim:
 " - Dubs Vim uses Ctrl-l because Ctrl-j/Ctrl-k are used for buffer
 "   ring navigation, so Dubs Vim remaps built-in Ctrl-k to Ctrl-l.
-"     https://github.com/landonb/vim-buffer-ring
+"     https://github.com/landonb/vim-buffer-ring#💍
 inoremap <C-l> <C-k>
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -226,7 +226,8 @@ inoremap <C-l> <C-k>
 "   EDITOR session.
 " - This is not exactly COPYD, but a much simpler impl. of Dubs Vim's
 "   it's same as <C-s> save-and-quit-command.vim sourced above.
-" ~/.depoxy/ambers/home/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
+" CXREF: https://github.com/DepoXy/vim-depoxy#🤙
+"   ~/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
 
 noremap <Leader>dq :wq<CR>
 inoremap <Leader>dq <C-o>:wq<CR>
@@ -243,27 +244,37 @@ autocmd FileType gitcommit setlocal textwidth=0 shiftwidth=2 tabstop=2 expandtab
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" CXREF: ~/.vim/pack/embrace-vim/start/vim-web-hatch/plugin/vim-web-hatch.vim
-"   https://github.com/embrace-vim/vim-web-hatch#🐣
+" CXREF: ~/.vim/pack/embrace-vim/start/vim-webopen/autoload/embrace/vim_webopen.vim
+"   https://github.com/embrace-vim/vim-webopen#🐣
 
 " Huh, not necessary for autoload fcns:
 "
-"   packadd vim-web-hatch
+"   packadd vim-webopen
 
-let g:vim_web_hatch_maps =
-  \ {
-  \   "open":
-  \     {
-  \       "nmap": [ "<Leader>T", "gW" ],
-  \       "imap": "<Leader>T",
-  \       "vmap": "<Leader>T",
-  \     },
-  \   "define": "<Leader>D",
-  \   "search": "<Leader>W",
-  \   "incognito": { "nmap": "g!" },
-  \ }
+function! s:Webopen_CreateMaps() abort
+  let g:vim_webopen_maps =
+    \ {
+    \   "open":
+    \     {
+    \       "nmap": [ "<Leader>T", "gW" ],
+    \       "imap": "<Leader>T",
+    \       "vmap": "<Leader>T",
+    \     },
+    \   "define": "<Leader>D",
+    \   "search": "<Leader>W",
+    \   "incognito": { "nmap": "g!" },
+    \ }
 
-call embrace#vim_web_hatch#create_maps()
+  try
+    call g:embrace#webopen#CreateMaps()
+	catch /^Vim\%((\a\+)\)\=:E117:/
+    " E.g., E117: Unknown function: foo#bar#baz
+
+    echom "ALERT: Please install embrace-vim/vim-webopen to enable browser open commands"
+  endtry
+endfunction
+
+call s:Webopen_CreateMaps()
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -279,19 +290,19 @@ call embrace#vim_web_hatch#create_maps()
 " COPYD/2024-12-14:
 " ~/.vim/pack/landonb/start/vim-ovm-easyescape-kj-jk/plugin/vim_ovm_easyescape_kj_jk.vim
 
-function! s:setup_bindings_all_modes_kj_jk() abort
+function! s:AsyncMap_CreateMaps_kj_jk() abort
   try
     " SAVVY: Timeout defaults 100 msec.
-    call g:embrace#async_map#register_insert_mode_map("kj", "\<ESC>")
-    call g:embrace#async_map#register_insert_mode_map("jk", "\<ESC>")
+    call g:embrace#async_map#RegisterInsertModeMap("kj", "\<ESC>")
+    call g:embrace#async_map#RegisterInsertModeMap("jk", "\<ESC>")
 
     " SAVVY: These don't work at all or as intended when the line above
     " and/or below is missing... oh, well, don't really care that much.
     " - For Git commit message template where there's no line above
     "   but there are below, `kj` start insert mode but on line below;
     "   but `jk` works correctly.
-    call g:embrace#async_map#register_normal_mode_map("kj", "ji")
-    call g:embrace#async_map#register_normal_mode_map("jk", "ki")
+    call g:embrace#async_map#RegisterNormalModeMap("kj", "ji")
+    call g:embrace#async_map#RegisterNormalModeMap("jk", "ki")
 	catch /^Vim\%((\a\+)\)\=:E117:/
     " E.g., E117: Unknown function: foo#bar#baz
 
@@ -300,13 +311,13 @@ function! s:setup_bindings_all_modes_kj_jk() abort
   endtry
 endfunction
 
-call s:setup_bindings_all_modes_kj_jk()
+call s:AsyncMap_CreateMaps_kj_jk()
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" COPYD: ~/.depoxy/ambers/home/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-shift-ctrl-bindings.vim
-" https://github.com/DepoXy/depoxy#🍯
+" COPYD: ~/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-shift-ctrl-bindings.vim
+"   https://github.com/DepoXy/vim-depoxy#🤙
 "
 " - CXREF: See Alacritty substitutions for terminal `vim`:
 "     ~/.depoxy/ambers/home/.config/alacritty/alacritty.toml

@@ -16,8 +16,9 @@
 #
 #        - Digraphs are remaped from Ctrl-k to Ctrl-l, to match
 #          Dub Vim's built-in (so if you use Dubs Vim, or at least
-#          https://github.com/landonb/vim-buffer-ring then you won't
-#          have to struggle with an existing brain mapping).
+#            https://github.com/landonb/vim-buffer-ring#💍
+#          then you won't have to struggle with an existing brain
+#          mapping).
 #
 #        - You can save and quit Vim from any mode using Ctrl-s.
 #          Idea is that Vim will start in Insert mode so you can
