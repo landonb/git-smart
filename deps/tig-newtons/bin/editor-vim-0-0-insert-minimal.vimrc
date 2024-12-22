@@ -61,6 +61,17 @@ if filereadable($VIMRUNTIME . "/defaults.vim")
   source $VIMRUNTIME/defaults.vim
 endif
 
+
+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+" PRIVY: Enable to test bare mswin Vim.
+if 0
+  source ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
+
+  finish
+endif
+
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -229,8 +240,8 @@ inoremap <C-l> <C-k>
 " CXREF: https://github.com/DepoXy/vim-depoxy#🤙
 "   ~/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
 
-noremap <Leader>dq :wq<CR>
-inoremap <Leader>dq <C-o>:wq<CR>
+noremap <Leader>dQ :wq<CR>
+inoremap <Leader>dQ <C-o>:wq<CR>
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
