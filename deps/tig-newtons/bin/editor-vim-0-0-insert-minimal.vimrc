@@ -205,7 +205,7 @@ inoremap <CR> <CR><C-g>u
 "   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/center-cursor-on-highlight-next-search-match.vim
 "
 " - <C-s> saves and quits (:wq).
-"   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/save-and-quit-command.vim
+"   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim
 let $VIM_EDIT_JUICE_EXIT_ON_SAVE = 1
 
 function! s:LoadDubsAfterJuiceCommands() abort
@@ -213,7 +213,7 @@ function! s:LoadDubsAfterJuiceCommands() abort
     \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim",
     \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/hide-highlights.vim",
     \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/center-cursor-on-highlight-next-search-match.vim",
-    \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/save-and-quit-command.vim",
+    \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim",
   \ ]
     if filereadable(l:sourcep)
       exec "source " . l:sourcep
@@ -236,7 +236,7 @@ inoremap <C-l> <C-k>
 " - But generally I <C-s> to save and quit a Git commit message
 "   EDITOR session.
 " - This is not exactly COPYD, but a much simpler impl. of Dubs Vim's
-"   it's same as <C-s> save-and-quit-command.vim sourced above.
+"   it's same as <C-s> ctrl-s-save-command.vim sourced above.
 " CXREF: https://github.com/DepoXy/vim-depoxy#🤙
 "   ~/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
 
