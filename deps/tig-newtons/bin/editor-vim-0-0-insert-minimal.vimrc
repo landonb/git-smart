@@ -249,8 +249,18 @@ inoremap <Leader>dQ <C-o>:wq<CR>
 " COPYD: ~/.vim/pack/landonb/start/dubs_ftype_mess/plugin/dubs_ftype_mess.vim
 "   https://github.com/landonb/dubs_ftype_mess
 
-" Vim defaults textwidth=72 and wraps once you type past that boundary.
-autocmd FileType gitcommit setlocal textwidth=0 shiftwidth=2 tabstop=2 expandtab
+" SAVVY: Vim defaults textwidth=72 and wraps once you type past that boundary.
+
+" SAVVY: Even with spellcheck on, Vim ignores spell errors below the diff line.
+" - E.g.:
+"    # Please enter the commit message for your changes. Lines starting
+"    # with '#' will be ignored, and an empty message aborts the commit.
+"    ...
+"    SpellingError <--Spell checked
+"    diff --git foo foo
+"    SpellingError <-- Not spelled checked
+
+autocmd FileType gitcommit setlocal textwidth=0 shiftwidth=2 tabstop=2 expandtab spell
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
