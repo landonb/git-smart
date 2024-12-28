@@ -61,13 +61,26 @@ if filereadable($VIMRUNTIME . "/defaults.vim")
   source $VIMRUNTIME/defaults.vim
 endif
 
-
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" PRIVY: Enable to test bare mswin Vim.
+" DEVEL: Enable to test bare mswin Vim.
 if 0
-  source ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
+  " CXREF: See also author's mswin.vim loader (which saves/restores
+  " <C-f> and <C-h> bindings, if another plugin sets those before
+  " mswin.vim runs):
+  "   https://github.com/landonb/dubs_edit_juice#🧃
+  "     https://github.com/landonb/dubs_edit_juice/blob/release/after/plugin/enable-behave-mswin.vim
+  " - You could also source that plugin file here, e.g.:
+  "   source ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
+
+  let s:running_windows = has("win16") || has("win32") || has("win64")
+
+  if !s:running_windows
+    source $VIMRUNTIME/mswin.vim
+
+    behave mswin
+  endif
 
   finish
 endif
