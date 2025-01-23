@@ -39,7 +39,33 @@ editor_vim_0_0_insert_minimal () {
   # CXREF: ~/.kit/git/tig-newtons/bin/editor-vim-0-0-insert-minimal.vimrc
   local git_commit_v_vimrc="$(dirname -- "$0")/editor-vim-0-0-insert-minimal.vimrc"
 
-  vim -u "${git_commit_v_vimrc}" --noplugin -c "startinsert" -c "norm! gg" "$@"
+  local editor="vim"
+  if ${EDITOR_PREFER_NVIM:-false}; then
+    editor="nvim"
+  fi
+
+  if [ -d "${HOME}/.vim/pack" ]; then
+    # Using conventional ~/.vim/pack path, and relying on |packadd|.
+    ${editor} -u "${git_commit_v_vimrc}" --noplugin -c "startinsert" -c "norm! gg" "$@"
+  else
+    # Using arbitrary plugins path, and bootstrapping with vim-plug.
+
+    # Note that ~/.vim/plugs is just where DepoXy keeps its plugins.
+    # - This path can be whatever, but it should follow |packpath|
+    #   convention and keep projects under */start and */opt
+    local plugins_dir="${TIGNEWTONS_VIM_PLUGS:-${HOME}/.vim/plugs}"
+
+    if [ -d "${plugins_dir}" ]; then
+      # Omit --noplugin or vim-plug won't load plugins.
+      TIGNEWTONS_VIM_PLUGS="${plugins_dir}" \
+        ${editor} -u "${git_commit_v_vimrc}" -c "startinsert" -c "norm! gg" "$@"
+    else
+      >&2 echo "ERROR: Please set TIGNEWTONS_VIM_PLUGS to Vim plugins root"
+      >&2 echo "- Or create ~/.vim/pack or ~/.vim/plugs"
+
+      return 1
+    fi
+  fi
 }
 
 # ***

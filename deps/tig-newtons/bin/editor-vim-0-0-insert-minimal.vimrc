@@ -3,84 +3,115 @@
 " Project: https://github.com/DepoXy/tig-newtons#🍎
 " License: MIT. Please find more in the LICENSE file.
 
-" Copyright (c) © 2020-2023 Landon Bouma. All Rights Reserved.
+" Copyright (c) © 2015, 2018-2025 Landon Bouma. All Rights Reserved.
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" COPYD: ~/.vim/.vimrc
-" https://github.com/landonb/dubs-vim#🖖
+" COPYD: OS Bootstrap and MacVim setup copied from DepoXy
+"          ~/.depoxy/ambers/home/.vim/.vimrc
+"        https://github.com/DepoXy/depoxy#🍯
 
 " ----------------------------------------
-"  OS Bootstrap
+"  Distro Bootstrap
 " ----------------------------------------
 
-" The buck stops here.
-"      ... or does it?
-" Actually, it does; we're responsible for 
-" loading the application's startup script 
-" if the user's startup script (this script) 
-" exists.
-if filereadable($VIMRUNTIME . "/../.vimrc")
-  " This is where the startup file lives in 
-  " 'nix, but in Cygwin, it's not created by 
-  " default (but I can't vouch for other 
-  " distributions).
-  source $VIMRUNTIME/../.vimrc
-elseif filereadable($VIMRUNTIME . "/../_vimrc")
-  " This file exists and *must* be sourced 
-  " for native Windows gVim to work properly.
-  source $VIMRUNTIME/../_vimrc
-elseif filereadable($VIMRUNTIME . "/../vimrc")
-  " MacVim (Apple Silicon Homebrew).
-  source $VIMRUNTIME/../vimrc
-else
-  " Well, we could complain, but in some
-  " distros, the application startup file
-  " doesn't exist. So let's not bother the
-  " user, i.e., we won't:
-  "  call confirm(
-  "   \ 'vimrc: Cannot find VIMRUNTIME''s vimrc, '
-  "   \ . 'i.e., $VIMRUNTIME/../[\.|_]vimrc', 'OK')
-endif
+" Not every Vim distribution includes a vimrc, but if we can find one,
+" load it.
+" - CALSO: Same with defaults.vim, which we'll source after this.
+function! s:SourceDistroVimrc() abort
+  if filereadable($VIMRUNTIME . "/../vimrc")
+    " - E.g., MacVim:
+    "   /Applications/MacVim.app/Contents/Resources/vim/runtime/../vimrc
+    "   - CALSO:
+    "     /Applications/MacVim.app/Contents/Resources/vim/gvimrc
+    source $VIMRUNTIME/../vimrc
+  elseif filereadable($VIMRUNTIME . "/../_vimrc")
+    " - SAVVY/2009-09-21: For native Windows gVim to work properly.
+    "   - HSTRY/2025-01-23: Keeping for historic reasons, but cannot vouch.
+    source $VIMRUNTIME/../_vimrc
+  elseif filereadable($VIMRUNTIME . "/../.vimrc")
+    " - Possibly found on some 'nix distros [author added this block in
+    "   2009, when I may have been on Fedora in VM on Windows, and also
+    "   using Cygwin, but 2009 Cygwin Vim doesn't include a vimrc file].
+    source $VIMRUNTIME/../.vimrc
+  else
+    " Don't bother complaining. This file doesn't exist everywhere.
+    " - E.g., Debian 12 has /usr/share/vim/gvimrc, but no vimrc (and
+    "   gvimrc is just comments).
+    " - Also, e.g., LM 19.3: Author runs local build, where
+    "   $VIMRUNTIME is ~/.local/share/vim/vim82/ but there's nothing
+    "   else under ~/.local/share/vim and no vimrc thereunder.
+  endif
+endfunction
 
-" MAYBE/2023-02-08: How dated is Dubs Vim?
-" - There's no .vimrc in my $VIMRUNTIME @linux, just defaults.vim.
-" - I added this `source defaults.vim` only to minimal.vimrc:
-"   - I do not source defaults.vim from Dubs Vim.
-"   - But I probably don't need to: Dubs Vim works like I expect/want, so
-"     I bet that my various plugins setup Vim similarly to defaults.vim.
-" Source defaults.vim, otherwise when Vim starts: you'll see strange
-" phantom control characters on the first line of input; the arrow keys
-" won't work (they'll insert As, Bs, Cs, and Ds); Ctrl-s doesn't work;
-" and also whatever else is wrong that I didn't notice b/c those three.
-if filereadable($VIMRUNTIME . "/defaults.vim")
-  " CXREF: ~/.local/share/vim/vim90/defaults.vim
-  "   /Applications/MacVim.app/Contents/Resources/vim/runtime/defaults.vim
-  "   /usr/share/vim/vim90/defaults.vim
-  source $VIMRUNTIME/defaults.vim
-endif
+call s:SourceDistroVimrc()
+
+" ***
+
+" You'll likely find a defaults.vim in the runtime path,
+" but it's not always necessary to source it.
+" - E.g., the author's usual Vim configuration ignores it
+"   and runs just fine.
+" - But I had issues when I didn't source it for minimal.vim:
+"   - There were strange phantom control characters on the first
+"     line of input; the arrow keys didn't work (they'd insert
+"     As, Bs, Cs, and Ds); Ctrl-s didn't work; and also probably
+"     lots more but I quit after noting those three.
+"   - DUNNO: I think MacVim vim TUI, but might have been Linux build.
+" - So this `source defaults.vim` necessary from minimal.vimrc,
+"   but probably not from your normal ~/.vimrc
+function! s:SourceDistroDefaults() abort
+  if filereadable($VIMRUNTIME . "/defaults.vim")
+    " CXREF: Some places you might find this file:
+    "   /Applications/MacVim.app/Contents/Resources/vim/runtime/defaults.vim
+    "   /usr/share/vim/vim90/defaults.vim
+    "   ~/.local/share/vim/vim90/defaults.vim
+    source $VIMRUNTIME/defaults.vim
+  endif
+endfunction
+
+call s:SourceDistroDefaults()
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" DEVEL: Enable to test bare mswin Vim.
-if 0
-  " CXREF: See also author's mswin.vim loader (which saves/restores
-  " <C-f> and <C-h> bindings, if another plugin sets those before
-  " mswin.vim runs):
-  "   https://github.com/landonb/dubs_edit_juice#🧃
-  "     https://github.com/landonb/dubs_edit_juice/blob/release/after/plugin/enable-behave-mswin.vim
-  " - You could also source that plugin file here, e.g.:
-  "   source ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
+" CALSO: See also author's more complicated mswin.vim loader,
+"        which saves and restores <C-f> and <C-h> bindings.
+"
+" - Because plugin order is not guaranteed, and author's Vim config
+"   calls `behave mswin` from ~/.vim/pack/*/start/*/plugin script,
+"   it's possible another plugin sets <C-f> and <C-h> before mswin.vim
+"   runs.
+"
+" CXREF: https://github.com/landonb/dubs_edit_juice#🧃
+"
+"   https://github.com/landonb/dubs_edit_juice/blob/release/after/plugin/enable-behave-mswin.vim
+"
+" ALTLY: You can also source that plugin file here, e.g.:
+"
+"  source ~/.vim/plugs/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
 
+function! s:EnableBehaveMswin() abort
   let s:running_windows = has("win16") || has("win32") || has("win64")
 
   if !s:running_windows
-    source $VIMRUNTIME/mswin.vim
+    if has('nvim')
+      " CXREF:
+      " /Applications/MacVim.app/Contents/Resources/vim/runtime/mswin.vim
+      source $VIMRUNTIME/mswin.vim
+    else
+      behave mswin
+    endif
 
-    behave mswin
+    return 1
   endif
+
+  return 0
+endfunction
+
+" DEVEL: Enable this to test bare mswin Vim.
+if 0 && s:EnableBehaveMswin()
 
   finish
 endif
@@ -88,23 +119,48 @@ endif
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" COPYD: ~/.vim/plugin/dubs_preloads.vim
-" https://github.com/landonb/dubs-vim#🖖
-
 " ------------------------------------------------------
-" MacVim Alt-key sequence mapping enablement
+" Preemptive MacVim configuration
 " ------------------------------------------------------
 
-" CXREF: /Applications/MacVim.app/Contents/Resources/vim/gvimrc
+" Disable features from MacVim gvimrc, and enable Alt-key sequences.
+"
+" CXREF:
+" /Applications/MacVim.app/Contents/Resources/vim/gvimrc
 
-if has('macunix')
-  " Enable Alt-key (aka Meta, aka Option) mappings (e.g., <M-a>).
-  set macmeta
+" SAVVY: Because scope, do not call `let` from within fcn.
+"
+" - E.g., this won't work:
+"
+"     function! s:ConfigureMacVim() abort
+"       let macvim_skip_colorscheme=1
+"       ...
+"
+"   because macvim_skip_colorscheme won't be visiable outside
+"   that function.
+
+" Note that MacVim also sets 'gui_macvim' for terminal Vim.
+if has('macunix') && has('gui_macvim')
+  " ISOFF: For broader compatibility throughout macOS (n)vim instances,
+  " be they GUIs or TUIs, prefer using literal <Option> key map sequences,
+  " and not control sequences.
+  " - E.g., while this binds <Shift-Alt-3> on Linux and in MacVim with
+  "   |macmeta| enabled:
+  "     nnoremap <M-#> :Foobar<CR>
+  "   It doesn't work in Neovide or terminal Vim.
+  " - So use literal characters instead, e.g.:
+  "     nnoremap ‹ :Foobar<CR>
+  "   though note you'll want to avoid 2-character macOS accent-generator
+  "   bindings, like <Option-e>, <Option-i>, etc.
+  "
+  "  " Enable Alt-key (aka Meta, aka Option) mappings (e.g., <M-a>).
+  "  set macmeta
 
   " Don't let MacVim call `colorscheme macvim`.
-  " - Dubs Vim sets its own colorscheme (see plugin
-  "   ~/.vim/pack/landonb/start/dubs_after_dark/).
-  " - CXREF: :h macvim-colorscheme
+  " - See our `colorscheme` call elsewhere in this file.
+  " - CXREF:
+  "   ~/.vim/plugs/landonb/start/dubs_after_dark/
+  " - REFER: |macvim-colorscheme|
   let macvim_skip_colorscheme=1
 
   " Glossary: HIG: Apple's Human interface Guidelines.
@@ -125,40 +181,225 @@ endif
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" 'Defaults everyone can agree on'
-" https://github.com/tpope/vim-sensible
-" - CXREF:
-"   ~/.vim/pack/tpope/opt/vim-sensible/plugin/sensible.vim
-packadd vim-sensible
+" USAGE: Set TIGNEWTONS_VIM_PLUGS if your plugins are not under ~/.vim/pack
+"
+" - Note that |packadd| scans the |packpath| directories to locate
+"   plugin scripts — at {packpath}/pack/*/opt/{plugin-name}/plugin/
+"
+"     - And also at {packpath}/pack/*/start/{plugin-name}/plugin/
+"       if --noplugins or noloadplugins in effect.
+"
+" - Because ~/.vim is the first path on &packpath, ~/.vim/pack is
+"   commonly used for storing plugins, at least if the user is
+"   relying on built-in |packloadall| behavior.
+"
+" - But if user is using a plugin manager, e.g., vim-plug, then they're
+"   likely *not* using ~/.vim/pack, so that Vim does not automatically
+"   load any plugins.
+"
+"   - In this case, there is no conventional plugins path.
+"
+"   - Furthermore, plugin managers don't expact the packpath layout.
+"
+"     - E.g., you'd call just `Plug '~/path/to/my/plugin` to register
+"       a plugin with vim-plug (and later vim-plug calls `source` on
+"       the individual plugin/ and after/ files).
+"
+" - Note that DepoXy stores plugins under the arbitrarily-picked
+"   ~/.vim/plugs (which you'll see refereneced in comments throughout
+"   this file).
+"
+"   - But ~/.vim/plugs doesn't itself have a pack/ subdirectory.
+"
+"   - If we wanted to use |packadd|, we'd need that pack/ directory:
+"
+"     - We could stuff everything under ~/.vim/plugs/pack/
+"
+"     - Or we could create an intermediate directory, e.g.,
+"
+"         mkdir ~/.vim/foo
+"         ln -s ~/.vim/plugs ~/.vim/foo/pack
+"         TIGNEWTONS_VIM_PACKPATH=~/.vim/foo \
+"           vim -u minimal.vimrc --noplugin
+"
+"       - And then herein: set packpath+=$TIGNEWTONS_VIM_PACKPATH
+"
+"   - Because of this (minor) issue, use vim-plug and don't worry 'bout
+"     the intermediate pack/ directory.
 
-" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
-" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+" ----------------------------------------
+"  Plugin declarations
+" ----------------------------------------
 
-" SAVVY/2024-12-12: Phew! We can load select plugins at runtime.
-" - So far I don't notice a performance difference with these
-"   enabled or not!
-" - Note that after/plugin/ scripts are *not* loaded.
+function! s:PlugBootstrap() abort
+  if has('nvim')
+    " Unnecessary check: Neovim doesn't source this file unless you source it.
+    echom "ALERT: Don't source ~/.vimrc from Neovim, eh"
+
+    return 0
+  endif
+
+  " ***
+
+  " Check if plugin dir for vim-plug, e.g., ~/.vim/plugs
+  let s:plugins_dir = $TIGNEWTONS_VIM_PLUGS
+
+  " Fallback ~/.vim/pack and |packadd|
+  if s:plugins_dir == ''
+      \ || fnamemodify(s:plugins_dir, ':p') == fnamemodify($HOME . '/.vim/pack', ':p')
+    let s:plugins_dir = ''
+
+    " REFER: |loadplugins| aka |lpl| is unnecessary here if caller
+    " used --noplugin, but setting here means they don't have to.
+    " - E.g., these both work:
+    "     vim -u /path/to/editor-vim-0-0-insert-minimal.vimrc --noplugin
+    "     vim -u /path/to/editor-vim-0-0-insert-minimal.vimrc
+    " - BWARE: But don't use with vim-plug or nothing loads.
+    set noloadplugins
+  endif
+
+  " ***
+
+  if s:plugins_dir != ''
+    try
+      call plug#begin()
+    catch /^Vim\%((\a\+)\)\=:E117:/
+      " E.g., E117: Unknown function: foo#bar#baz
+      echom "ERROR: Missing autoload/plug.vim from:"
+      echom "  https://github.com/junegunn/vim-plug"
+
+      return 0
+    endtry
+  endif
+
+  " ***
+
+  " vim-sensible — 'Defaults everyone can agree on'
+  " https://github.com/tpope/vim-sensible
+  " - CXREF:
+  "   ~/.vim/plugs/tpope/opt/vim-sensible/plugin/sensible.vim
+  call s:PlugsRegister(s:plugins_dir, 'tpope/opt/vim-sensible')
+
+  " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+  " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+  " SAVVY/2024-12-12: Load select plugins at runtime.
+  " - So far I don't notice a performance difference
+  "   with these enabled or not.
+  " - Note that after/plugin/ scripts are *not* loaded by |packadd|
+  "   (if ~/.vim/pack exists), but they are by vim-plug (if using
+  "   user-provided plugins path).
+
+  call s:SourcePluginsPre()
+
+  " ***
+
+  " Load a look 'n feel (lots of `set` commands).
+  " https://github.com/landonb/dubs_appearance#💅
+  call s:PlugsRegister(s:plugins_dir, 'landonb/start/dubs_appearance')
+
+  " ***
+
+  " Load a ton of command maps to which author is accustomed.
+  " https://github.com/landonb/dubs_edit_juice#🧃
+  call s:PlugsRegister(s:plugins_dir, 'landonb/start/dubs_edit_juice')
+
+  " ***
+
+  " Load selection gestures (like <Ctrl-Shift-{Arrow}>).
+  " https://github.com/landonb/vim-select-mode-stopped-down#🛑
+  call s:PlugsRegister(s:plugins_dir, 'landonb/start/vim-select-mode-stopped-down')
+
+  " ***
+
+  if s:plugins_dir != ''
+    call s:PlugsRegister(s:plugins_dir, 'embrace-vim/start/vim-async-map')
+
+    call s:PlugsRegister(s:plugins_dir, 'embrace-vim/start/vim-webopen')
+
+    call s:PlugsRegister(s:plugins_dir, 'landonb/start/dubs_after_dark')
+  endif
+
+  " ***
+
+  " Update &runtimepath and initialize the plugin system.
+  " - Also runs `filetype plugin indent on` and `syntax enable`.
+  if s:plugins_dir != ''
+    call plug#end()
+  endif
+
+  " ***
+
+  au VimEnter * call s:SourcePluginsPost()
+
+  " Author's (favorite) colorscheme (won't error if not installed).
+  " CXREF: ~/.vim/plugs/landonb/start/dubs_after_dark/colors/after-dark.vim
+  " - Should be found on &rtp now because plug#end().
+  silent! colorscheme after-dark
+
+  return 1
+endfunction
 
 " ***
 
-" Load a look 'n feel (lots of `set` commands).
-" https://github.com/landonb/dubs_appearance#💅
-packadd dubs_appearance
+function! s:PlugsRegister(plugins_dir, subdir) abort
+  if a:plugins_dir != ''
+    " Using arbitrary plugins path, and bootstrapping with vim-plug.
+    call s:PlugsRegister_Vimplug(a:plugins_dir, a:subdir)
+  else
+    " Using conventional ~/.vim/pack path, and relying on |packadd|.
+    call s:PlugsRegister_Packpath(a:subdir)
+  endif
+endfunction
 
-" Disable line no. for distraction-free Git commit authoring.
-set nonu
+" SAVVY: Note that 'Plug' will source files under after/, but when
+" using |packadd|, Vim will not source files under after/.
+" - See below: s:LoadDubsAfterJuiceCommands()
+"   which manually sources after/ scripts when using |packadd|
+" - Otherwise just FYI: |Plug| sources all after/ scripts.
+function! s:PlugsRegister_Vimplug(plugins_dir, subdir) abort
+  let l:project_path = a:plugins_dir .. '/' .. a:subdir
+
+  if isdirectory(l:project_path)
+    Plug l:project_path
+  else
+    echom 'ALERT: Missing vim-plug plugin: ' .. l:project_path
+  endif
+endfunction
+
+function! s:PlugsRegister_Packpath(subdir) abort
+  let l:plugin_name = fnamemodify(a:subdir, ':t')
+
+  try
+    exec 'packadd ' .. l:plugin_name
+  catch /^Vim\%((\a\+)\)\=:E919:/
+    " E.g., E919: Directory not found in 'packpath': "pack/*/opt/foo"
+    echom 'ALERT: Missing packpath plugin: ' .. l:plugin_name
+  endtry
+endfunction
 
 " ***
 
-" Load a ton of command maps author is accustomed to.
-" https://github.com/landonb/dubs_edit_juice#🧃
-packadd dubs_edit_juice
+" REFER: See comment below re: dubs_edit_juice
+" - <C-s> saves and quits (:wq).
+"   ~/.vim/plugs/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim
+function! s:SourcePluginsPre() abort
+  let $VIM_EDIT_JUICE_EXIT_ON_SAVE = 1
+endfunction
+
+function! s:SourcePluginsPost() abort
+  " Disable line no. for distraction-free Git commit authoring.
+  " - CXREF:
+  "   ~/.vim/plugs/landonb/start/dubs_appearance/plugin/line_numbers_show.vim
+  set nonu
+endfunction
 
 " ***
 
-" Load selection gestures (like <Ctrl-Shift-{Arrow}>).
-" https://github.com/landonb/vim-select-mode-stopped-down#🛑
-packadd vim-select-mode-stopped-down
+if ! s:PlugBootstrap()
+
+  finish
+endif
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -209,24 +450,39 @@ inoremap <CR> <CR><C-g>u
 " CXREF: https://github.com/landonb/dubs_edit_juice
 "
 " - <C-c> copy, etc.
-"   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
+"   ~/.vim/plugs/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim
 "
 " - <C-h> hides search highlight (:nohlsearch)
-"   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/hide-highlights.vim
+"   ~/.vim/plugs/landonb/start/dubs_edit_juice/after/plugin/hide-highlights.vim
 "
 " - Center cursor on search jump (n, N, <M-n>, <M-N>, *, #, g*, g#)
-"   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/center-cursor-on-highlight-next-search-match.vim
+"   ~/.vim/plugs/landonb/start/dubs_edit_juice/after/plugin/center-cursor-on-highlight-next-search-match.vim
 "
 " - <C-s> saves and quits (:wq).
-"   ~/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim
-let $VIM_EDIT_JUICE_EXIT_ON_SAVE = 1
+"   ~/.vim/plugs/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim
+"
+"     let $VIM_EDIT_JUICE_EXIT_ON_SAVE = 1
+"
+"   - CXREF: See above: s:SourcePluginsPre()
 
 function! s:LoadDubsAfterJuiceCommands() abort
+  " Check if custom plugin path, e.g., ~/.vim/plugs
+  if s:plugins_dir != ''
+    " Unnecessary when using vim-plug, which sources after/ files.
+
+    return
+  endif
+
+  call s:SourcePluginsPre()
+
+  " Conventional ~/.vim/pack path
+  let l:pack_dir = $HOME . '/.vim/pack'
+
   for l:sourcep in [
-    \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim",
-    \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/hide-highlights.vim",
-    \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/center-cursor-on-highlight-next-search-match.vim",
-    \ $HOME . "/.vim/pack/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim",
+    \ l:pack_dir . '/landonb/start/dubs_edit_juice/after/plugin/enable-behave-mswin.vim',
+    \ l:pack_dir . '/landonb/start/dubs_edit_juice/after/plugin/hide-highlights.vim',
+    \ l:pack_dir . '/landonb/start/dubs_edit_juice/after/plugin/center-cursor-on-highlight-next-search-match.vim',
+    \ l:pack_dir . '/landonb/start/dubs_edit_juice/after/plugin/ctrl-s-save-command.vim',
   \ ]
     if filereadable(l:sourcep)
       exec "source " . l:sourcep
@@ -251,7 +507,7 @@ inoremap <C-l> <C-k>
 " - This is not exactly COPYD, but a much simpler impl. of Dubs Vim's
 "   it's same as <C-s> ctrl-s-save-command.vim sourced above.
 " CXREF: https://github.com/DepoXy/vim-depoxy#🤙
-"   ~/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
+"   ~/.vim/plugs/DepoXy/start/vim-depoxy/plugin/vim-save-close-quit-maps.vim
 
 noremap <Leader>dQ :wq<CR>
 inoremap <Leader>dQ <C-o>:wq<CR>
@@ -259,7 +515,7 @@ inoremap <Leader>dQ <C-o>:wq<CR>
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" COPYD: ~/.vim/pack/landonb/start/dubs_ftype_mess/plugin/dubs_ftype_mess.vim
+" COPYD: ~/.vim/plugs/landonb/start/dubs_ftype_mess/plugin/dubs_ftype_mess.vim
 "   https://github.com/landonb/dubs_ftype_mess
 
 " SAVVY: Vim defaults textwidth=72 and wraps once you type past that boundary.
@@ -278,7 +534,7 @@ autocmd FileType gitcommit setlocal textwidth=0 shiftwidth=2 tabstop=2 expandtab
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" CXREF: ~/.vim/pack/embrace-vim/start/vim-webopen/autoload/embrace/vim_webopen.vim
+" CXREF: ~/.vim/plugs/embrace-vim/start/vim-webopen/autoload/embrace/vim_webopen.vim
 "   https://github.com/embrace-vim/vim-webopen#🐣
 
 " Huh, not necessary for autoload fcns:
@@ -319,10 +575,10 @@ call s:Webopen_CreateMaps()
 "   So, whatever, adding it.
 
 " CXREF/2024-12-14:
-" ~/.vim/pack/embrace-vim/start/vim-async-map/autoload/embrace/async_map.vim
+" ~/.vim/plugs/embrace-vim/start/vim-async-map/autoload/embrace/async_map.vim
 "
 " COPYD/2024-12-14:
-" ~/.vim/pack/landonb/start/vim-ovm-easyescape-kj-jk/plugin/vim_ovm_easyescape_kj_jk.vim
+" ~/.vim/plugs/landonb/start/vim-ovm-easyescape-kj-jk/plugin/vim_ovm_easyescape_kj_jk.vim
 
 function! s:AsyncMap_CreateMaps_kj_jk() abort
   try
@@ -350,7 +606,7 @@ call s:AsyncMap_CreateMaps_kj_jk()
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-" COPYD: ~/.vim/pack/DepoXy/start/vim-depoxy/plugin/vim-shift-ctrl-bindings.vim
+" COPYD: ~/.vim/plugs/DepoXy/start/vim-depoxy/plugin/vim-shift-ctrl-bindings.vim
 "   https://github.com/DepoXy/vim-depoxy#🤙
 "
 " - CXREF: See Alacritty substitutions for terminal `vim`:
@@ -368,13 +624,6 @@ inoremap  <C-O>:call CursorFriendlyIndent(1)<CR>
 
 " Enable <Shift-Ctrl-W>
 inoremap  <C-O>:<C-U>call dubs_edit_juice_backspace#delete_back_line()<CR>
-
-" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
-" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
-
-" Author's (favorite) colorscheme (won't error if not installed).
-" CXREF: ~/.vim/pack/landonb/start/dubs_after_dark/colors/after-dark.vim
-silent! colorscheme after-dark
 
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 " +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
