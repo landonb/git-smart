@@ -145,7 +145,7 @@ git_leave_breadcrumb () {
   # And then increment by 1 for the new breadcrumb.
   local max_crumb_num=$( \
     git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" \
-    | /usr/bin/env sed -E 's#^.*/0*([0-9]+)/[0-9_]+(/.+)?$#\1#' \
+    | $(command -v gsed || command -v sed) -E 's#^.*/0*([0-9]+)/[0-9_]+(/.+)?$#\1#' \
     | sort -n -r \
     | head -n1 \
   )
