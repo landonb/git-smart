@@ -39,7 +39,7 @@ _GS_PRECISION="2"
 _GS_TAG_PREFIX="🍞/"
 
 # Trace message switch.
-DTRACE=false
+DTRACE=${DTRACE:-false}
 # DEV/YOU: Uncomment to spit trace to stderr.
 #  DTRACE=true
 
