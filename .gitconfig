@@ -1116,20 +1116,27 @@
 # ***                         Commit Aliases                          ***
 # #######################################################################
 
-# BWARE/2024-08-07: These commit aliases are now very opinionated:
-# - They each use `-c core.editor=editor-vim-0-0-insert-minimal`
-#   to use a minimal Vim editor, with some handy shortcuts
-#   (like <Ctrl-S> to save and quit (:wq), so you can finish
-#   your commit message quicker!).
-#   - REFER: See the source for more details. / CXREF: On DepoXy at:
-#     ~/.kit/git/git-smart/bin/editor-vim-0-0-insert-minimal.vimrc
+# REFER/2025-02-03: The author uses a minimal Neovim EDITOR for commit
+# messages, e.g.
+#
+#   ci = -c core.editor=editor-vim-0-0-insert-minimal commit
+#
+# You'll find the minimal (n)vim sources in author's Vim/Neovim project:
+#
+#   https://github.com/DepoXy/nvim-depoxy#🐇
+#
+# and the associated Git alias (ci, cm, cv, civ, cim, cim-only) in DepoXy:
+#
+#   https://github.com/DepoXy/depoxy/blob/release/home/.gitconfig.local
+#
+# We'll map the same aliases here, but without the editor setting.
 
 [alias]
   # Simple git-commit shortcut.
-  ci = -c core.editor=editor-vim-0-0-insert-minimal commit
+  ci = commit
 
   # Type message at prompt.
-  cm = -c core.editor=editor-vim-0-0-insert-minimal commit --message
+  cm = commit --message
 
   # - Some other commit alias ruminations:
   #   - Stage modified and deleted files, but not new files:
@@ -1145,30 +1152,24 @@
   #   at the terminal prompt, and to *always* use Vim (my EDITOR).
   #
   #   (lb): Used 40% of the time (type message at prompt).
-  cv = -c core.editor=editor-vim-0-0-insert-minimal commit --verbose
+  cv = commit --verbose
   #
   # For parity with `git cim` and `git civ`.
-  civ = -c core.editor=editor-vim-0-0-insert-minimal commit --verbose
+  civ = commit --verbose
 
   # ***
 
-  # Use `cim` and `cin` to amend the last commit, even with unstaged work.
-
-  # (lb): `commit --amend` the long way: --fixup + wip + rebase + pop1.
-
-  # (lb): 2020-11-24: At least I can say I use `cim` and `cin` a lot.
-  # - I first had `cin` aliased from `cia` (commit/ci + amend/a), but I
-  #   feel like `cin` complements `cim` better, and I like the idea of
-  #   c-in → commit-in → commit into last commit (and then cim is like
-  #   cim → commit-into-message → commit into last commit & edit message). #pneumonics
-
-  cim = -c core.editor=editor-vim-0-0-insert-minimal commit --amend
+  # Use `cin` and `cim` to amend the last commit, even with unstaged work.
+  # - `cin` will automatically fixup staged into the most recent commit.
+  # - `cim` works similarly but runs the EDITOR so you can edit the message.
+  cim = commit --amend
 
   # Like `git cim`, but leave staged changes staged.
   # https://github.com/mgedmin/dotfiles/blob/1da8d86/gitconfig#L167-L168
   # (https://github.com/mgedmin/dotfiles is technically not licensed: No license file.)
-  cim-only = -c core.editor=editor-vim-0-0-insert-minimal commit --amend --only -v
+  cim-only = commit --amend --only -v
 
+[alias]
   # Amend the staged changes to the latest commit.
   # - BWARE: If you only `git mv foo bar`, then `git diff --cached --quiet`
   #   returns true (i.e., nothing staged?!). But `git diff --cached` still

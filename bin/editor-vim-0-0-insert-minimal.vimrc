@@ -1,1 +1,0 @@
-../deps/tig-newtons/bin/editor-vim-0-0-insert-minimal.vimrc
