@@ -263,6 +263,39 @@
   # Nothing specified, nothing added.
   addEmptyPathspec = false
 
+  # Remove two lines from `git status`:
+  #   (use "git push" to publish your local commits)
+  # And:
+  #   (use "git add <file>..." to include in what will be committed)
+  statusHints = false
+
+  # Remove all but the last line (17 lines!) from detached-HEAD message, e.g.,
+  #   $ git checkout ee1f35925
+  #   Note: switching to 'ee1f359259312c42ae40442b8e3b84ca62a52cf1'.
+  #
+  #   You are in 'detached HEAD' state. You can look around, make experimental
+  #   changes and commit them, and you can discard any commits you make in this
+  #   state without impacting any branches by switching back to a branch.
+  #
+  #   If you want to create a new branch to retain commits you create, you may
+  #   do so (now or later) by using -c with the switch command. Example:
+  #
+  #     git switch -c <new-branch-name>
+  #
+  #   Or undo this operation with:
+  #
+  #     git switch -
+  #
+  #   Turn off this advice by setting config variable advice.detachedHead to false
+  #
+  #   HEAD is now at ee1f35925 foo
+  detachedHead = false
+  #
+  # CALSO: From https://github.com/lukas-reineke/dotfiles/blob/02064d6dc/git/.gitconfig
+  #  commitBeforeMerge = false
+  #  resolveConflict = false
+  #  implicitIdentity = false
+
 # #######################################################################
 # ***                              diff                               ***
 # #######################################################################
