@@ -251,13 +251,16 @@
 # "I'm all good, thanks."
 #
 # Quell Git advice, e.g.,
-#
-#   $ git add
-#   Nothing specified, nothing added.
-#   hint: Maybe you wanted to say 'git add .'?
-#   hint: Turn this message off by running
-#   hint: "git config advice.addEmptyPathspec false"
+
 [advice]
+  # $ git add
+  # Nothing specified, nothing added.
+  # hint: Maybe you wanted to say 'git add .'?
+  # hint: Turn this message off by running
+  # hint: "git config advice.addEmptyPathspec false"
+  #
+  # $ GIT_ADVICE=0 git add
+  # Nothing specified, nothing added.
   addEmptyPathspec = false
 
 # #######################################################################
