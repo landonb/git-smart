@@ -876,6 +876,9 @@
   #  up = upstream
   # - Ha, ya know... there's an obvious melding of the minds here,
   #   we can `git up` and  `git up remote/branch` in one!
+  # CXREF/2025-02-23: Completion wired by our custom completions,
+  # which you'll find in a DepoXy environment under ~/.kit/git/:
+  #   ~/.kit/git/git-smart/bin/completions/git-completion.bash
   up = "! f () { \
     if [ $# -eq 0 ]; then \
       git rev-parse --abbrev-ref --symbolic-full-name \"@{u}\"; \

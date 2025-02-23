@@ -3389,3 +3389,24 @@ __git_complete gitk __gitk_main
 if [ Cygwin = "$(uname -o 2>/dev/null)" ]; then
 __git_complete git.exe __git_main
 fi
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# CXREF: Completion for git-up (complicated) alias:
+# ~/.kit/git/git-smart/.gitconfig
+_git_up ()
+{
+	__git_complete_refs --cur="${cur##--set-upstream-to=}"
+	# ALTLY: These appear to return same results:
+	#   __git_complete_refs --cur="${cur#*=}"
+	#   __git_complete_refs --cur="$cur_"
+}
+
+# Not that this command is ever used with an argument (the alias
+# is used as a getter to control the default branch name). But
+# we can complete with local branch names, why not.
+_git_main_branch ()
+{
+	__gitcomp_direct "$(__git_heads "" "$cur" " ")"
+}
+
