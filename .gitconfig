@@ -322,7 +322,14 @@
   #   - I think these prefixes are holdovers from old SCMs. See:
   #       https://stackoverflow.com/questions/6764953/
   #         what-is-the-reason-for-the-a-b-prefixes-of-git-diff
-  noprefix = true
+  # - ISOFF/2025-02-23: Author rarely double-clicks to copy-paste paths anymore.
+  #   - I've been using `tig` and the `tig-newtons` extension, the
+  #     latter which contains a `P` command that copies the path.
+  # - BUGGN: This setting, noprefix=true, also breaks LazyVim git-diff
+  #   snacks viewer.
+  #   - SPIKE/NOPRI: Fix and submit a PR... or not....
+  #
+  #  noprefix = true
 
   # NOTE: The diff.noprefix option does not apply to the 'a/' and 'b/'
   #       prefixes shown in interactive patch mode, i.e., on `git add -p`.
