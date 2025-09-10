@@ -10,8 +10,20 @@
 
 fzf_log() {
   hash=$(git log --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" | fzf | awk '{print $1}')
-  echo $hash | xclip
+  printf "%s" $hash | _gsm_clip_raw
   git showtool $hash
+}
+
+# COPYD/2025-09-10: See `_hf_clip_raw` in Homefries:
+# https://github.com/landonb/home-fries#🍟
+_gsm_clip_raw() {
+  if command -v pbcopy >/dev/null; then
+    pbcopy
+  elif [ -n ${WAYLAND_DISPLAY} ] && command -v wl-copy >/dev/null; then
+    wl-copy
+  elif [ -n ${DISPLAY} ] && command -v xclip >/dev/null; then
+    xclip -selection c
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
