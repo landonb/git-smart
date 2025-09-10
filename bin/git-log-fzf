@@ -8,7 +8,7 @@
 # commit hash on your clipboard using xclip. I also have it set to use icdiff via
 # `git showtool`."
 
-fzf_log () {  
+fzf_log() {
   hash=$(git log --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr" "$@" | fzf | awk '{print $1}')
   echo $hash | xclip
   git showtool $hash
@@ -16,11 +16,10 @@ fzf_log () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-main () {
+main() {
   fzf_log
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
   main "${@}"
 fi
-
