@@ -1257,7 +1257,14 @@
   #   commit).
   # - SAVVY: Call `git cinit -m` or `git cinit -v`
   cinit = ciinit
-  ciinit = commit --allow-empty -S
+  ciinit = "! f() { \
+    if test -z \"$(git config get user.signingkey)\"; then \
+      >&2 echo \"ERROR: Either set signingkey, or use ciinit-nosign\"; \
+      return 1; \
+    fi; \
+    git commit --allow-empty -S \"$@\"; \
+    }; f"
+  ciinit-nosign = commit --allow-empty
 
   # Here's a clever way to change the last commit's author, courtesy:
   #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig [MIT]
