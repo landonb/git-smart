@@ -45,14 +45,14 @@ DTRACE=${DTRACE:-false}
 
 # ***
 
-source_deps () {
+source_deps() {
   # Load: git_is_commit, git_tag_name_check_format.
   . "$(dirname -- "$(realpath -- "$0")")/../deps/sh-git-nubs/lib/git-nubs.sh"
 }
 
 # ***
 
-git_leave_breadcrumb () {
+git_leave_breadcrumb() {
   local dry=false
   if [ "$1" = "-v" ]; then
     dry=true
@@ -143,11 +143,11 @@ git_leave_breadcrumb () {
   #   🍞/private/01/230226_1406
   #   🍞/private/02/230420_1113/some-slug
   # And then increment by 1 for the new breadcrumb.
-  local max_crumb_num=$( \
-    git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" \
-    | $(command -v gsed || command -v sed) -E 's#^.*/0*([0-9]+)/[0-9_]+(.*)$#\1#' \
-    | sort -n -r \
-    | head -n1 \
+  local max_crumb_num=$(
+    git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" |
+      $(command -v gsed || command -v sed) -E 's#^.*/0*([0-9]+)/[0-9_]+(.*)$#\1#' |
+      sort -n -r |
+      head -n1
   )
   ${DTRACE} && >&2 echo "max_crumb_num=${max_crumb_num}"
 
@@ -190,11 +190,11 @@ git_leave_breadcrumb () {
 
 # ***
 
-is_already_tagged () {
+is_already_tagged() {
   local branch_name="$1"
   local max_crumb_num="$2"
   local tag_commit="$3"
-  
+
   local fmtd_prev_crumb_num
   fmtd_prev_crumb_num=$(printf "%0${_GS_PRECISION}d" "${max_crumb_num}")
   ${DTRACE} && >&2 echo "fmtd_prev_crumb_num=${fmtd_prev_crumb_num}"
@@ -203,8 +203,8 @@ is_already_tagged () {
   latest_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/${fmtd_prev_crumb_num}"
   ${DTRACE} && >&2 echo "latest_crumb_prefix=${latest_crumb_prefix}"
 
-  local latest_crumb_tag="$( \
-    git --no-pager tag --list "${latest_crumb_prefix}/*" \
+  local latest_crumb_tag="$(
+    git --no-pager tag --list "${latest_crumb_prefix}/*"
   )"
   ${DTRACE} && >&2 echo "latest_crumb_tag=${latest_crumb_tag}"
 
@@ -227,7 +227,7 @@ is_already_tagged () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-main () {
+main() {
   source_deps
 
   git_leave_breadcrumb "$@"
@@ -236,4 +236,3 @@ main () {
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
   main "$@"
 fi
-
