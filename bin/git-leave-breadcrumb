@@ -155,9 +155,9 @@ git_leave_breadcrumb() {
     max_crumb_num=0
   else
     if is_already_tagged "${branch_name}" "${max_crumb_num}" "${tag_commit}"; then
-      echo "already tagged!"
+      >&2 echo "ERROR: Commit already breadcrumbed"
 
-      return
+      return 1
     fi
   fi
 
