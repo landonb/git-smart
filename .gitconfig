@@ -1890,6 +1890,25 @@
   # ***
 
 # #######################################################################
+# ***                    git-smart/bin Git Aliases                    ***
+# #######################################################################
+
+# Commands to complement Git Smart's bin/git-* commands.
+
+[alias]
+  # SAVVY: Print list of tags created by git-leave-breadcrumb.
+  # - CXREF: If on a DepoXy host, you'll find the command at:
+  #     ~/.kit/git/git-smart/bin/git-leave-breadcrumb
+  # - USAGE:
+  #     # Print breadcrumb tags.
+  #     git breadcrumbs
+  #     # Specify a different prefix, e.g.:
+  #     _GS_TAG_PREFIX=1. git breadcrumbs
+  breadcrumbs = "!f() { \
+    git --no-pager tag --list "${_GS_TAG_PREFIX:-🍞/}*"; \
+  }; f"
+
+# #######################################################################
 # ***                    Miscellaneous Git Aliases                    ***
 # #######################################################################
 
