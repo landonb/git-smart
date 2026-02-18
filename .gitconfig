@@ -1183,6 +1183,8 @@
 
   # Type message at prompt.
   cm = commit --message
+  # Typo support (we got you!).
+  ci-m = commit --message
 
   # - Some other commit alias ruminations:
   #   - Stage modified and deleted files, but not new files:
