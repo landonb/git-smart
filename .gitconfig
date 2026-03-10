@@ -358,6 +358,41 @@
 [diff "zip"]
   textconv = unzip -v
 
+# NTRST: 'command' is tried first, then 'textconv'.
+# - ASIDE/REFER:
+#     diff.<driver>.command
+#         The custom diff driver command. See gitattributes(5) for details.
+#     diff.<driver>.textconv
+#         The command that the diff driver should call to generate the
+#         text-converted version of a file. The result of the conversion is
+#         used to generate a human-readable diff. See gitattributes(5) for
+#         details.
+
+# USAGE: To git-diff a SQLite database that's being tracked,
+# so you don't just get a bland git-diff message, e.g.,
+#   $ gnp diff @^^..@ -- dob.sqlite
+#   Binary files a/dob.sqlite and b/dob.sqlite differ
+# add a .gitattributes project file with a glob filename
+# match that sets the diff value to match ours, e.g.,
+#   # ./.gitattributes
+#   *.sqlite diff=sqlite3
+# - SAVVY: The file must be local; using ~/.gitattributes does not work.
+# - CPYST:
+#   - Setup .gitattributes:
+#       test -d .git && echo "*.sqlite diff=sqlite3" >> .gitattributes || >&2 echo "WRONG"
+#   - Setup ~/.gitconfig:
+#       git config --global diff.sqlite3.textconv "sh -c 'sqlite3 \"\$0\" .dump'"
+#   - Verify ~/.gitconfig:
+#       $ git --no-pager config get diff.sqlite3.textconv
+#       sh -c 'sqlite3 "$0" .dump'
+#   - ASIDE: The git-config-set above sets this value in ~/.gitconfig:
+#         textconv = sh -c 'sqlite3 \"$0\" .dump'
+#     - Though works without the escapes (it's git-config, do double-
+#       quotes need to be escaped?) — But I wonder if not with spaces:
+#         textconv = sh -c 'sqlite3 "$0" .dump'
+[diff "sqlite3"]
+	textconv = sh -c 'sqlite3 \"$0\" .dump'
+
 # #######################################################################
 # ***                             merge                               ***
 # #######################################################################
