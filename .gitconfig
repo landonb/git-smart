@@ -987,16 +987,28 @@
   #     so let's go ahead and use up a single character alias! Worth it!!
   # - HSTRY/2020-02-09: The previous incantation:
   #     l = !git --no-pager log -1
-  l = "! f() { git --no-pager log -${1:-1}; }; f"
-  l1 = "! f() { git --no-pager log -1; }; f"
-  l2 = "! f() { git --no-pager log -2; }; f"
-  l3 = "! f() { git --no-pager log -3; }; f"
-  l4 = "! f() { git --no-pager log -4; }; f"
-  l5 = "! f() { git --no-pager log -5; }; f"
-  l6 = "! f() { git --no-pager log -6; }; f"
-  l7 = "! f() { git --no-pager log -7; }; f"
-  l8 = "! f() { git --no-pager log -8; }; f"
-  l9 = "! f() { git --no-pager log -9; }; f"
+  # - HSTRY/2026-05-31: The previous incantation, we've come a long way since:
+  #     l = "! f() { git --no-pager log -${1:-1}; }; f"
+  # - REMEM: When passing args. to `bash -c`, first arg is $0, not $1!
+  #   - E.g.,
+  #       $ bash -c 'printf "$0\n"'
+  #       /home/user/.local/bin/bash
+  #       $ bash -c 'printf "$0\n"' foo
+  #       foo
+  #   - SAVVY: So that the shell code looks "normal" and refs. $1 as the
+  #     first arg., include $0 in the `bash -c` args.
+  #     - In this case, when called as a git alias, $0 is the alias string
+  #       itself, without the leading "!".
+  l = "! f() { bash -c 'git --no-pager log -${1:-1} \"${@:2}\"' \"$0\" \"$@\"; }; f"
+  l1 = "! f() { git --no-pager log -1 \"$@\"; }; f"
+  l2 = "! f() { git --no-pager log -2 \"$@\"; }; f"
+  l3 = "! f() { git --no-pager log -3 \"$@\"; }; f"
+  l4 = "! f() { git --no-pager log -4 \"$@\"; }; f"
+  l5 = "! f() { git --no-pager log -5 \"$@\"; }; f"
+  l6 = "! f() { git --no-pager log -6 \"$@\"; }; f"
+  l7 = "! f() { git --no-pager log -7 \"$@\"; }; f"
+  l8 = "! f() { git --no-pager log -8 \"$@\"; }; f"
+  l9 = "! f() { git --no-pager log -9 \"$@\"; }; f"
 
   # Git command to show tag creation dates.
   # - Optional: Add --graph to see branching lines. E.g.,
