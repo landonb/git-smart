@@ -1611,8 +1611,14 @@
       echo '  ——————————'; \
       git --no-pager log -1 --decorate --color=always | pad2; \
       echo; \
-      echo \"  If you want a do-over:\"; \
+      echo \"  If you want want to use this message again:\"; \
+      echo; \
       echo \"    git ci -m \\\"$(git --no-pager log -1 --format=%s)\\\"\"; \
+      echo; \
+      echo \"  - Or, more conveniently, this works until you move HEAD:\"; \
+      echo; \
+      echo \"    git ciprev\"; \
+      echo; \
     fi; \
     \
     echo; \
