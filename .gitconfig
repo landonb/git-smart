@@ -960,8 +960,14 @@
 
 [alias]
   # Use `git l` to show the latest log message.
-  # - (I tried other, longer names, such as `last`, `l1`, and `l`.
-  #    But I like 'l' the best.
+  # - HSTRY/2020-02-09: WORDS: ASIDE: I tried other, longer names,
+  #   such as `last`, `l1`, and `l`. But I like 'l' the best.
+  #   - TL_DR/2026-05-31: In 2020, I felt the need to rationalize
+  #     using a coveted/precious single-letter git alias (`git l`).
+  #     - But it's a good alias! I use it all the time. That's all
+  #       you really need to know.
+  #     Nonetheless, the remaining blather is from when I first
+  #     "poached" the "l" spot....
   #   - I like 'last' because it's descriptive, and the user probably doesn't
   #     have to guess what it does -- but it's annoying to type an 'a' after
   #     an 'l' (such a stretch across the keyboard!).
@@ -978,8 +984,9 @@
   #     I can also use the mnemonic of wanting one log record: And what 1
   #     character does the word 'log' start with? It's an 'l'! Finally, I
   #     think I will use this option frequently (I've already started),
-  #     so let's go ahead and use up a single character alias! Worth it!!)
-  #  l = !git --no-pager log -1
+  #     so let's go ahead and use up a single character alias! Worth it!!
+  # - HSTRY/2020-02-09: The previous incantation:
+  #     l = !git --no-pager log -1
   l = "! f() { git --no-pager log -${1:-1}; }; f"
   l1 = "! f() { git --no-pager log -1; }; f"
   l2 = "! f() { git --no-pager log -2; }; f"
