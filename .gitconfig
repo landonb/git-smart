@@ -965,7 +965,7 @@
   #   - I like 'last' because it's descriptive, and the user probably doesn't
   #     have to guess what it does -- but it's annoying to type an 'a' after
   #     an 'l' (such a stretch across the keyboard!).
-  #   - I like 'l1' because it's short, and it has a good pneumonic --
+  #   - I like 'l1' because it's short, and it has a good mnemonic --
   #     1 log record, or 'l1' (well, '1l', I suppose, but whatever).
   #   - And I like 'l' because it's also short -- but I don't normally like
   #     single character abbreviations, because it makes searching more
@@ -975,7 +975,7 @@
   #   - In this case, with 'l', I do like the single character -- it's quick
   #     to type, and it's not like this single character appears any place
   #     other then here (so there's no grep-pollution to worry about). Also,
-  #     I can also use the pneumonic of wanting one log record: And what 1
+  #     I can also use the mnemonic of wanting one log record: And what 1
   #     character does the word 'log' start with? It's an 'l'! Finally, I
   #     think I will use this option frequently (I've already started),
   #     so let's go ahead and use up a single character alias! Worth it!!)
