@@ -1565,8 +1565,8 @@
   #
   #     git undo && git reset HEAD *
   #
-  # 2020-05-24: I find myself running rollback, but then
-  #             adding `git l`, so combine the two!
+  # HSTRY/2020-05-24: I find myself running rollback, but then
+  #                   adding `git l`, so combining the two.
   #
   #   This was:
   #
@@ -1582,7 +1582,7 @@
   #       git reset --mixed @~1 && \
   #       git --no-pager log -1 --pretty=oneline --abbrev-commit
   #
-  # 2020-05-27: Getting lazy with age. Rename `pop1`.
+  # HSTRY/2020-05-27: Getting lazy with age. Renaming `pop1`.
   #
   #   Let's call it `git pop1`, as in "pop 1 commit"
   #   as opposed to `git rollback`
@@ -1595,6 +1595,8 @@
   #   short of an alias. Using 'pop' and a number is
   #   still pretty short, at least typing 'pop' is very
   #   quick.
+  #
+  # REMEM/2026-05-31: `git reset --mixed` is the default mode.
 
   # 2020-10-27: Let's keep the paradigm rolling, adding pop* 2-9.
   popn = "! f() { \
