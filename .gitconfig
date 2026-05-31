@@ -1300,6 +1300,43 @@
     fi; \
   }; f"
 
+  # Use message from previous HEAD position (from reflog).
+  # - UCASE: After using `git reset @~1` to pop the latest commit, and
+  #   staging again, you can run `git ciprev` to reuse the "previous"
+  #   commit meesage, i.e., from the commit you just "popped".
+  #   - This is perhaps a rare case where a user knows the value
+  #     of HEAD@{1}. But in general, at least in this author's
+  #     experience, I don't track HEAD ref. history in my head.
+  #     I need to check the reflog to dig for a deeper HEAD@{N}.
+  # - Aside: Re: UX msg below, at least in author's terminal, not
+  #   all Kaomoji look as good in term. as they do in editor, e.g.:
+  #     >&2 echo \"      (ᵟຶ︵ ᵟຶ)\"; \
+  # - Thanx: https://genius.com/Nirvana-smells-like-teen-spirit-lyrics
+  #
+  # CPYST: If you want to use an older message based on HEAD@{N}, run
+  # `git reflog` to see a list of `sha HEAD@{N} action: message`, and
+  # pick the one you want (Savvy: tig reflog doesn't show) then, e.g.:
+  #   git log --format=%B -1 HEAD@{5} | git commit -F -
+  ciprev = "! f() { \
+    git_object_exists() { \
+      git rev-parse --verify --end-of-options \"$1\" >/dev/null 2>&1; \
+    }; \
+    \
+    if git_object_exists HEAD@{1}; then \
+      git commit --message \"$(git log --format=%B -1 HEAD@{1})\" \"$@\"; \
+    else \
+      >&2 echo \"ERROR: Our little group has always been HEAD  ♫⋆｡♪ ₊˚♬ ﾟ.\"; \
+      >&2 echo \"           And always will until the end      (っ•́｡•́)♪♬\"; \
+      >&2 echo \"- Which is to sing, there is nothing in the reflog about HEAD@{1}\"; \
+      if ! git_object_exists HEAD; then \
+        >&2 echo \"  - Nor does HEAD exist, what kind of world is this 💀\"; \
+        >&2 echo \"      (༎ຶ ෴ ༎ຶ)\"; \
+      fi; \
+      \
+      return 1; \
+    fi; \
+  }; f"
+
   # Use signed, empty first commit.
   # - Use case: If you only sign commits before pushing (because you
   #   rebase often before publishing, and signing is slow), ensure
