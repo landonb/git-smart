@@ -124,6 +124,10 @@ _git_safe() {
   # Prompt user if command consequences are undoable,
   # i.e., if previous file state would be *unrecoverable*.
   _git_prompt_user_where_reflog_wont_save_them "$@"
+  unset -f _first_char_capped
+  unset -f _git_prompt_determine_if_destructive
+  unset -f _git_prompt_ask_user_to_continue
+  unset -f _git_prompt_user_where_reflog_wont_save_them
 
   # ***
 
