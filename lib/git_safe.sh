@@ -39,7 +39,7 @@
 #     But not if `--hard` is specified, in which case you might lose
 #     unstaged changes and/or untracked files.
 
-# HISTORY/2017-06-06: We all make mistakes sometimes, so I 
+# HISTORY/2017-06-06: We all make mistakes sometimes, so I
 # like to make destructive commands less easily destructive.
 #
 # - E.g., I alias the `rm` command in my environment to `rm_safe`
@@ -63,13 +63,13 @@
 # NOTE: The name of this function appears in the terminal window title, e.g., on
 #       `git log`, the tmux window title might be, `_git_safe log | {tmux-title}`.
 
-_git_safe () {
+_git_safe() {
   local disallowed=false
 
-  _git_prompt_user_where_reflog_wont_save_them () {
+  _git_prompt_user_where_reflog_wont_save_them() {
     local prompt_yourself=false
 
-    _git_prompt_determine_if_destructive () {
+    _git_prompt_determine_if_destructive() {
       # Check if `git co` or git-reset command.
       # NOTE: `co` is a simple alias, `co = checkout`.
       #       See .gitconfig in the root of this project.
@@ -90,7 +90,7 @@ _git_safe () {
       fi
     }
 
-    _git_prompt_ask_user_to_continue () {
+    _git_prompt_ask_user_to_continue() {
       printf "Are you sure this is absolutely what you want? [Y/n] "
       read -e YES_OR_NO
       # As writ for Bash 4.x+ only:
@@ -117,7 +117,7 @@ _git_safe () {
     fi
   }
 
-  _first_char_capped () {
+  _first_char_capped() {
     printf "$1" | cut -c1-1 | tr '[:lower:]' '[:upper:]'
   }
 
@@ -139,7 +139,7 @@ _git_safe () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-main () {
+main() {
   if [ "$0" = "${BASH_SOURCE[0]}" ]; then
     >&2 echo "ERROR: Trying sourcing the file instead: . $0" && exit 1
   else
@@ -152,4 +152,3 @@ main () {
 
 main "$@"
 unset -f main
-
