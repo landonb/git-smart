@@ -1493,6 +1493,28 @@
   #        setting if it's not configured properly, i.e., it's a
   #        proactive git-init that compels you to sign-off on signing.
 
+  # FEATR: See also the git-smart `git init` interceptor:
+  #
+  # - We cannot alias a built-in, e.g.,
+  #
+  #     init = initci
+  #
+  #   but we can intercept the `git` call and advertise
+  #   git-initci when user calls `git init`.
+  #
+  # - CXREF: See:
+  #
+  #     _git_alert_user_where_git_smart_has_better
+  #
+  #       ~/.kit/git/git-smart/lib/git_safe.sh
+  #
+  #   - E.g.,
+  #
+  #     $ mkcd -p /tmp/foo && git init .
+  #     ALERT: Have you tried the "better" git-smart git-init?: git initci 😚👌
+  #     - Conversely, disable this alert: GITSMART_INHIBIT_ALERT_INIT=true
+  #     Initialized empty Git repository in /tmp/foo/.git/
+
   # SAVVY: Be aware GIT_PREFIX, b/c Git runs aliases from root dir (alongside .git/).
   # - But the whole point of git-initci is to create a new project
   #   *in the current directory*.
@@ -1520,6 +1542,28 @@
   # PREVY: More legacy command name wiring (I guess easier to type
   # than double-"i" "ciinit" /shrug).
   cinit = ciinit
+
+  # ***
+
+# Ensure `git sign-help` pages by default.
+#
+# - CXREF: Find git-sign-help within DepoXy env. at:
+#
+#   ~/.kit/git/git-smart/bin/git-sign-help
+#
+# - SAVVY: You can enable the pager on any command on the fly, e.g.,
+#
+#   git -c pager.sign-help=on sign-help
+#
+# - ASIDE: Note pagination precedence:
+#
+#     --P|--no-pager > GIT_PAGER > core.pager > PAGER > less
+#
+#   - See also -p|--paginate option.
+
+[pager]
+
+  sign-help = on
 
   # ***
 

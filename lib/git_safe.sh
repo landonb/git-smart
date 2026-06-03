@@ -127,6 +127,69 @@ _git_safe() {
 
   # ***
 
+  # Alert the user if Git-Smart has a wrapper command with
+  # a "better" implemention (obvi a subjective assessment).
+  # - Note we only do this for non-obvious commands, and
+  #   those whose defaults aren't basically the same.
+  #   - E.g., the `git ci` commit wrapper alias only adds
+  #     `-c core.editor <editor>`, but that's generally a
+  #     no-op, because $EDITOR is likely setup correctly.
+  #     - I.e., `git ci` likely same as `git commit`; also
+  #       it's a frequently-used command; no reminder needed.
+  #   - Same with `git br`, the user probably runs this enough
+  #     that they don't need to hear about it on `git branch`.
+  #     - Likewise any git-smart alias that simply adds the
+  #       --no-pager option; users know these git-smart
+  #       commands exist.
+  # - The only instance that (currently) makes sense for us to
+  #   tell the user (to advertise to!) is probably git-init
+  #   (that user should use our "improved" git-initci).
+  #   - But even this remembrancer, maybe after the author has
+  #     used the new git-initci feature a few times, maybe it'll
+  #     be ingrained my birdbrain, er, forebrain (or hindbrain?).
+  #
+  # git-smart snobbery:
+  # - Re: git-init — the git-smart variant is "better" in that
+  #   it's signature-forward: it'll ensure you know if --gpg-sign
+  #   is enabled or not in the new project.
+  #   - Secondly, it runs `git commit --allow-empty`, which promotes the
+  #     author's preferred empty-first-commit-but-killer-commit-message
+  #     strataGEM.
+  _git_alert_user_where_git_smart_has_better() {
+    local cmd=""
+
+    while [ $# -gt 0 ]; do
+      case $1 in
+      -C | -c)
+        # [-C <path>] [-c <name>=<value>]
+        shift 2
+        continue
+        ;;
+      -* | --*)
+        # All other core git command options, -*, --*, are single-arg.
+        shift
+        continue
+        ;;
+      *)
+        cmd="$1"
+        break
+        ;;
+      esac
+    done
+
+    if [ "${cmd}" = "init" ]; then
+      if ! ${GITSMART_INHIBIT_ALERT_INIT:-false}; then
+        >&2 echo "ALERT: Have you tried the \"better\" git-smart git-init?: git initci 😚👌"
+        >&2 echo "- Conversely, disable this alert: GITSMART_INHIBIT_ALERT_INIT=true"
+      fi
+    fi
+  }
+
+  _git_alert_user_where_git_smart_has_better "$@"
+  unset -f _git_alert_user_where_git_smart_has_better
+
+  # ***
+
   local exit_code=0
 
   if ! ${disallowed}; then
