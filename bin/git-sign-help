@@ -1,0 +1,252 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:ft=sh
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/landonb/git-smart#💡
+# License: MIT. Please find more in the LICENSE file.
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# ASIDE: Re: Git pager usage/enablement:
+#
+# - REFER: You can enable the pager on any command on the fly, e.g.,
+#
+#     git -c pager.sign-help=on sign-help
+#
+#   Or you can enable by default via gitconfig — as git-smart
+#   does for this command, e.g.
+#
+#     [pager]
+#
+#       sign-help = on
+#
+#   - CXREF: Found in DepoXy env. at:
+#     ~/.kit/git/git-smart/.gitconfig
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_sign_help() {
+  echo "Active Sign Status"
+  echo "=================="
+
+  printf "\n%s" "  "
+  git sign-status
+
+  echo
+
+  if test -n "$(git config get user.signingkey)"; then
+    print_help_to_disable
+  else
+    print_help_to_actuate
+  fi
+}
+
+print_help_to_disable() {
+  print_help_generic "Disable" "private" "clear"
+}
+
+print_help_to_actuate() {
+  print_help_generic "Actuate" "signing" "set"
+}
+
+print_help_generic() {
+  local Actuate_or_Disable="$1"
+  local signing_or_private="$2"
+  local shall_set_or_clear="$3"
+
+  cat <<EOF
+To ${Actuate_or_Disable} Signing
+==================
+
+  *** Consider these Techniques:
+
+▶ (1) Edit the main ~/.gitconfig
+--------------------------------
+
+  - Setup an appropriate includeIf, e.g.:
+
+      [includeIf "gitdir:$(pwd -L | _sh_tilde_for_home)/"]
+
+        path = .gitconfig.user-${signing_or_private}
+
+    Where the conditionally-included config ${shall_set_or_clear}s user.signingkey
+    (see below how an example of this gitconfig).
+
+    - This approach lets you easily configure GPG signing on a
+      project-by-project basis that works across your development
+      environments (assuming they share the same paths, 'natch!).
+
+      — Then you don't need to edit local .git/config files for
+        every host on which you work.
+
+  - REFER: See "Conditional includes" in \`man git-config\`.
+
+    - In addition to \`gitdir:\`, you can also set signing based on
+      the branch (see \`onbranch:\` example below), or based on the
+      presence of a particular remote (\`hasconfig:remote.*.url:\`).
+
+▶ (2) Edit the local project .git/config
+----------------------------------------
+
+  - You could ${shall_set_or_clear} the signingkey just for this project, e.g.:
+$(print_help_generic_local_example "${Actuate_or_Disable}")
+
+    But this is generally not recommended as it's not inherently portable.
+
+    - Although if you use DepoXy OhMyRepos, you could add that git-config
+      command to a mrconfig 'infuse' action for the project.
+
+      This ensures that the step is memorialized in your O.M.R. config,
+      and that the setting applies to all of your development environments.
+
+      Though it still feels wonky to rely on a local .git/config setting, IMiHOp!
+
+▶ (3) Use a special branch enabler/disabler
+-------------------------------------------
+
+- Here's a *fun* trick, though not sure how useful:
+
+  - You can use a special branch name to toggle signing.
+
+- E.g., consider if this in your ~/.gitconfig, and that
+  it's listed *after* any includeIf \`gitdir:\` directives:
+
+    [includeIf "onbranch:nosign"]
+
+      path = .gitconfig.user-${_signing_or_private_private:-private}
+
+    [includeIf "onbranch:dosign"]
+
+      path = .gitconfig.user-${_signing_or_private_signing:-signing}
+
+- Then, no matter what directory you're in, you can
+  set the branch name to override signing.
+
+  - For example, checkout 'dosign' to enable signingkey:
+
+      \$ git init -b dosign
+      \$ git config get user.signingkey | cat
+      ABCDEF12
+
+  - And then checkout 'nosign' to disable it:
+
+      \$ git branch -m nosign
+      \$ git config get user.signingkey | cat
+
+Example Gitconfigs
+==================
+
+- The previous examples rely on 2 conditional gitconfigs:
+
+  - One disables signing (by clearing user.signingkey); and
+
+  - The other enables signing (by setting user.signingkey,
+    and its associated email).
+
+- The disablement gitconfig disables signing.
+
+  - It generally applies to *private* commits, i.e., any commit
+    that *will not* be public.
+
+    - Note that you might keep private commits at the head of
+      an otherwise public branch, i.e., you can have a mix of
+      public, signed commits and private, unsigned commits in
+      the same repository.
+
+  - Because private commits are not public, you can choose the
+    name you want to see in the commit log. When not included,
+    host defaults to <name>@\$(hostname), e.g., \`hackerX@$(hostname)\`:
+
+    # ~/.gitconfig.user-private
+
+    [user]
+      name = hackerX
+
+    [user]
+      signingkey =
+
+    [commit]
+      gpgSign = false
+
+- The other gitconfig enables signing. It sets signingkey and
+  specifies the email associated with that key.
+
+  - For example:
+
+    # ~/.gitconfig.user-signing
+
+    [user]
+      name = 'Clark Kent'
+      email = user@users.noreply.github.com
+
+    [user]
+      # Set the GPG key to use on commit.gpgSign (or -S|--gpg-sign).
+      signingkey = ABCDEF12
+
+    [commit]
+      # If you use git-put-wise, leave gpgSign disabled by default.
+      # - The put-wise commit, rebase, and push commands each manage signing.
+      #   - They'll choose what to sign on a *per-commit* basis (e.g., by
+      #     determining the commit scope, and then adding or removing the
+      #     --gpg-sign|-S option from each git-commit in the rebase-todo).
+      #   - It's also important to choose what not to sign (for example,
+      #     git-put-wise does not sign scoped commits, which are private,
+      #     otherwise git-rebase is real slow; it basically assumes you
+      #     don't care about signing commits just for yourself).
+      # - On the other hand, to sign *every* commit, set this true.
+      gpgSign = false
+EOF
+}
+
+# ***
+
+print_help_generic_local_example() {
+  local Actuate_or_Disable="$1"
+
+  if test "${Actuate_or_Disable}" = "Actuate"; then
+    echo "
+      \$ git config set --local user.signingkey \"\$(
+        git --no-pager \\
+          config get \\
+            --file ~/.gitconfig.user-${_signing_or_private_signing:-signing} \\
+            user.signingkey
+          )\""
+  elif test "${Actuate_or_Disable}" = "Disable"; then
+    echo '
+      $ git config set --local user.signingkey ""'
+  fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# COPYD: Less robust tilde swapper:
+#   ~/.kit/git/git-smart/bin/git-sign-help
+#   ~/.kit/sh/sh-rm_safe/bin/rm_rotate
+# - Canon code:
+#   ~/.kit/sh/sh-logger/bin/logger.sh
+_sh_tilde_for_home() {
+  _gsm_gnu_sed() {
+    if command -v gsed 2>/dev/null ||
+      command -v sed 2>/dev/null; then
+
+      return
+    fi
+
+    >&2 echo "ERROR: (g)sed absent!"
+
+    echo "_gsm_nullary_cat"
+  }
+
+  _gsm_nullary_cat() { cat; }
+
+  $(_gsm_gnu_sed) -E "s#^${HOME}(/|$)#~\1#"
+}
+
+# ***
+
+main() {
+  git_sign_help "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "$@"
+fi
