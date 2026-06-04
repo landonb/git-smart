@@ -1271,6 +1271,36 @@
   # (https://github.com/mgedmin/dotfiles is technically not licensed: No license file.)
   cim-only = commit --amend --only -v
 
+  # How author likes to make their initial commit; also useful for
+  # (tig view) hrules [see alias below], grouping commits (again,
+  # generally for tig views), etc.
+  # - MPROV: Complain if anything staged.
+  #   - PREVY:
+  #     ci-empty = commit --allow-empty
+  #   - THANX:
+  #     https://www.poetryfoundation.org/poems/56966/speech-all-the-worlds-a-stage
+  #   >&2 echo \"ERROR: All the world's a stage,\" \
+  #     \"And all your $(attr_underline)changes$(attr_reset) merely players\"; \
+  #   >&2 echo \"    Sans teeth, sans eyes, sans taste, sans everything\"; \
+  #   >&2 echo \"    𝔖𝔞𝔫𝔰 𝔱𝔢𝔢𝔱𝔥, 𝔰𝔞𝔫𝔰 𝔢𝔶𝔢𝔰, 𝔰𝔞𝔫𝔰 𝔱𝔞𝔰𝔱𝔢, 𝔰𝔞𝔫𝔰 𝔢𝔳𝔢𝔯𝔶𝔱𝔥𝔦𝔫𝔤\"; \
+  #   >&2 echo \"    𝒮𝒶𝓃𝓈 𝓉ℯℯ𝓉𝒽, 𝓈𝒶𝓃𝓈 ℯ𝓎ℯ𝓈, 𝓈𝒶𝓃𝓈 𝓉𝒶𝓈𝓉ℯ, 𝓈𝒶𝓃𝓈 ℯ𝓋ℯ𝓇𝓎𝓉𝒽𝒾𝓃𝑔\"; \
+  #   >&2 echo \"    𝓢𝓪𝓷𝓼 𝓽𝓮𝓮𝓽𝓱, 𝓼𝓪𝓷𝓼 𝓮𝔂𝓮𝓼, 𝓼𝓪𝓷𝓼 𝓽𝓪𝓼𝓽𝓮, 𝓼𝓪𝓷𝓼 𝓮𝓿𝓮𝓻𝔂𝓽𝓱𝓲𝓷𝓰\"; \
+  ci-empty = "! f() { \
+    attr_reset() { printf \"\\001\\033[0m\\002\"; }; \
+    attr_underline() { printf \"\\001\\033[4m\\002\"; }; \
+    \
+    if ! git diff --cached --quiet; then \
+      >&2 echo \"ERROR: All the world's a stage, And all\"; \
+      >&2 echo \"         your $(attr_underline)changes$(attr_reset) merely players\"; \
+      >&2 echo \"- Please commit your changes or git-reset the index!\"; \
+      >&2 echo \"  𝕾𝖆𝖓𝖘 𝖙𝖊𝖊𝖙𝖍, 𝖘𝖆𝖓𝖘 𝖊𝖞𝖊𝖘, 𝖘𝖆𝖓𝖘 𝖙𝖆𝖘𝖙𝖊, 𝖘𝖆𝖓𝖘 𝖊𝖛𝖊𝖗𝖞𝖙𝖍𝖎𝖓𝖌\"; \
+      \
+      return 1; \
+    fi; \
+    \
+    git commit --allow-empty \"$@\"; \
+  }; f"
+
 [alias]
   # Amend the staged changes to the latest commit.
   # - BWARE: If you only `git mv foo bar`, then `git diff --cached --quiet`
