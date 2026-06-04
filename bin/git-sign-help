@@ -123,7 +123,7 @@ $(print_help_generic_local_example "${Actuate_or_Disable}")
 
   - For example, checkout 'dosign' to enable signingkey:
 
-      \$ git init -b dosign
+      \$ command git init -b dosign
       \$ git config get user.signingkey | cat
       ABCDEF12
 
