@@ -1383,27 +1383,145 @@
 
 [alias]
 
-  # Use signed, empty first commit.
-  # - Use case: If you only sign commits before pushing (because you
-  #   rebase often before publishing, and signing is slow), ensure
-  #   the first commit is signed. (If you don't sign the first commit
-  #   now, you can always sign it later, but not as easily as signing
-  #   it now.)
-  # - Use case: In addition to -S[igning], we'll also --allow-empty,
-  #   for those who like to use a meaningful message but no content
-  #   for the first commit (which also makes it easy to fixup changes
-  #   before your first push, without having to fiddle with the --root
-  #   commit).
-  # - SAVVY: Call `git cinit -m` or `git cinit -v`
-  cinit = ciinit
+  # FEATR: Author prefers to use signed, empty first commit
+  # with (usually fun) root commit message.
+  #                                         #CINIT/CIINT/INITC/NITCI/NITCO
+  # - CXREF: See git-init wrapper, git-initci:
+  #   - Found in DepoXy env. at:
+  #
+  #       ~/.kit/git/git-smart/bin/git-initci
+  #
+  #   - Here we alias the legacy git-smart command names, `git ciinit`
+  #     and `git cinit` (deprecated, and calling warn-tells as much).
+  #
+  # - Use case: The author's git-put-wise tool manages commit signing,
+  #   and it runs after rebasing and before pushing. But not on commit.
+  #   - Instead, it'll retroactively sign commits only when necessary.
+  #   - This approach is mostly because GPG signing is slow, especially
+  #     when rebasing multiple commits. So we do not sign until it's time
+  #     (*No Sign Until Its Time!*), and we don't sign unless it's below
+  #     the line (the line being the scoped commit boundary line, which
+  #     separates public commits (below it) from private commits (above
+  #     it, at least in a default tig main view)).
+  #   - When using git-put-wise, the user *usually* does not directly
+  #     sign their commits, *except* the first commit.
+  #     - Usually, signing happens as a result of other put-wise commands.
+  #   - But the user *must* manually sign the very first commit, if they
+  #     want, because GPW won't (at least not by default; the user can
+  #     specify PUT_WISE_REBASE_ALL_COMMITS=true and put-wise will extend
+  #     the rebase boundary using git-rebase `--root` option).
+  #     (- SPIKE/2026-06-04: Could put-wise always use --root?)
+  #     - Hence this helper function!
+  #       - Note that initci relies on ~/.gitconfig to decide whether to
+  #         sign or not, based on your existing git config.
+  #         - E.g., on author's machine, any repo under ~/.kit is public
+  #           (user.signingkey enabled); and any repo under ~/work is
+  #           private (user.signingkey cleared) (and then lots of other
+  #           paths have special rules, because I setup my filesystem
+  #           long before I started signing repos; so most projects are
+  #           explicitly configured with an includeIf for their path;
+  #           because Git doesn't make it super-simple to config signing,
+  #           hence this command (initci, below), and what put-wise does).
+  #     - By the way, you can sign the root commit later;
+  #       but it's probably easier to just do it on init.
+  #
+  # - Use case: In addition to -S[igning], `initci` specifies --allow-empty.
+  #   - Based on previous comment (re: git-put-wise handles signing, except
+  #     first commit), it would seem that --allow-empty is so we can add a
+  #     signed, empty first commit, and not have to worry about it again
+  #     (or so we don't have to tell put-wise to use git-rebase --root,
+  #     e.g., `PUT_WISE_REBASE_ALL_COMMITS=true git put-wise ...`).
+  #   - But that's merely a "coincidence of fate" — this command (`initci`,
+  #     née `ciinit`) was originally crafted to serve those of us who like
+  #     to use a meaningful message but no "changes" for the first commit
+  #     (which also makes it easy to fixup changes before your first push
+  #     without having to fiddle with the --root commit, because you
+  #     you won't ever need to edit the root commit (well,
+  #     unless you want to change the message, maybe you
+  #     read some song lyrics
+  #     you found
+  #     deep).
+  #
+  # - USAGE:
+  #
+  #   - Open editor to set commit message:
+  #
+  #       git initci
+  #
+  #   - Set commit message from cli:
+  #
+  #       git initci -m "message"
+  #
+  #   - Start on a different branch:
+  #
+  #       git initci -b "private"
+  #
+  # - CXREF: You'll find the initci func. we just described
+  #   in DepoXy at:
+  #
+  #     ~/.kit/git/git-smart/bin/git-initci
+  #
+  # - [NIDEA: Move this comment elsewhere. B/c that alias
+  #    has been promoted to git-initci, this long comment
+  #    feels a bit misplaced here. Like the other kids left
+  #    the playground and all that's left is this comment,
+  #    and a couple alternative-name aliases.]
+  #
+  # PREVY/2026-06-02: The orig. version was named `ciinit`, as in:
+  # - `ciinit`:
+  #     This is the first commit you run *after* git-init.
+  # - Issue: But that's not entirely clear!
+  #   - The "init" part might convey (incorrectly) that the
+  #     old version also runs init (this new version does,
+  #     but that old version didn't).
+  #     - But if that's the case, why is "init" *after* "ci"
+  #       in the command name? That feels like a hint/clue
+  #       when in fact there's no there there.
+  # - Solvd: Leave "init" in the command name, but actually call init!
+  #   - If git-init has not been called, call it.
+  #   - Also, for clarity, reverse the two name parts.
+  #     - Combine the command names in the order they're called.
+  #     - This is like `mkcd` command I saw in someone's dotfiles
+  #       recently (which is such a classy smash-up, `mkdir + cd`).
+  #    - So this command is similar, it's `init + commit`.
+  #       - It's technically `commit --allow-emtpy`, which was the
+  #         original point of `ciinit`, so I could remember how to
+  #         make empty commits (because I like an empty root commit
+  #         with a snazzy initial commit message!).
+  #      - It's also a --gpg-sign alerter: it'll tell you if signing
+  #        is enabled or not for the new project, so you can fix the
+  #        setting if it's not configured properly, i.e., it's a
+  #        proactive git-init that compels you to sign-off on signing.
+
+  # SAVVY: Be aware GIT_PREFIX, b/c Git runs aliases from root dir (alongside .git/).
+  # - But the whole point of git-initci is to create a new project
+  #   *in the current directory*.
+  # - Note that our git-initci will cd to GIT_PREFIX if set, so either cd
+  #   and unset the environ, or do nothing — but don't `cd` but not `unset`.
+  # - Interestingly, GIT_PREFIX is not set (and current directory remains
+  #   unchanged) when a basic alias is used, e.g.:
+  #     runs_from_cwd = some-command
+  #   But GIT_PREFIX is used when a shell command is specified, e.g.:
+  #     runs_from_root = ! git some-command
+  #     runs_from_root = "! f() { echo $GIT_PREFIX\"; pwd; }; f"
+
   ciinit = "! f() { \
-    if test -z \"$(git config get user.signingkey)\"; then \
-      >&2 echo \"ERROR: Either set signingkey, or use ciinit-nosign\"; \
-      return 1; \
+    cd -- \"${GIT_PREFIX:-.}\"; \
+    unset -v GIT_PREFIX; \
+    \
+    if ! ${GITSMART_INHIBIT_ALERT_CIINIT:-false}; then \
+      >&2 echo \"ALERT: Please consider using the new command name: ‘initci’\"; \
+      >&2 echo \"- Inhibit this alert w/ GITSMART_INHIBIT_ALERT_CIINIT=true\"; \
     fi; \
-    git commit --allow-empty -S \"$@\"; \
+    \
+    git initci \"$@\"; \
     }; f"
-  ciinit-nosign = commit --allow-empty
+
+  # PREVY: More legacy command name wiring (I guess easier to type
+  # than double-"i" "ciinit" /shrug).
+  cinit = ciinit
+
+  # ***
 
 # #######################################################################
 # ***                   Staging and Commit Aliases                    ***
