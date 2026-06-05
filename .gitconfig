@@ -1398,6 +1398,35 @@
       return 1; \
     fi; \
   }; f"
+  # Generalize previous for special cr1..cr9 (part of a family of
+  # log and reflog "most recent 1 through 9" commands).
+  # - On error, if N > reflog refs, e.g.:
+  #   $ git commit-reuse-reflog-message 57
+  #   fatal: log for 'HEAD' only has 23 entries
+  # - Dunno: What's the best default, 1 or 0?
+  #   - Reuse 2 commits ago, or 1 ago/prev (current? latest) commit?
+  commit-reuse-reflog-message = "! f() { \
+    bash -c ' \
+      if [[ \"${1:-1}\" =~ ^-?[0-9]+$ ]]; then \
+        if git log --format=%B -1 HEAD@{${1:-1}} >/dev/null; then \
+          git log --format=%B -1 HEAD@{${1:-1}} | git commit -F - \"${@:2}\"; \
+        fi; \
+      else \
+        >&2 echo \"ERROR: Please specify an integer first argument\"; \
+        \
+        exit 1; \
+      fi; \
+    ' \"$0\" \"$@\"; \
+  }; f"
+  cr1 = commit-reuse-reflog-message 1
+  cr2 = commit-reuse-reflog-message 2
+  cr3 = commit-reuse-reflog-message 3
+  cr4 = commit-reuse-reflog-message 4
+  cr5 = commit-reuse-reflog-message 5
+  cr6 = commit-reuse-reflog-message 6
+  cr7 = commit-reuse-reflog-message 7
+  cr8 = commit-reuse-reflog-message 8
+  cr9 = commit-reuse-reflog-message 9
 
   # Here's a clever way to change the last commit's author, courtesy:
   #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig [MIT]
