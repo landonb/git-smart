@@ -1020,6 +1020,28 @@
   l8 = "! f() { git --no-pager log -8 \"$@\"; }; f"
   l9 = "! f() { git --no-pager log -9 \"$@\"; }; f"
 
+  # Similar to previous, but prints *only* the nth latest commit.
+  ll = "! f() { \
+      bash -c ' \
+        if [[ \"${1:-1}\" =~ ^-?[0-9]+$ ]]; then \
+          git --no-pager log --oneline -1 --skip=$((${1:-1} - 1)) \"${@:2}\"; \
+        else \
+          >&2 echo \"ERROR: Please specify an integer first argument\"; \
+          \
+          exit 1; \
+        fi; \
+      ' \"$0\" \"$@\"; \
+    }; f"
+  ll1 = "! f() { git --no-pager log --oneline -1 --skip=0 \"$@\"; }; f"
+  ll2 = "! f() { git --no-pager log --oneline -1 --skip=1 \"$@\"; }; f"
+  ll3 = "! f() { git --no-pager log --oneline -1 --skip=2 \"$@\"; }; f"
+  ll4 = "! f() { git --no-pager log --oneline -1 --skip=3 \"$@\"; }; f"
+  ll5 = "! f() { git --no-pager log --oneline -1 --skip=4 \"$@\"; }; f"
+  ll6 = "! f() { git --no-pager log --oneline -1 --skip=5 \"$@\"; }; f"
+  ll7 = "! f() { git --no-pager log --oneline -1 --skip=6 \"$@\"; }; f"
+  ll8 = "! f() { git --no-pager log --oneline -1 --skip=7 \"$@\"; }; f"
+  ll9 = "! f() { git --no-pager log --oneline -1 --skip=8 \"$@\"; }; f"
+
   # Git command to show tag creation dates.
   # - Optional: Add --graph to see branching lines. E.g.,
   #     `git tags --graph`
