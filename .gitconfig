@@ -1428,6 +1428,45 @@
   cr8 = commit-reuse-reflog-message 8
   cr9 = commit-reuse-reflog-message 9
 
+  # Another slew of resuse-old-commit-message commit aliases.
+  # - Similar to ciprev and cr1..cr9, but reuse nth ago commit
+  #   message from log (whereas ciprev/cr1..cr9 uses nth prev
+  #   HEAD pointer, from `git reflog`; this uses nth ago commit
+  #   from `git log`).
+  # CALSO: Prevvies: l1-9, lo1-9, p1-9, r1-9 (shell only), cm1-9, cr1-9
+  # - Prevvies, as in they work with a recent previous commit/reference.
+  # SAVVY: This fails if old commit message is empty, or if --skip=N
+  # specifies a number larger than the number of commits in the
+  # branch (i.e., commit doesn't exist, in which case git-log prints
+  # an empty string (well, prints nothing), and doesn't fail nonzero).
+  # - In either case, unless user specifies --allow-empty-message,
+  #   git-commit fails: "Aborting commit due to empty commit message."
+  # - If user really wants an empty commit message, they could do:
+  #     git commit -m "" --allow-empty-message
+  #   - But unlike empty commits (--alow-empty), author doesn't
+  #     have a use case for empty commit messages (just empty
+  #     commits), so leaving opt-in (not making default).
+  commit-reuse-log-message = "! f() { \
+    bash -c ' \
+      if [[ \"${1:-1}\" =~ ^-?[0-9]+$ ]]; then \
+        git log --format=%B -1 --skip=$((${1:-1} - 1)) | git commit -F - \"${@:2}\"; \
+      else \
+        >&2 echo \"ERROR: Please specify an integer first argument\"; \
+        \
+        exit 1; \
+      fi; \
+    ' \"$0\" \"$@\"; \
+  }; f"
+  cl1 = commit-reuse-log-message 1
+  cl2 = commit-reuse-log-message 2
+  cl3 = commit-reuse-log-message 3
+  cl4 = commit-reuse-log-message 4
+  cl5 = commit-reuse-log-message 5
+  cl6 = commit-reuse-log-message 6
+  cl7 = commit-reuse-log-message 7
+  cl8 = commit-reuse-log-message 8
+  cl9 = commit-reuse-log-message 9
+
   # Here's a clever way to change the last commit's author, courtesy:
   #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig [MIT]
   # (although I added argument verification).
