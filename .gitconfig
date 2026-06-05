@@ -999,7 +999,11 @@
   #     first arg., include $0 in the `bash -c` args.
   #     - In this case, when called as a git alias, $0 is the alias string
   #       itself, without the leading "!".
-  l = "! f() { bash -c 'git --no-pager log -${1:-1} \"${@:2}\"' \"$0\" \"$@\"; }; f"
+  l = "! f() { \
+      bash -c ' \
+        git --no-pager log -${1:-1} \"${@:2}\" \
+      ' \"$0\" \"$@\"; \
+    }; f"
   l1 = "! f() { git --no-pager log -1 \"$@\"; }; f"
   l2 = "! f() { git --no-pager log -2 \"$@\"; }; f"
   l3 = "! f() { git --no-pager log -3 \"$@\"; }; f"
