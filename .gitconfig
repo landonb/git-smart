@@ -1396,7 +1396,7 @@
 
   # 2021-06-11: A friend has a coworker that uses the commit message
   # convention, "{user}'s first commit", "{user}'s second commit", etc.
-  # HAHAHA. So I send this improvement, just commit a random message.
+  # HAHAHA. So I sent this improvement, just commit a random message.
   cirand = "! f() { \
     rand_msg=$( \
       curl -L -s http://whatthecommit.com/ | \
