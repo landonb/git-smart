@@ -1001,7 +1001,13 @@
   #       itself, without the leading "!".
   l = "! f() { \
       bash -c ' \
-        git --no-pager log -${1:-1} \"${@:2}\" \
+        if [[ \"${1:-1}\" =~ ^-?[0-9]+$ ]]; then \
+          git --no-pager log -${1:-1} \"${@:2}\"; \
+        else \
+          >&2 echo \"ERROR: Please specify an integer first argument\"; \
+          \
+          exit 1; \
+        fi; \
       ' \"$0\" \"$@\"; \
     }; f"
   l1 = "! f() { git --no-pager log -1 \"$@\"; }; f"
