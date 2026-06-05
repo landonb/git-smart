@@ -1150,7 +1150,7 @@
 
   # -------
 
-  # Use `git log1` to show exclusive history for the current branch.
+  # Use `git log1` to show columnarized, colorful --oneline history.
   #
   # - Shows one log entry per line, formatted like:
   #
