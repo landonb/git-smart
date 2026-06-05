@@ -1240,6 +1240,19 @@
 
   # -------
 
+  # E.g.,
+  #   $ git reflog
+  #   309f568 (HEAD -> release) HEAD@{0}: rebase (finish): returning to refs/heads/release
+  #   ...
+  #
+  #   $ git reflog --date=iso --no-decorate
+  #   309f568 HEAD@{2026-06-05 02:07:26 -0500}: rebase (finish): returning to refs/heads/release
+  #   ...
+  #
+  #   $ git reflog --all --date=relative
+  #   309f568 (HEAD -> release) refs/heads/release@{11 minutes ago}: rebase (finish):
+  #     refs/heads/release onto 3cfb6bc5579255af595ae3c1d6a79772d1cee4ca
+  #   ...
   ref = reflog --date=iso --no-decorate
 
   # -------
