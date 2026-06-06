@@ -1021,7 +1021,7 @@
   l9 = "! f() { git --no-pager log -9 \"$@\"; }; f"
 
   # Similar to previous, but prints *only* the nth latest commit.
-  ll = "! f() { \
+  lm = "! f() { \
       bash -c ' \
         if [[ \"${1:-1}\" =~ ^-?[0-9]+$ ]]; then \
           git --no-pager log --oneline -1 --skip=$((${1:-1} - 1)) \"${@:2}\"; \
@@ -1032,15 +1032,15 @@
         fi; \
       ' \"$0\" \"$@\"; \
     }; f"
-  ll1 = "! f() { git --no-pager log --oneline -1 --skip=0 \"$@\"; }; f"
-  ll2 = "! f() { git --no-pager log --oneline -1 --skip=1 \"$@\"; }; f"
-  ll3 = "! f() { git --no-pager log --oneline -1 --skip=2 \"$@\"; }; f"
-  ll4 = "! f() { git --no-pager log --oneline -1 --skip=3 \"$@\"; }; f"
-  ll5 = "! f() { git --no-pager log --oneline -1 --skip=4 \"$@\"; }; f"
-  ll6 = "! f() { git --no-pager log --oneline -1 --skip=5 \"$@\"; }; f"
-  ll7 = "! f() { git --no-pager log --oneline -1 --skip=6 \"$@\"; }; f"
-  ll8 = "! f() { git --no-pager log --oneline -1 --skip=7 \"$@\"; }; f"
-  ll9 = "! f() { git --no-pager log --oneline -1 --skip=8 \"$@\"; }; f"
+  lm1 = "! f() { git --no-pager log --oneline -1 --skip=0 \"$@\"; }; f"
+  lm2 = "! f() { git --no-pager log --oneline -1 --skip=1 \"$@\"; }; f"
+  lm3 = "! f() { git --no-pager log --oneline -1 --skip=2 \"$@\"; }; f"
+  lm4 = "! f() { git --no-pager log --oneline -1 --skip=3 \"$@\"; }; f"
+  lm5 = "! f() { git --no-pager log --oneline -1 --skip=4 \"$@\"; }; f"
+  lm6 = "! f() { git --no-pager log --oneline -1 --skip=5 \"$@\"; }; f"
+  lm7 = "! f() { git --no-pager log --oneline -1 --skip=6 \"$@\"; }; f"
+  lm8 = "! f() { git --no-pager log --oneline -1 --skip=7 \"$@\"; }; f"
+  lm9 = "! f() { git --no-pager log --oneline -1 --skip=8 \"$@\"; }; f"
 
   # Git command to show tag creation dates.
   # - Optional: Add --graph to see branching lines. E.g.,
@@ -1470,15 +1470,15 @@
       fi; \
     ' \"$0\" \"$@\"; \
   }; f"
-  cl1 = commit-reuse-log-message 1
-  cl2 = commit-reuse-log-message 2
-  cl3 = commit-reuse-log-message 3
-  cl4 = commit-reuse-log-message 4
-  cl5 = commit-reuse-log-message 5
-  cl6 = commit-reuse-log-message 6
-  cl7 = commit-reuse-log-message 7
-  cl8 = commit-reuse-log-message 8
-  cl9 = commit-reuse-log-message 9
+  cm1 = commit-reuse-log-message 1
+  cm2 = commit-reuse-log-message 2
+  cm3 = commit-reuse-log-message 3
+  cm4 = commit-reuse-log-message 4
+  cm5 = commit-reuse-log-message 5
+  cm6 = commit-reuse-log-message 6
+  cm7 = commit-reuse-log-message 7
+  cm8 = commit-reuse-log-message 8
+  cm9 = commit-reuse-log-message 9
 
   # Here's a clever way to change the last commit's author, courtesy:
   #   https://github.com/jessfraz/dotfiles/blob/master/.gitconfig [MIT]
