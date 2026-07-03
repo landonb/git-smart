@@ -2371,8 +2371,11 @@
     git rev-parse \"$@\" $rev; \
   }; f"
 
-  # 2022-12-10 17:22: See also sha, forgot about that one.
-  id = rev-parse --short=11
+  # CALSO/2022-12-10: See also sha (forgot about that one).
+  # DEBAR/2026-07-03: Add passthru args using Bash: ${@:2}.
+  id = "!f() { \
+    git rev-parse --short=11 \"${1:-HEAD}\" ; \
+  }; f"
 
 # #######################################################################
 # ***                 Set your own Default Branch Name                ***
