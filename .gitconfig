@@ -1394,17 +1394,27 @@
   # `git reflog` to see a list of `sha HEAD@{N} action: message`, and
   # pick the one you want (Savvy: tig reflog doesn't show) then, e.g.:
   #   git log --format=%B -1 HEAD@{5} | git commit -F -
+  # WRONG: Incorrect syntax (includes trailing "}" when $1 exists):
+  #   local gitref="${1:-HEAD@{1}}"
   ciprev = "! f() { \
+    local gitref=\"$1\"; \
+    if test -z \"${gitref}\"; then \
+      gitref=\"HEAD@{1}\"; \
+    fi; \
     git_object_exists() { \
       git rev-parse --verify --end-of-options \"$1\" >/dev/null 2>&1; \
     }; \
     \
-    if git_object_exists HEAD@{1}; then \
-      git commit --message \"$(git log --format=%B -1 HEAD@{1})\" \"$@\"; \
+    if git_object_exists \"${gitref}\"; then \
+      git commit --message \"$(git log --format=%B -1 \"${gitref}\")\"; \
     else \
-      >&2 echo \"ERROR: Our little group has always been HEAD  ♫⋆｡♪ ₊˚♬ ﾟ.\"; \
-      >&2 echo \"           And always will until the end      (っ•́｡•́)♪♬\"; \
-      >&2 echo \"- Which is to sing, there is nothing in the reflog about HEAD@{1}\"; \
+      if test -z \"$1\"; then \
+        >&2 echo \"ERROR: Our little group has always been HEAD  ♫⋆｡♪ ₊˚♬ ﾟ.\"; \
+        >&2 echo \"           And always will until the end      (っ•́｡•́)♪♬\"; \
+        >&2 echo \"- Which is to sing, there is nothing in the reflog about HEAD@{1}\"; \
+      else \
+        >&2 echo \"ERROR: Invalid commit reference: ${gitref}\"; \
+      fi; \
       if ! git_object_exists HEAD; then \
         >&2 echo \"  - Nor does HEAD exist, what kind of world is this 💀\"; \
         >&2 echo \"      (༎ຶ ෴ ༎ຶ)\"; \
@@ -1930,7 +1940,11 @@
       echo; \
       echo \"    git ci -m \\\"$(git --no-pager log -1 --format=%s)\\\"\"; \
       echo; \
-      echo \"  - Or, more conveniently, this works until you move HEAD:\"; \
+      echo \"  - Or, more conveniently:\"; \
+      echo; \
+      echo \"    git ciprev $(git rev-parse --short HEAD)\"; \
+      echo; \
+      echo \"  - For brevity, this works until you move HEAD:\"; \
       echo; \
       echo \"    git ciprev\"; \
       echo; \
