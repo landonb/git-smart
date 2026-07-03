@@ -1954,7 +1954,6 @@
       echo \"  - For brevity, this works until you move HEAD:\"; \
       echo; \
       echo \"    git ciprev\"; \
-      echo; \
     fi; \
     \
     echo; \
