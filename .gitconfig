@@ -1394,6 +1394,9 @@
   #   run `git reflog` to see a list of `sha HEAD@{N} action: message`,
   #   and pick the one you want (Savvy: tig reflog doesn't show) then,
   #   e.g.: git log --format=%B -1 HEAD@{5} | git commit -F -
+  # - CXREF: DepoXy users: See shell `p1` command that refs. git-ciprev:
+  #     _dxy_git_popX() {
+  #       ./depoxy/ambers/core/git-smart.sh
   ciprev = "! f() { \
     local gitref=\"$1\"; \
     if test -z \"${gitref}\"; then \
@@ -1920,6 +1923,11 @@
   # HSTRY/2020-10-27: Let's keep the paradigm rolling, adding pop* 2-9.
   #
   # REMEM/2026-05-31: `git reset --mixed` is the default mode.
+  #
+  # CXREF/2026-07-03: DepoXy users: See shell `p1` command wrapper:
+  # - BONUS: It adds the git-ciprev re-commit cmd. to Bash history:
+  #     _dxy_git_popX() {
+  #       ./depoxy/ambers/core/git-smart.sh
 
   popn = "! f() { \
     pad2 () { sed 's/^/  /'; }; \
