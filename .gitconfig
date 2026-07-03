@@ -1377,7 +1377,8 @@
     fi; \
   }; f"
 
-  # Use message from previous HEAD position (from reflog).
+  # Use message from previous commit, either specified as an arg,
+  # or defaults to using previous reflog position (HEAD@{1}).
   # - UCASE: After using `git reset @~1` to pop the latest commit, and
   #   staging again, you can run `git ciprev` to reuse the "previous"
   #   commit meesage, i.e., from the commit you just "popped".
@@ -1385,17 +1386,14 @@
   #     of HEAD@{1}. But in general, at least in this author's
   #     experience, I don't track HEAD ref. history in my head.
   #     I need to check the reflog to dig for a deeper HEAD@{N}.
-  # - Aside: Re: UX msg below, at least in author's terminal, not
+  # - ASIDE: Re: UX msg below, at least in author's terminal, not
   #   all Kaomoji look as good in term. as they do in editor, e.g.:
   #     >&2 echo \"      (ᵟຶ︵ ᵟຶ)\"; \
-  # - Thanx: https://genius.com/Nirvana-smells-like-teen-spirit-lyrics
-  #
-  # CPYST: If you want to use an older message based on HEAD@{N}, run
-  # `git reflog` to see a list of `sha HEAD@{N} action: message`, and
-  # pick the one you want (Savvy: tig reflog doesn't show) then, e.g.:
-  #   git log --format=%B -1 HEAD@{5} | git commit -F -
-  # WRONG: Incorrect syntax (includes trailing "}" when $1 exists):
-  #   local gitref="${1:-HEAD@{1}}"
+  # - THANX: https://genius.com/Nirvana-smells-like-teen-spirit-lyrics
+  # - ASIDE/REFER: If you want to use an older message based on HEAD@{N},
+  #   run `git reflog` to see a list of `sha HEAD@{N} action: message`,
+  #   and pick the one you want (Savvy: tig reflog doesn't show) then,
+  #   e.g.: git log --format=%B -1 HEAD@{5} | git commit -F -
   ciprev = "! f() { \
     local gitref=\"$1\"; \
     if test -z \"${gitref}\"; then \
@@ -1919,9 +1917,10 @@
   #   still pretty short, at least typing 'pop' is very
   #   quick.
   #
+  # HSTRY/2020-10-27: Let's keep the paradigm rolling, adding pop* 2-9.
+  #
   # REMEM/2026-05-31: `git reset --mixed` is the default mode.
 
-  # 2020-10-27: Let's keep the paradigm rolling, adding pop* 2-9.
   popn = "! f() { \
     pad2 () { sed 's/^/  /'; }; \
     \
