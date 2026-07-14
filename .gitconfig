@@ -1396,7 +1396,7 @@
   #   e.g.: git log --format=%B -1 HEAD@{5} | git commit -F -
   # - CXREF: DepoXy users: See shell `p1` command that refs. git-ciprev:
   #     _dxy_git_popX() {
-  #       ./depoxy/ambers/core/git-smart.sh
+  #       depoxy/core/git-smart.sh
   ciprev = "! f() { \
     local gitref=\"$1\"; \
     if test -z \"${gitref}\"; then \
@@ -1927,7 +1927,7 @@
   # CXREF/2026-07-03: DepoXy users: See shell `p1` command wrapper:
   # - BONUS: It adds the git-ciprev re-commit cmd. to Bash history:
   #     _dxy_git_popX() {
-  #       ./depoxy/ambers/core/git-smart.sh
+  #       depoxy/core/git-smart.sh
 
   popn = "! f() { \
     pad2 () { sed 's/^/  /'; }; \
