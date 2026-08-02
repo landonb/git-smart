@@ -225,8 +225,7 @@ print_help_generic_local_example() {
 #   ~/.kit/sh/sh-logger/bin/logger.sh
 _sh_tilde_for_home() {
   _gsm_gnu_sed() {
-    if command -v gsed 2>/dev/null ||
-      command -v sed 2>/dev/null; then
+    if command -v gsed || command -v sed; then
 
       return
     fi
