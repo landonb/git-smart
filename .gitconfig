@@ -353,7 +353,13 @@
   textconv = hexdump -v -C
 
 [diff "pdf"]
-  textconv = pdfinfo
+  # For 'git log -S', check size nonzero to avoid error,
+  # "Syntax Error: Document stream is empty" from pdfinfo
+  # (and then "fatal: unable to read files to diff" from
+  # git).
+  # - The '|| true' is bonus, in case we missed anything,
+  #   to ensure command completes.
+  textconv = "! _f() { [ -s \"$1\" ] && pdfinfo \"$1\" || true; }; _f"
 
 [diff "zip"]
   textconv = unzip -v
