@@ -204,13 +204,15 @@ is_already_tagged() {
   latest_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/${fmtd_prev_crumb_num}"
   ${DTRACE} && >&2 echo "latest_crumb_prefix=${latest_crumb_prefix}"
 
-  local latest_crumb_tag
-  latest_crumb_tag="$(
+  local latest_crumb_tags
+  latest_crumb_tags="$(
     git --no-pager tag --list "${latest_crumb_prefix}/*"
   )"
-  ${DTRACE} && >&2 echo "latest_crumb_tag=${latest_crumb_tag}"
+  ${DTRACE} && >&2 echo "latest_crumb_tags=${latest_crumb_tags}"
 
-  if [ -n "${latest_crumb_tag}" ]; then
+  local latest_crumb_tag
+  # Unquoted var (Git disallows spaces in tag names).
+  for latest_crumb_tag in ${latest_crumb_tags}; do
     local latest_crumb_id
     latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
     ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
@@ -224,7 +226,7 @@ is_already_tagged() {
 
       return 0
     fi
-  fi
+  done
 
   return 1
 }
