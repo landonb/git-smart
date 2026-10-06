@@ -143,7 +143,8 @@ git_leave_breadcrumb() {
   #   🍞/private/01/230226_1406
   #   🍞/private/02/230420_1113/some-slug
   # And then increment by 1 for the new breadcrumb.
-  local max_crumb_num=$(
+  local max_crumb_num
+  max_crumb_num=$(
     git --no-pager tag --list "${_GS_TAG_PREFIX}${branch_name}/*" |
       $(command -v gsed || command -v sed) -E 's#^.*/0*([0-9]+)/[0-9_]+(.*)$#\1#' |
       sort -n -r |
@@ -203,16 +204,19 @@ is_already_tagged() {
   latest_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/${fmtd_prev_crumb_num}"
   ${DTRACE} && >&2 echo "latest_crumb_prefix=${latest_crumb_prefix}"
 
-  local latest_crumb_tag="$(
+  local latest_crumb_tag
+  latest_crumb_tag="$(
     git --no-pager tag --list "${latest_crumb_prefix}/*"
   )"
   ${DTRACE} && >&2 echo "latest_crumb_tag=${latest_crumb_tag}"
 
   if [ -n "${latest_crumb_tag}" ]; then
-    local latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
+    local latest_crumb_id
+    latest_crumb_id="$(git rev-parse "${latest_crumb_tag}")"
     ${DTRACE} && >&2 echo "latest_crumb_id=${latest_crumb_id}"
 
-    local target_id="$(git rev-parse "${tag_commit}")"
+    local target_id
+    target_id="$(git rev-parse "${tag_commit}")"
     ${DTRACE} && >&2 echo "target_id=${target_id}"
 
     if [ "${latest_crumb_id}" = "${target_id}" ]; then
