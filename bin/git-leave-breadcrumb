@@ -228,6 +228,8 @@ is_already_tagged() {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main() {
+  set -e
+
   source_deps
 
   git_leave_breadcrumb "$@"
