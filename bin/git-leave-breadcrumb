@@ -155,7 +155,12 @@ git_leave_breadcrumb() {
   if [ -z "${max_crumb_num}" ]; then
     max_crumb_num=0
   else
-    if is_already_tagged "${branch_name}" "${max_crumb_num}" "${tag_commit}"; then
+    if ${_GS_LEAVE_BREADCRUMB_CHECK_MAX_ID_ONLY:-false} &&
+      is_already_breadcrumbed_with_max_crumb_num \
+        "${branch_name}" "${max_crumb_num}" "${tag_commit}" ||
+      is_already_breadcrumbed_with_any_crumb_num \
+        "${branch_name}" "${tag_commit}" \
+      ; then
       >&2 echo "ERROR: Commit already breadcrumbed"
 
       return 1
@@ -191,7 +196,7 @@ git_leave_breadcrumb() {
 
 # ***
 
-is_already_tagged() {
+is_already_breadcrumbed_with_max_crumb_num() {
   local branch_name="$1"
   local max_crumb_num="$2"
   local tag_commit="$3"
@@ -222,6 +227,33 @@ is_already_tagged() {
     ${DTRACE} && >&2 echo "target_id=${target_id}"
 
     if [ "${latest_crumb_id}" = "${target_id}" ]; then
+      # Already tagged.
+
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+is_already_breadcrumbed_with_any_crumb_num() {
+  local branch_name="$1"
+  local tag_commit="$2"
+
+  local branch_crumb_prefix
+  branch_crumb_prefix="${_GS_TAG_PREFIX}${branch_name}/"
+  ${DTRACE} && >&2 echo "branch_crumb_prefix=${branch_crumb_prefix}"
+
+  local all_target_tags
+  all_target_tags="$(
+    git tag --points-at "${tag_commit}"
+  )"
+  ${DTRACE} && >&2 echo "all_target_tags=${all_target_tags}"
+
+  local a_target_tag
+  # Unquoted var (Git disallows spaces in tag names).
+  for a_target_tag in ${all_target_tags}; do
+    if [[ "${a_target_tag}" == "${branch_crumb_prefix}"* ]]; then
       # Already tagged.
 
       return 0
