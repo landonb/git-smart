@@ -2341,10 +2341,10 @@
   #     Only generate one fixup per commit
 
   ga = "!f() { \
-    echo \"\\$ git absorb --no-limit --one-fixup-per-commit\"; \
-    if ! git absorb --no-limit --one-fixup-per-commit; then \
-      echo \"\\$ git absorb --one-fixup-per-commit\"; \
-      git absorb --one-fixup-per-commit; \
+    echo \"\\$ git absorb --force-author --no-limit --one-fixup-per-commit\"; \
+    if ! git absorb --force-author --no-limit --one-fixup-per-commit \"$@\"; then \
+      echo \"\\$ git absorb --force-author --one-fixup-per-commit\" \"$@\"; \
+      git absorb --force-author --one-fixup-per-commit; \
     fi; \
   }; f"
 
