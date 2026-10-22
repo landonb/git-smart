@@ -2340,7 +2340,13 @@
   # -F, --one-fixup-per-commit
   #     Only generate one fixup per commit
 
-  ga = absorb --no-limit --one-fixup-per-commit
+  ga = "!f() { \
+    echo \"\\$ git absorb --no-limit --one-fixup-per-commit\"; \
+    if ! git absorb --no-limit --one-fixup-per-commit; then \
+      echo \"\\$ git absorb --one-fixup-per-commit\"; \
+      git absorb --one-fixup-per-commit; \
+    fi; \
+  }; f"
 
   # ***
 
